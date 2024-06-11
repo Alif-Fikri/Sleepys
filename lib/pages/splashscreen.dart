@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:sleepys/pages/loginpage.dart';
 import 'dart:async';
-
 import 'package:sleepys/pages/singup.dart';
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -19,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 4),
+      duration: const Duration(seconds: 3),
     );
 
     _animation = CurvedAnimation(
@@ -29,7 +29,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animationController.forward();
 
-    Timer(Duration(seconds: 5), () {
+    Timer( const Duration(seconds: 4), () {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => ScreenOpsi()),
       );
@@ -158,7 +158,7 @@ class ScreenOpsi extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => singup(),
+                      builder: (context) => Signup(),
                     ));
                   },
                   style: ElevatedButton.styleFrom(

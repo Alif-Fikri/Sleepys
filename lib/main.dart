@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import '../pages/singup.dart';
+import 'package:provider/provider.dart';
 import '../pages/splashscreen.dart';
+import '../widgets/signupprovider.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => SignupFormProvider()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
