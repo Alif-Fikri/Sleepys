@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sleepys/pages/datepicker.dart';
-import 'package:sleepys/pages/namepage.dart';
 import 'package:sleepys/pages/workpage.dart';
 
 class Genderpage extends StatelessWidget {

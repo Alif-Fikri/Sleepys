@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sleepys/widgets/bloodpressure.dart';
 import 'package:sleepys/widgets/sleeppage.dart';
 import '../widgets/weekpage.dart';
 import '../widgets/monthpage.dart';
@@ -15,7 +16,7 @@ class _HomePageState extends State<HomePage> {
 
   static List<Widget> _widgetOptions = <Widget>[
     JurnalTidurPage(),
-    SleepPage(),
+    Bloodpressure(),
     ProfilePage(),
   ];
 
