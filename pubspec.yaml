@@ -31,6 +31,8 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.0.3
+  intl: ^0.19.0
+  fl_chart: ^0.68.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -46,7 +48,7 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -65,6 +67,27 @@ flutter:
   - assets/images/lock.png
   - assets/images/email.png
   - assets/images/email1.png
+  - assets/images/person1.png
+  - assets/images/person2.png
+  - assets/images/sleep.png
+  - assets/images/book.png
+  - assets/images/profile.png
+  - assets/images/clock.png
+  - assets/images/wakeup.png
+  - assets/images/back.png
+  - assets/images/next.png
+  - assets/images/bed.png
+  - assets/images/sun.png
+  - assets/images/detil.png
+  - assets/images/terms.png
+  - assets/images/feedback.png
+  - assets/images/calendar.png
+  - assets/images/dob.png
+  - assets/images/edit.png
+  - assets/images/ceklis.png
+  - assets/images/gangguan.png
+  - assets/images/baik.png
+  - assets/images/line.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -82,6 +105,7 @@ flutter:
       fonts:
         - asset: assets/fonts/Urbanist-Regular.ttf
         - asset: assets/fonts/Urbanist-Bold.ttf
+        - asset: assets/fonts/Urbanist-SemiBold.ttf
           weight: 700
         # Tambahkan variasi font lain jika ada
 

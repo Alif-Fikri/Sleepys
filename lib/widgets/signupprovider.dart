@@ -27,7 +27,8 @@ class SignupFormProvider extends ChangeNotifier {
     _cpassword = cpassword;
     notifyListeners();
   }
-    void updateEmail1(String email1) {
+
+  void updateEmail1(String email1) {
     _email1 = email1;
     notifyListeners();
   }
