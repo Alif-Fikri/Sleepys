@@ -134,8 +134,7 @@ class ScreenOpsi extends StatelessWidget {
                           ),
                           ElevatedButton(
                             onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => Loginpage()));
+                              Navigator.pushReplacementNamed(context, '/login');
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF009090),
@@ -159,8 +158,7 @@ class ScreenOpsi extends StatelessWidget {
                           ),
                           ElevatedButton(
                             onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (context) => Signup()));
+                              Navigator.pushReplacementNamed(context, '/sign');
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,

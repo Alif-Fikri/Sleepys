@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sleepys/pages/genderpage.dart';
+import 'package:sleepys/widgets/bloodpressure.dart';
+import 'package:sleepys/widgets/dailystep.dart';
 import 'package:sleepys/widgets/sleeppage.dart';
 import '../pages/singup.dart';
 import 'package:provider/provider.dart';
@@ -29,7 +31,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: SplashScreen(),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => SplashScreen(),
+        '/login': (context) => LoginPages(),
+        '/sign': (context) => Signup(),
+        '/name': (context) => Namepage(),
+      },
       theme: ThemeData(
         fontFamily: 'Urbanist',
       ),

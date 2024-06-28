@@ -41,110 +41,114 @@ class _GenderpagesState extends State<Genderpages> {
         borderColor1 = Colors.transparent;
       }
     });
-    Navigator.push(
+    Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (context) => Workpage()));
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Color(0xFF20223F),
+          automaticallyImplyLeading: false,
+        ),
         backgroundColor: Color(0xFF20223F),
-      ),
-      backgroundColor: Color(0xFF20223F),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Hi ${widget.name}!',
-              style: TextStyle(
-                fontFamily: 'Urbanist',
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: 24,
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Hi ${widget.name}!',
+                style: TextStyle(
+                  fontFamily: 'Urbanist',
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
               ),
-            ),
-            SizedBox(height: 5),
-            Text(
-              'Pilih gender kamu, agar kami bisa mengenal kamu lebih baik.',
-              style: TextStyle(
-                fontFamily: 'Urbanist',
-                fontSize: 18,
-                color: Colors.white,
+              SizedBox(height: 5),
+              Text(
+                'Pilih gender kamu, agar kami bisa mengenal kamu lebih baik.',
+                style: TextStyle(
+                  fontFamily: 'Urbanist',
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            Expanded(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 100),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () => _onTap(1),
-                        child: Container(
-                          width: 350,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF272E49),
-                            borderRadius: BorderRadius.circular(10.0),
-                            border: Border.all(color: borderColor1, width: 2),
-                          ),
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(15),
-                                child: Image.asset('assets/images/person2.png'),
-                              ),
-                              Text(
-                                'Perempuan',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Urbanist',
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 100),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () => _onTap(1),
+                          child: Container(
+                            width: 350,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Color(0xFF272E49),
+                              borderRadius: BorderRadius.circular(10.0),
+                              border: Border.all(color: borderColor1, width: 2),
+                            ),
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(15),
+                                  child: Image.asset('assets/images/person2.png'),
                                 ),
-                              ),
-                            ],
+                                Text(
+                                  'Perempuan',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                    fontFamily: 'Urbanist',
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      SizedBox(height: 20),
-                      GestureDetector(
-                        onTap: () => _onTap(2),
-                        child: Container(
-                          width: 350,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF272E49),
-                            borderRadius: BorderRadius.circular(10.0),
-                            border: Border.all(color: borderColor2, width: 2),
-                          ),
-                          child: Row(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(15),
-                                child: Image.asset('assets/images/person1.png'),
-                              ),
-                              Text(
-                                'Pria',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                  fontFamily: 'Urbanist',
+                        SizedBox(height: 20),
+                        GestureDetector(
+                          onTap: () => _onTap(2),
+                          child: Container(
+                            width: 350,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Color(0xFF272E49),
+                              borderRadius: BorderRadius.circular(10.0),
+                              border: Border.all(color: borderColor2, width: 2),
+                            ),
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(15),
+                                  child: Image.asset('assets/images/person1.png'),
                                 ),
-                              ),
-                            ],
+                                Text(
+                                  'Pria',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                    fontFamily: 'Urbanist',
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -100,85 +100,76 @@ class _WeekPageState extends State<WeekPage> {
                   ),
                 ],
               ),
-              Column(
-                children: [
-                  SizedBox(
-                    height: 250, // Provide a fixed height for GridView
-                    child: SleepEntryGrid(),
+              SleepEntryGrid(),
+              Padding(
+                padding: const EdgeInsets.only(right: 200, bottom: 20),
+                child: Text(
+                  'Durasi Tidur',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontFamily: 'Urbanist',
+                    fontWeight: FontWeight.bold,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 250, bottom: 20),
-                    child: Text(
-                      'Durasi Tidur',
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Colors.white,
-                        fontFamily: 'Urbanist',
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 20, left: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Color(0xFF272E49)),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 20, left: 20),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xFF272E49)),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: EdgeInsets.all(30),
-                      child: WeekBarChart(sleepData: sleepData),
-                    ),
+                  padding: EdgeInsets.all(15),
+                  child: WeekBarChart(sleepData: sleepData),
+                ),
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 200, top: 10),
+                child: Text(
+                  'Mulai Tidur',
+                  style: TextStyle(
+                      fontFamily: 'Urbanist',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 20, left: 20, top: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Color(0xFF272E49)),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  SizedBox(
-                    height: 5,
+                  padding: EdgeInsets.all(15),
+                  child: SleepLineChart(data: lineData),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 200, top: 10),
+                child: Text(
+                  'Bangun Tidur',
+                  style: TextStyle(
+                      fontFamily: 'Urbanist',
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 20, left: 20, top: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Color(0xFF272E49)),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 250, top: 10),
-                    child: Text(
-                      'Mulai Tidur',
-                      style: TextStyle(
-                          fontFamily: 'Urbanist',
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(right: 20, left: 20, top: 20),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xFF272E49)),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: EdgeInsets.all(15),
-                      child: SleepLineChart(data: lineData),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 250, top: 10),
-                    child: Text(
-                      'Bangun Tidur',
-                      style: TextStyle(
-                          fontFamily: 'Urbanist',
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(right: 20, left: 20, top: 20),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Color(0xFF272E49)),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: EdgeInsets.all(10),
-                      child: SleepLineChart1(data: lineData1),
-                    ),
-                  ),
-                ],
+                  padding: EdgeInsets.all(10),
+                  child: SleepLineChart1(data: lineData1),
+                ),
               ),
             ],
           ),
@@ -197,90 +188,110 @@ class WeekBarChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return SizedBox(
-          width: constraints.maxWidth,
-          height: 200, // Define a fixed height for the chart
-          child: BarChart(
-            BarChartData(
-              barGroups: _createBarGroups(),
-              titlesData: FlTitlesData(
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    getTitlesWidget: (value, meta) {
-                      switch (value.toInt()) {
-                        case 0:
-                          return Text('Sen',
+        double chartWidth =
+            constraints.maxWidth * 0.9; // 90% of available width
+        double chartHeight =
+            constraints.maxHeight * 0.5; // 50% of available height
+        double barWidth = chartWidth / (6.5 * 1.5);
+
+        if (constraints.maxHeight.isInfinite) {
+          chartHeight = 200;
+        }
+
+        return Center(
+          child: SizedBox(
+            width: chartWidth,
+            height: chartHeight, // Define a fixed height for the chart
+            child: BarChart(
+              BarChartData(
+                barGroups: _createBarGroups(barWidth),
+                titlesData: FlTitlesData(
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        switch (value.toInt()) {
+                          case 0:
+                            return Text('Sen',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Urbanist'));
+                          case 1:
+                            return Text('Sel',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Urbanist'));
+                          case 2:
+                            return Text('Rab',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Urbanist'));
+                          case 3:
+                            return Text('Kam',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Urbanist'));
+                          case 4:
+                            return Text('Jum',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Urbanist'));
+                          case 5:
+                            return Text('Sab',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Urbanist'));
+                          case 6:
+                            return Text('Min',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Urbanist'));
+                          default:
+                            return Text('',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Urbanist'));
+                        }
+                      },
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                        showTitles: true,
+                        interval: 2,
+                        getTitlesWidget: (value, meta) {
+                          return Text('${value.toInt()}j',
                               style: TextStyle(
                                   color: Colors.white, fontFamily: 'Urbanist'));
-                        case 1:
-                          return Text('Sel',
-                              style: TextStyle(
-                                  color: Colors.white, fontFamily: 'Urbanist'));
-                        case 2:
-                          return Text('Rab',
-                              style: TextStyle(
-                                  color: Colors.white, fontFamily: 'Urbanist'));
-                        case 3:
-                          return Text('Kam',
-                              style: TextStyle(
-                                  color: Colors.white, fontFamily: 'Urbanist'));
-                        case 4:
-                          return Text('Jum',
-                              style: TextStyle(
-                                  color: Colors.white, fontFamily: 'Urbanist'));
-                        case 5:
-                          return Text('Sab',
-                              style: TextStyle(
-                                  color: Colors.white, fontFamily: 'Urbanist'));
-                        case 6:
-                          return Text('Min',
-                              style: TextStyle(
-                                  color: Colors.white, fontFamily: 'Urbanist'));
-                        default:
-                          return Text('',
-                              style: TextStyle(
-                                  color: Colors.white, fontFamily: 'Urbanist'));
-                      }
-                    },
+                        }),
+                  ),
+                  topTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: false,
+                    ), // Set to false to hide top titles
+                  ),
+                  rightTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: false,
+                    ), // Set to false to hide right titles
                   ),
                 ),
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                      showTitles: true,
-                      interval: 2,
-                      getTitlesWidget: (value, meta) {
-                        return Text('${value.toInt()}j',
-                            style: TextStyle(
-                                color: Colors.white, fontFamily: 'Urbanist'));
-                      }),
-                ),
-                topTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: false,
-                  ), // Set to false to hide top titles
-                ),
-                rightTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: false,
-                  ), // Set to false to hide right titles
-                ),
-              ),
-              borderData: FlBorderData(show: false),
-              gridData: FlGridData(show: false),
-              barTouchData: BarTouchData(
-                touchTooltipData: BarTouchTooltipData(
-                  tooltipPadding: EdgeInsets.all(5),
-                  tooltipMargin: 8,
-                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                    return BarTooltipItem(
-                      '${rod.toY.toInt()}j',
-                      TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    );
-                  },
+                borderData: FlBorderData(show: false),
+                gridData: FlGridData(show: false),
+                barTouchData: BarTouchData(
+                  touchTooltipData: BarTouchTooltipData(
+                    tooltipPadding: EdgeInsets.all(5),
+                    tooltipMargin: 8,
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      return BarTooltipItem(
+                        '${rod.toY.toInt()}j',
+                        TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
@@ -290,7 +301,7 @@ class WeekBarChart extends StatelessWidget {
     );
   }
 
-  List<BarChartGroupData> _createBarGroups() {
+  List<BarChartGroupData> _createBarGroups(double barWidth) {
     return List.generate(7, (index) {
       return BarChartGroupData(
         x: index,
@@ -298,7 +309,7 @@ class WeekBarChart extends StatelessWidget {
           BarChartRodData(
             toY: sleepData[index],
             color: index == 3 ? Colors.red : Color(0xFF60354A),
-            width: 35,
+            width: barWidth,
             borderRadius: BorderRadius.only(
               topLeft: Radius.circular(8),
               topRight: Radius.circular(8),
@@ -325,7 +336,7 @@ class _SleepLineChartState extends State<SleepLineChart> {
     return Padding(
       padding: const EdgeInsets.all(16.0), // Add padding for better spacing
       child: SizedBox(
-        width: 300, // Adjust the width as needed
+        width: 315, // Adjust the width as needed
         height: 200, // Adjust the height as needed
         child: LineChart(
           LineChartData(
@@ -487,7 +498,7 @@ class _SleepLineChart1State extends State<SleepLineChart1> {
     return Padding(
       padding: const EdgeInsets.all(16.0), // Add padding for better spacing
       child: SizedBox(
-        width: 300, // Adjust the width as needed
+        width: 315, // Adjust the width as needed
         height: 200, // Adjust the height as needed
         child: LineChart(
           LineChartData(
@@ -649,54 +660,73 @@ class SleepEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get screen width
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    // Adjust sizes based on screen width
+    final double imageHeight = screenWidth * 0.06; // 6% of screen width
+    final double imageWidth = screenWidth * 0.06; // 6% of screen width
+    final double fontSizeContent = screenWidth * 0.035; // 3.5% of screen width
+    final double fontSizeTitle = screenWidth * 0.03; // 3% of screen width
+    final double fontSizeValue = screenWidth * 0.03; // 3% of screen width
+
+    final double imageTop = screenWidth * 0.05; // 5% of screen width
+    final double imageLeft = screenWidth * 0.025; // 2.5% of screen width
+    final double contentLeft = screenWidth * 0.1; // 10% of screen width
+    final double contentTop = screenWidth * 0.0125; // 1.25% of screen width
+    final double titleTop = screenWidth * 0.05; // 5% of screen width
+    final double valueTop = screenWidth * 0.0875; // 8.75% of screen width
+
     return Card(
       color: Color(0xFF272E49),
       child: Padding(
-        padding: const EdgeInsets.only(
-          left: 20,
-          right: 20,
-          top: 20,
-        ),
+        padding: EdgeInsets.all(screenWidth * 0.025), // 2.5% of screen width
         child: Stack(
           children: [
             Positioned(
-              left: 0,
-              top: 20,
+              left: imageLeft,
+              top: imageTop,
               child: Image.asset(
                 imageAsset,
-                height: 25,
-                width: 25,
+                height: imageHeight,
+                width: imageWidth,
               ),
             ),
             Positioned(
-              left: 30,
-              top: 0,
+              left: contentLeft,
+              top: contentTop,
               child: Text(
                 content,
-                style: TextStyle(color: Colors.white, fontFamily: 'Urbanist'),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Urbanist',
+                  fontSize: fontSizeContent,
+                ),
               ),
             ),
             Positioned(
-              left: 30,
-              top: 15,
+              left: contentLeft,
+              top: titleTop,
               child: Text(
                 title,
                 style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                    fontFamily: 'Urbanist'), // Reduced font size
+                  fontSize: fontSizeTitle,
+                  color: Colors.white,
+                  fontFamily: 'Urbanist',
+                ),
               ),
-            ), // Reduced spacing
+            ),
             Positioned(
-              left: 30,
-              top: 33,
+              left: contentLeft,
+              top: valueTop,
               child: Text(
                 value,
                 style: TextStyle(
-                    fontSize: 14, // Reduced font size
-                    color: Colors.white,
-                    fontFamily: 'Urbanist',
-                    fontWeight: FontWeight.bold),
+                  fontSize: fontSizeValue,
+                  color: Colors.white,
+                  fontFamily: 'Urbanist',
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -736,20 +766,33 @@ class SleepEntryGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 20, left: 20),
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          childAspectRatio: 5 / 3,
-        ),
-        itemCount: sleepEntries.length,
-        itemBuilder: (context, index) {
-          return GridTile(
-            child: sleepEntries[index],
-          );
-        },
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double maxItemWidth =
+            constraints.maxWidth / 2 - 10; // 2 items per row with spacing
+        double itemHeight =
+            maxItemWidth * 0.55; // Adjust the aspect ratio as needed
+
+        return Center(
+          child: Padding(
+            padding: const EdgeInsets.all(5),
+            child: GridView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: maxItemWidth,
+                childAspectRatio: maxItemWidth / itemHeight,
+                mainAxisSpacing: 5,
+                crossAxisSpacing: 5,
+              ),
+              itemCount: sleepEntries.length,
+              itemBuilder: (context, index) {
+                return sleepEntries[index];
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }

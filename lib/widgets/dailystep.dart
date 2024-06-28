@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:sleepys/widgets/sleeppage.dart';
+import 'package:sleepys/widgets/bloodpressure.dart';
 
-class Bloodpressure extends StatefulWidget {
-  Bloodpressure({super.key});
+class Dailystep extends StatefulWidget {
+  Dailystep({super.key});
 
   @override
-  _BloodpressureState createState() => _BloodpressureState();
+  _DailystepState createState() => _DailystepState();
 }
 
-class _BloodpressureState extends State<Bloodpressure> {
+class _DailystepState extends State<Dailystep> {
   TextEditingController _upperPressureController = TextEditingController();
   TextEditingController _lowerPressureController = TextEditingController();
 
@@ -32,7 +33,7 @@ class _BloodpressureState extends State<Bloodpressure> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SleepPage(),
+        builder: (context) => Bloodpressure(),
       ),
     );
   }
@@ -42,7 +43,7 @@ class _BloodpressureState extends State<Bloodpressure> {
     _navigateToSleepPage();
   }
 
-  void _skipAndNavigate() {
+  void _NextAndNavigate() {
     _navigateToSleepPage();
   }
 
@@ -61,7 +62,7 @@ class _BloodpressureState extends State<Bloodpressure> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Saya ingin tahu tentang kamu,',
+              'Saya ingin tau tentang kamu,',
               style: TextStyle(
                 fontFamily: 'Urbanist',
                 fontWeight: FontWeight.bold,
@@ -71,7 +72,7 @@ class _BloodpressureState extends State<Bloodpressure> {
             ),
             SizedBox(height: 5), // Add spacing between the texts
             Text(
-              'Berapa tekanan darah kamu seminggu terakhir?',
+              'Berapa Jumlah langkah hari ini?',
               style: TextStyle(
                 fontFamily: 'Urbanist',
                 fontSize: 18,
@@ -91,7 +92,7 @@ class _BloodpressureState extends State<Bloodpressure> {
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color(0xFF272E49),
-                      hintText: 'Tekanan darah atas',
+                      hintText: 'Jumlah langkah ',
                       hintStyle: TextStyle(
                         color: Colors.white,
                         fontFamily: 'Urbanist',
@@ -121,48 +122,6 @@ class _BloodpressureState extends State<Bloodpressure> {
                 ),
               ],
             ),
-            SizedBox(height: 20), // Add spacing between the text fields
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _lowerPressureController,
-                    keyboardType: TextInputType.number,
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (value) => _navigateToSleepPage(),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Color(0xFF272E49),
-                      hintText: 'Tekanan darah bawah',
-                      hintStyle: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Urbanist',
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Urbanist',
-                    ),
-                  ),
-                ),
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => _decrement(_lowerPressureController),
-                      icon: Icon(Icons.remove, color: Colors.white),
-                    ),
-                    IconButton(
-                      onPressed: () => _increment(_lowerPressureController),
-                      icon: Icon(Icons.add, color: Colors.white),
-                    ),
-                  ],
-                ),
-              ],
-            ),
             Expanded(
               child: Center(
                 child: Column(
@@ -172,7 +131,7 @@ class _BloodpressureState extends State<Bloodpressure> {
                       height: 50,
                       width: 350,
                       child: ElevatedButton(
-                        onPressed: _skipAndNavigate,
+                        onPressed: _NextAndNavigate,
                         child: Text('Next'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xFF009090), // Button color
@@ -184,7 +143,6 @@ class _BloodpressureState extends State<Bloodpressure> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 10), // Add spacing between the buttons
                   ],
                 ),
               ),

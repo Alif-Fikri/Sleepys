@@ -28,40 +28,43 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFF20223F),
-      body: _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: ClipRRect(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(10),
-          topRight: Radius.circular(10),
-        ),
-        child: BottomNavigationBar(
-          items: const <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-              icon: ImageIcon(AssetImage('assets/images/book.png')),
-              label: 'Jurnal Tidur',
-            ),
-            BottomNavigationBarItem(
-              icon: ImageIcon(AssetImage('assets/images/sleep.png')),
-              label: 'Sleep',
-            ),
-            BottomNavigationBarItem(
-              icon: ImageIcon(AssetImage('assets/images/profile.png')),
-              label: 'Profile',
-            ),
-          ],
-          currentIndex: _selectedIndex,
-          backgroundColor: Color(0xFF272E49),
-          selectedItemColor: Colors.white,
-          unselectedItemColor: Color(0xFF627EAE),
-          selectedLabelStyle:
-              TextStyle(color: Color(0xFF627EAE), fontFamily: 'Urbanist'),
-          unselectedLabelStyle:
-              TextStyle(color: Color(0xFF627EAE), fontFamily: 'Urbanist'),
-          selectedIconTheme: IconThemeData(color: Color(0xFFFFC754)),
-          unselectedIconTheme: IconThemeData(color: Color(0xFF627EAE)),
-          onTap: _onItemTapped,
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        backgroundColor: Color(0xFF20223F),
+        body: _widgetOptions.elementAt(_selectedIndex),
+        bottomNavigationBar: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(10),
+            topRight: Radius.circular(10),
+          ),
+          child: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: ImageIcon(AssetImage('assets/images/book.png')),
+                label: 'Jurnal Tidur',
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(AssetImage('assets/images/sleep.png')),
+                label: 'Sleep',
+              ),
+              BottomNavigationBarItem(
+                icon: ImageIcon(AssetImage('assets/images/profile.png')),
+                label: 'Profile',
+              ),
+            ],
+            currentIndex: _selectedIndex,
+            backgroundColor: Color(0xFF272E49),
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Color(0xFF627EAE),
+            selectedLabelStyle:
+                TextStyle(color: Color(0xFF627EAE), fontFamily: 'Urbanist'),
+            unselectedLabelStyle:
+                TextStyle(color: Color(0xFF627EAE), fontFamily: 'Urbanist'),
+            selectedIconTheme: IconThemeData(color: Color(0xFFFFC754)),
+            unselectedIconTheme: IconThemeData(color: Color(0xFF627EAE)),
+            onTap: _onItemTapped,
+          ),
         ),
       ),
     );
@@ -205,7 +208,7 @@ class Infoprofile extends StatelessWidget {
                 children: [
                   Container(
                     height: 20,
-                    width: 120,
+                    width: 130,
                     margin: EdgeInsets.only(bottom: 10),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -222,6 +225,7 @@ class Infoprofile extends StatelessWidget {
                           fontFamily: 'Urbanist',
                           fontSize: 10,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
@@ -252,15 +256,18 @@ class SleepEntry extends StatelessWidget {
       color: Color(0xFF272E49),
       margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Padding(
-        padding: const EdgeInsets.all(30),
+        padding: const EdgeInsets.all(20),
         child: Stack(
           children: [
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   date,
-                  style: TextStyle(color: Colors.white, fontFamily: 'Urbanist'),
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Urbanist',
+                      fontSize: 12),
                 ),
                 SizedBox(
                     height: 50), // Memberi jarak agar tidak tertabrak oleh ikon
@@ -274,13 +281,17 @@ class SleepEntry extends StatelessWidget {
                 children: [
                   Text(
                     'Durasi tidur',
-                    style:
-                        TextStyle(color: Colors.white, fontFamily: 'Urbanist'),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Urbanist',
+                        fontSize: 12),
                   ),
                   Text(
                     duration,
-                    style:
-                        TextStyle(color: Colors.white, fontFamily: 'Urbanist'),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Urbanist',
+                        fontSize: 12),
                   ),
                 ],
               ),
@@ -293,33 +304,37 @@ class SleepEntry extends StatelessWidget {
                 children: [
                   Text(
                     'Waktu tidur',
-                    style:
-                        TextStyle(color: Colors.white, fontFamily: 'Urbanist'),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Urbanist',
+                        fontSize: 12),
                   ),
                   Text(
                     time,
-                    style:
-                        TextStyle(color: Colors.white, fontFamily: 'Urbanist'),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Urbanist',
+                        fontSize: 12),
                   ),
                 ],
               ),
             ),
             Positioned(
-              left: 15,
+              left: 17,
               top: 38,
               child: Image.asset(
                 'assets/images/clock.png',
-                height: 25,
-                width: 25,
+                height: 23,
+                width: 23,
               ),
             ),
             Positioned(
-              right: 123,
+              right: 113,
               top: 38,
               child: Image.asset(
                 'assets/images/wakeup.png',
-                height: 25,
-                width: 25,
+                height: 23,
+                width: 23,
               ),
             ),
           ],

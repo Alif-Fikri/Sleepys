@@ -32,112 +32,115 @@ class _DatepickersState extends State<Datepickers> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Color(0xFF20223F),
+        ),
         backgroundColor: Color(0xFF20223F),
-      ),
-      backgroundColor: Color(0xFF20223F),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Terima kasih!',
-              style: TextStyle(
-                fontFamily: 'Urbanist',
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: 24,
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Terima kasih!',
+                style: TextStyle(
+                  fontFamily: 'Urbanist',
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 24,
+                ),
               ),
-            ),
-            SizedBox(height: 5),
-            Text(
-              'Sekarang, kapan tanggal lahir mu?',
-              style: TextStyle(
-                fontFamily: 'Urbanist',
-                fontSize: 18,
-                color: Colors.white,
+              SizedBox(height: 5),
+              Text(
+                'Sekarang, kapan tanggal lahir mu?',
+                style: TextStyle(
+                  fontFamily: 'Urbanist',
+                  fontSize: 18,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            Expanded(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 100),
-                  child: GestureDetector(
-                    onTap: () async {
-                      final DateTime? picked = await showDatePicker(
-                        context: context,
-                        initialDate: selectedDate,
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime.now(),
-                        builder: (BuildContext context, Widget? child) {
-                          return Theme(
-                            data: ThemeData.dark().copyWith(
-                              colorScheme: ColorScheme.dark(
-                                primary: Color(
-                                    0xFF20223F), // Header background color
-                                onPrimary: Colors.white, // Header text color
-                                surface: Colors.white, // Background color
-                                onSurface: Colors.black, // Text color
+              Expanded(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 100),
+                    child: GestureDetector(
+                      onTap: () async {
+                        final DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: selectedDate,
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime.now(),
+                          builder: (BuildContext context, Widget? child) {
+                            return Theme(
+                              data: ThemeData.dark().copyWith(
+                                colorScheme: ColorScheme.dark(
+                                  primary: Color(
+                                      0xFF20223F), // Header background color
+                                  onPrimary: Colors.white, // Header text color
+                                  surface: Colors.white, // Background color
+                                  onSurface: Colors.black, // Text color
+                                ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
+                        if (picked != null && picked != selectedDate) {
+                          setState(() {
+                            selectedDate = picked;
+                            _controller.text =
+                                "${picked.day.toString().padLeft(2, '0')} / ${picked.month.toString().padLeft(2, '0')} / ${picked.year}";
+                          });
+                          // Delay for 3 seconds before navigating to the next page
+                          await Future.delayed(Duration(seconds: 1));
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HeightSelection(),
+                            ),
+                          );
+                        }
+                      },
+                      child: AbsorbPointer(
+                        child: Container(
+                          width: 350,
+                          height: 55,
+                          child: TextField(
+                            controller: _controller,
+                            textInputAction: TextInputAction.done,
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Color(0xFF272E49),
+                              hintText: 'DD / MM / YYYY',
+                              hintStyle: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Urbanist',
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10.0),
+                                borderSide: BorderSide.none,
                               ),
                             ),
-                            child: child!,
-                          );
-                        },
-                      );
-                      if (picked != null && picked != selectedDate) {
-                        setState(() {
-                          selectedDate = picked;
-                          _controller.text =
-                              "${picked.day.toString().padLeft(2, '0')} / ${picked.month.toString().padLeft(2, '0')} / ${picked.year}";
-                        });
-                        // Delay for 3 seconds before navigating to the next page
-                        await Future.delayed(Duration(seconds: 3));
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => HeightSelection(),
-                          ),
-                        );
-                      }
-                    },
-                    child: AbsorbPointer(
-                      child: Container(
-                        width: 350,
-                        height: 55,
-                        child: TextField(
-                          controller: _controller,
-                          textInputAction: TextInputAction.done,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: Color(0xFF272E49),
-                            hintText: 'DD / MM / YYYY',
-                            hintStyle: TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
                               fontFamily: 'Urbanist',
+                              fontWeight: FontWeight.bold,
+                              fontSize: 22,
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10.0),
-                              borderSide: BorderSide.none,
-                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Urbanist',
-                            fontWeight: FontWeight.bold,
-                            fontSize: 22,
-                          ),
-                          textAlign: TextAlign.center,
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
