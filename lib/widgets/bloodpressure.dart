@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sleepys/pages/home.dart';
+import 'package:sleepys/widgets/dailystep.dart';
 import 'package:sleepys/widgets/sleeppage.dart';
 
 class Bloodpressure extends StatefulWidget {
@@ -32,7 +34,7 @@ class _BloodpressureState extends State<Bloodpressure> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SleepPage(),
+        builder: (context) => Dailystep(),
       ),
     );
   }

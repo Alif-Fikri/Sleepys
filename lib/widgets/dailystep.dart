@@ -33,7 +33,7 @@ class _DailystepState extends State<Dailystep> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Bloodpressure(),
+        builder: (context) => SleepPage(),
       ),
     );
   }
