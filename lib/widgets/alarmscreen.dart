@@ -38,6 +38,8 @@ class _AlarmScreenState extends State<AlarmScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Color(0xFF20223F), // Background color from the image
       body: GestureDetector(
@@ -50,24 +52,27 @@ class _AlarmScreenState extends State<AlarmScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(top: 53, bottom: 250),
+              padding: EdgeInsets.only(
+                top: screenSize.height * 0.030, // Responsive top padding
+                bottom: screenSize.height * 0.20, // Responsive bottom padding
+              ),
               child: Text(
                 'Selamat tidur, Serena',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 24,
+                  fontSize: screenSize.width * 0.06, // Responsive font size
                   fontWeight: FontWeight.bold,
                   fontFamily: 'Urbanist',
                 ),
               ),
             ),
-            SizedBox(height: 40),
+            SizedBox(height: screenSize.height * 0.05),
             Center(
               child: Text(
                 _currentTime,
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 48,
+                  fontSize: screenSize.width * 0.12, // Responsive font size
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -77,22 +82,22 @@ class _AlarmScreenState extends State<AlarmScreen> {
                 'Waktu bangun: ${widget.wakeUpTime}',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 18,
+                  fontSize: screenSize.width * 0.045, // Responsive font size
                   fontFamily: 'Urbanist',
                 ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 100),
+              padding: EdgeInsets.only(top: screenSize.height * 0.10),
               child: Image.asset('assets/images/line.png'),
             ),
             Padding(
-              padding: const EdgeInsets.only(top: 150),
+              padding: EdgeInsets.only(top: screenSize.height * 0.10),
               child: Center(
                 child: Icon(
                   Icons.keyboard_arrow_up,
                   color: Colors.grey,
-                  size: 32,
+                  size: screenSize.width * 0.08, // Responsive icon size
                 ),
               ),
             ),
@@ -100,7 +105,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
               child: Icon(
                 Icons.keyboard_arrow_up,
                 color: Colors.white,
-                size: 32,
+                size: screenSize.width * 0.08, // Responsive icon size
               ),
             ),
             Center(
@@ -108,7 +113,7 @@ class _AlarmScreenState extends State<AlarmScreen> {
                 'Geser ke atas untuk bangun',
                 style: TextStyle(
                   color: Colors.grey,
-                  fontSize: 14,
+                  fontSize: screenSize.width * 0.035, // Responsive font size
                   fontFamily: 'Urbanist',
                 ),
               ),

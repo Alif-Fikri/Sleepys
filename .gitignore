@@ -9,3 +9,4 @@ ios/Pods
 .pub-cache/
 .gradle/
 .DS_Store
+.env

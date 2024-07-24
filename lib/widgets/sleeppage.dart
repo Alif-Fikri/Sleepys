@@ -11,25 +11,25 @@ class _SleepPageState extends State<SleepPage> {
   int selectedWakeUpHour = 7;
   int selectedSleepMinute = 30;
 
-  List<Widget> generateMinutes() {
+  List<Widget> generateMinutes(Size screenSize) {
     return List<Widget>.generate(60, (int index) {
       return Stack(
         alignment: Alignment.center,
         children: [
           if (selectedSleepMinute == index)
             Container(
-              width: 60,
-              height: 50,
+              width: screenSize.width * 0.15,
+              height: screenSize.height * 0.07,
               decoration: BoxDecoration(
                 color: Color(0xFFF0F2FF).withOpacity(0.5),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(screenSize.width * 0.025),
               ),
             ),
           Center(
             child: Text(
               index.toString().padLeft(2, '0'),
               style: TextStyle(
-                  fontSize: 40,
+                  fontSize: screenSize.width * 0.1,
                   fontFamily: 'Urbanist',
                   fontWeight: FontWeight.bold,
                   color: Colors.white),
@@ -40,25 +40,25 @@ class _SleepPageState extends State<SleepPage> {
     });
   }
 
-  List<Widget> generateHours() {
+  List<Widget> generateHours(Size screenSize) {
     return List<Widget>.generate(24, (int index) {
       return Stack(
         alignment: Alignment.center,
         children: [
           if (selectedWakeUpHour == index)
             Container(
-              width: 60,
-              height: 50,
+              width: screenSize.width * 0.15,
+              height: screenSize.height * 0.07,
               decoration: BoxDecoration(
                 color: Color(0xFFF0F2FF).withOpacity(0.5),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(screenSize.width * 0.025),
               ),
             ),
           Center(
             child: Text(
               index.toString().padLeft(2, '0'),
               style: TextStyle(
-                  fontSize: 40,
+                  fontSize: screenSize.width * 0.1,
                   fontFamily: 'Urbanist',
                   fontWeight: FontWeight.bold,
                   color: Colors.white),
@@ -71,6 +71,8 @@ class _SleepPageState extends State<SleepPage> {
 
   @override
   Widget build(BuildContext context) {
+    var screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Color(0xFF20223F),
       appBar: AppBar(
@@ -81,12 +83,12 @@ class _SleepPageState extends State<SleepPage> {
         decoration: BoxDecoration(
           color: Color(0xFF272E49),
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
+            topLeft: Radius.circular(screenSize.width * 0.05),
+            topRight: Radius.circular(screenSize.width * 0.05),
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.only(top: 75),
+          padding: EdgeInsets.only(top: screenSize.height * 0.1),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -94,21 +96,21 @@ class _SleepPageState extends State<SleepPage> {
                 'Pilih waktu bangun tidur mu',
                 style: TextStyle(
                     color: Colors.white,
-                    fontSize: 24,
+                    fontSize: screenSize.width * 0.06,
                     fontFamily: 'Urbanist',
                     fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: screenSize.height * 0.025),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
-                    height: 150,
-                    width: 100,
+                    height: screenSize.height * 0.25,
+                    width: screenSize.width * 0.25,
                     child: ListWheelScrollView.useDelegate(
-                      itemExtent: 50,
+                      itemExtent: screenSize.height * 0.085,
                       perspective: 0.001,
-                      diameterRatio: 2.0,
+                      diameterRatio: 9.0,
                       physics: FixedExtentScrollPhysics(),
                       onSelectedItemChanged: (index) {
                         setState(() {
@@ -116,21 +118,22 @@ class _SleepPageState extends State<SleepPage> {
                         });
                       },
                       childDelegate: ListWheelChildLoopingListDelegate(
-                        children: generateHours(),
+                        children: generateHours(screenSize),
                       ),
                     ),
                   ),
                   Text(
                     ':',
-                    style: TextStyle(fontSize: 40, color: Colors.white),
+                    style: TextStyle(
+                        fontSize: screenSize.width * 0.1, color: Colors.white),
                   ),
                   SizedBox(
-                    height: 150,
-                    width: 100,
+                    height: screenSize.height * 0.25,
+                    width: screenSize.width * 0.25,
                     child: ListWheelScrollView.useDelegate(
-                      itemExtent: 50,
+                      itemExtent: screenSize.height * 0.085,
                       perspective: 0.001,
-                      diameterRatio: 2.0,
+                      diameterRatio: 9.0,
                       physics: FixedExtentScrollPhysics(),
                       onSelectedItemChanged: (index) {
                         setState(() {
@@ -138,20 +141,20 @@ class _SleepPageState extends State<SleepPage> {
                         });
                       },
                       childDelegate: ListWheelChildLoopingListDelegate(
-                        children: generateMinutes(),
+                        children: generateMinutes(screenSize),
                       ),
                     ),
                   ),
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 45),
+                padding: EdgeInsets.only(top: screenSize.height * 0.056),
                 child: RichText(
                   text: TextSpan(
                       text: 'Waktu tidur ideal yang cukup adalah \nselama ',
                       style: TextStyle(
                           fontFamily: 'Urbanist',
-                          fontSize: 16,
+                          fontSize: screenSize.width * 0.04,
                           color: Colors.white),
                       children: [
                         TextSpan(
@@ -163,10 +166,10 @@ class _SleepPageState extends State<SleepPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 159),
+                padding: EdgeInsets.only(top: screenSize.height * 0.1),
                 child: Container(
-                  height: 50,
-                  width: 350,
+                  height: screenSize.height * 0.0625,
+                  width: screenSize.width * 0.875,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).push(
@@ -182,14 +185,15 @@ class _SleepPageState extends State<SleepPage> {
                       'Tidur sekarang',
                       style: TextStyle(
                           fontFamily: 'Urbanist',
-                          fontSize: 18,
+                          fontSize: screenSize.width * 0.045,
                           color: Colors.white,
                           fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF00A8B5),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius:
+                            BorderRadius.circular(screenSize.width * 0.075),
                       ),
                     ),
                   ),
@@ -206,7 +210,7 @@ class _SleepPageState extends State<SleepPage> {
                   style: TextStyle(
                       color: Colors.white,
                       fontFamily: 'Urbanist',
-                      fontSize: 18),
+                      fontSize: screenSize.width * 0.045),
                 ),
               ),
             ],

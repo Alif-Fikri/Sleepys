@@ -26,6 +26,8 @@ class ProfilePage extends StatelessWidget {
 class ProfileMainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    var screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Color(0xFF20223F),
       appBar: AppBar(
@@ -33,56 +35,58 @@ class ProfileMainPage extends StatelessWidget {
         backgroundColor: Color(0xFF20223F),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(screenSize.width * 0.04),
         child: Column(
           children: [
             CircleAvatar(
-              radius: 40,
+              radius: screenSize.width * 0.1,
               backgroundColor: Colors.grey,
               child: Icon(
                 Icons.person,
-                size: 40,
+                size: screenSize.width * 0.1,
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: screenSize.height * 0.02),
             Divider(
               color: Colors.grey,
             ),
-            Infoprofile(),
+            Infoprofile(screenSize: screenSize),
             Padding(
-              padding: const EdgeInsets.only(
-                  left: 20, right: 20, top: 10, bottom: 10),
+              padding: EdgeInsets.symmetric(
+                  vertical: screenSize.height * 0.01,
+                  horizontal: screenSize.width * 0.05),
               child: Card(
                 color: Color(0xFF272E49),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(screenSize.width * 0.025),
                 ),
                 child: Column(
                   children: [
                     ListTile(
                       leading: Image.asset(
                         'assets/images/detil.png',
-                        height: 25,
-                        width: 25,
+                        height: screenSize.width * 0.06,
+                        width: screenSize.width * 0.06,
                       ),
                       title: Text('Detil profil',
                           style: TextStyle(
                               color: Colors.white,
                               fontFamily: 'Urbanist',
-                              fontSize: 16,
+                              fontSize: screenSize.width * 0.04,
                               fontWeight: FontWeight.bold)),
                       trailing: Image.asset(
                         'assets/images/next.png',
-                        height: 35,
-                        width: 35,
+                        height: screenSize.width * 0.08,
+                        width: screenSize.width * 0.08,
                       ),
                       onTap: () {
                         Navigator.of(context).pushNamed('/details');
                       },
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(left: 60, right: 20),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: screenSize.width * 0.15),
                       child: Divider(
                         color: Colors.grey,
                         height: 0,
@@ -91,26 +95,27 @@ class ProfileMainPage extends StatelessWidget {
                     ListTile(
                       leading: Image.asset(
                         'assets/images/terms.png',
-                        height: 25,
-                        width: 25,
+                        height: screenSize.width * 0.06,
+                        width: screenSize.width * 0.06,
                       ),
                       title: Text('Terms & Conditions',
                           style: TextStyle(
                               color: Colors.white,
                               fontFamily: 'Urbanist',
-                              fontSize: 16,
+                              fontSize: screenSize.width * 0.04,
                               fontWeight: FontWeight.bold)),
                       trailing: Image.asset(
                         'assets/images/next.png',
-                        height: 35,
-                        width: 35,
+                        height: screenSize.width * 0.08,
+                        width: screenSize.width * 0.08,
                       ),
                       onTap: () {
                         // Add action for "Terms & Conditions"
                       },
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(left: 60, right: 20),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: screenSize.width * 0.15),
                       child: Divider(
                         color: Colors.grey,
                         height: 0,
@@ -119,19 +124,19 @@ class ProfileMainPage extends StatelessWidget {
                     ListTile(
                       leading: Image.asset(
                         'assets/images/feedback.png',
-                        height: 25,
-                        width: 25,
+                        height: screenSize.width * 0.06,
+                        width: screenSize.width * 0.06,
                       ),
                       title: Text('Feedback',
                           style: TextStyle(
                               color: Colors.white,
                               fontFamily: 'Urbanist',
-                              fontSize: 16,
+                              fontSize: screenSize.width * 0.04,
                               fontWeight: FontWeight.bold)),
                       trailing: Image.asset(
                         'assets/images/next.png',
-                        height: 35,
-                        width: 35,
+                        height: screenSize.width * 0.08,
+                        width: screenSize.width * 0.08,
                       ),
                       onTap: () {
                         // Add action for "Feedback"
@@ -142,8 +147,8 @@ class ProfileMainPage extends StatelessWidget {
               ),
             ),
             Container(
-              height: 50,
-              width: 360,
+              height: screenSize.height * 0.0625,
+              width: screenSize.width * 0.8,
               child: ElevatedButton(
                 onPressed: () {},
                 child: Text(
@@ -151,20 +156,36 @@ class ProfileMainPage extends StatelessWidget {
                   style: TextStyle(
                       fontFamily: 'Urbanist',
                       color: Color(0xFF009090),
-                      fontSize: 20,
+                      fontSize: screenSize.width * 0.05,
                       fontWeight: FontWeight.bold),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius:
+                        BorderRadius.circular(screenSize.width * 0.025),
                   ),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class Infoprofile extends StatelessWidget {
+  final Size screenSize;
+
+  Infoprofile({required this.screenSize});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Your Infoprofile widget implementation here
+      ],
     );
   }
 }
@@ -190,6 +211,8 @@ class Detilprofile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Color(0xFF20223F),
       appBar: AppBar(
@@ -198,26 +221,26 @@ class Detilprofile extends StatelessWidget {
       ),
       body: SafeArea(
         child: ListView(
-          padding: EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(screenSize.width * 0.04),
           children: [
             CircleAvatar(
-              radius: 40,
+              radius: screenSize.width * 0.1,
               backgroundColor: Colors.grey,
             ),
-            SizedBox(height: 16),
-            buildProfileItem(
-                'assets/images/detil.png', 'Nama', nameController, true),
-            buildProfileItem(
-                'assets/images/email.png', 'Email', emailController, true),
-            buildProfileItem(
-                'assets/images/dob.png', 'Gender', genderController, false),
+            SizedBox(height: screenSize.height * 0.02),
+            buildProfileItem('assets/images/detil.png', 'Nama', nameController,
+                true, screenSize),
+            buildProfileItem('assets/images/email.png', 'Email',
+                emailController, true, screenSize),
+            buildProfileItem('assets/images/dob.png', 'Gender',
+                genderController, false, screenSize),
             buildProfileItem('assets/images/calendar.png', 'Date of birth',
-                dobController, false),
-            SizedBox(height: 24),
+                dobController, false, screenSize),
+            SizedBox(height: screenSize.height * 0.03),
             Center(
               child: SizedBox(
-                height: 50,
-                width: 350,
+                height: screenSize.height * 0.0625,
+                width: screenSize.width * 0.875,
                 child: ElevatedButton(
                   onPressed: () {
                     // Save action
@@ -229,13 +252,14 @@ class Detilprofile extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF00ADB5),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius:
+                          BorderRadius.circular(screenSize.width * 0.05),
                     ),
                   ),
                   child: Text(
                     'Save',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: screenSize.width * 0.045,
                       fontFamily: 'Urbanist',
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
@@ -251,10 +275,10 @@ class Detilprofile extends StatelessWidget {
   }
 
   Widget buildProfileItem(String imagePath, String label,
-      TextEditingController controller, bool showPencilIcon) {
+      TextEditingController controller, bool showPencilIcon, Size screenSize) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.01),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -263,13 +287,14 @@ class Detilprofile extends StatelessWidget {
               style: TextStyle(
                 fontFamily: 'Urbanist',
                 color: Colors.white,
-                fontSize: 14,
+                fontSize: screenSize.width * 0.035,
               ),
             ),
-            SizedBox(height: 5),
+            SizedBox(height: screenSize.height * 0.01),
             Container(
-              width: 350, // Make the TextField take the full width
-              height: 55,
+              width: screenSize.width *
+                  0.875, // Make the TextField take the full width
+              height: screenSize.height * 0.06875,
               child: TextField(
                 controller: controller,
                 textInputAction: TextInputAction.done,
@@ -283,27 +308,28 @@ class Detilprofile extends StatelessWidget {
                     fontFamily: 'Urbanist',
                   ),
                   prefixIcon: Padding(
-                    padding: const EdgeInsets.all(12.0),
+                    padding: EdgeInsets.all(screenSize.width * 0.03),
                     child: Image.asset(
                       imagePath,
-                      width: 24,
-                      height: 24,
+                      width: screenSize.width * 0.06,
+                      height: screenSize.width * 0.06,
                       color: Colors.white,
                     ),
                   ),
                   suffixIcon: showPencilIcon
                       ? Padding(
-                          padding: const EdgeInsets.all(19),
+                          padding: EdgeInsets.all(screenSize.width * 0.035),
                           child: Image.asset(
                             'assets/images/edit.png',
-                            height: 20,
-                            width: 20,
+                            height: screenSize.width * 0.05,
+                            width: screenSize.width * 0.05,
                             color: Colors.white,
                           ),
                         )
                       : null,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
+                    borderRadius:
+                        BorderRadius.circular(screenSize.width * 0.025),
                     borderSide: BorderSide.none,
                   ),
                 ),

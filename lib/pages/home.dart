@@ -185,6 +185,9 @@ class DailyPage extends StatelessWidget {
 class Infoprofile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    double baseFontSize = MediaQuery.of(context).size.width * 0.035;
+    double buttonFontSize = baseFontSize * 0.65;
+
     return Padding(
       padding: const EdgeInsets.only(left: 20, right: 20),
       child: Card(
@@ -195,10 +198,10 @@ class Infoprofile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Untuk hasil analisa yang lebih baik, akurat, dan \nbermanfaat. Profil tidur hanya bisa diakses \nsetelah kamu melakukan pelacakan tidur paling \ntidak 30 hari.',
+                'Untuk hasil analisa yang lebih baik, akurat, dan bermanfaat. Profil tidur hanya bisa diakses setelah kamu melakukan pelacakan tidur paling tidak 30 hari.',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 13,
+                  fontSize: baseFontSize,
                   fontFamily: 'Urbanist',
                 ),
               ),
@@ -223,7 +226,7 @@ class Infoprofile extends StatelessWidget {
                         style: TextStyle(
                           color: Colors.white,
                           fontFamily: 'Urbanist',
-                          fontSize: 10,
+                          fontSize: buttonFontSize,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -252,6 +255,19 @@ class SleepEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    // Adjust sizes based on screen width
+    final double imageHeight = screenWidth * 0.05; // 5% of screen width
+    final double imageWidth = screenWidth * 0.05; // 5% of screen width
+    final double fontSizeTitle = screenWidth * 0.03; // 3% of screen width
+    final double fontSizeValue = screenWidth * 0.025; // 2.5% of screen width
+    final double imageTop = screenWidth * 0.065; // 6.5% of screen width
+    final double imageLeft = screenWidth * 0.035; // 3.5% of screen width
+    final double imageRight = screenWidth * 0.26;
+    final double contentTop = screenWidth * 0.05; // 5% of screen width
+    final double contentRight = screenWidth * 0.10; // 10% of screen width
+
     return Card(
       color: Color(0xFF272E49),
       margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -265,76 +281,86 @@ class SleepEntry extends StatelessWidget {
                 Text(
                   date,
                   style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Urbanist',
-                      fontSize: 12),
+                    color: Colors.white,
+                    fontFamily: 'Urbanist',
+                    fontSize: fontSizeTitle,
+                  ),
                 ),
                 SizedBox(
-                    height: 50), // Memberi jarak agar tidak tertabrak oleh ikon
+                  height: screenWidth * 0.1, // Adjust height proportionally
+                ),
               ],
             ),
             Positioned(
-              left: 50,
-              top: 30,
+              left: contentRight,
+              top: contentTop,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Durasi tidur',
                     style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Urbanist',
-                        fontSize: 12),
+                      color: Colors.white,
+                      fontFamily: 'Urbanist',
+                      fontSize: fontSizeTitle,
+                    ),
                   ),
                   Text(
                     duration,
                     style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Urbanist',
-                        fontSize: 12),
+                      color: Colors.white,
+                      fontFamily: 'Urbanist',
+                      fontSize: fontSizeValue,
+                    ),
                   ),
                 ],
               ),
             ),
             Positioned(
-              right: 40,
-              top: 30,
+              right: contentRight,
+              top: contentTop,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Waktu tidur',
                     style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Urbanist',
-                        fontSize: 12),
+                      color: Colors.white,
+                      fontFamily: 'Urbanist',
+                      fontSize: fontSizeTitle,
+                    ),
                   ),
                   Text(
                     time,
                     style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Urbanist',
-                        fontSize: 12),
+                      color: Colors.white,
+                      fontFamily: 'Urbanist',
+                      fontSize: fontSizeValue,
+                    ),
                   ),
                 ],
               ),
             ),
             Positioned(
-              left: 17,
-              top: 38,
-              child: Image.asset(
-                'assets/images/clock.png',
-                height: 23,
-                width: 23,
+              left: imageLeft,
+              top: imageTop,
+              child: Row(
+                children: [
+                  Image.asset(
+                    'assets/images/clock.png',
+                    height: imageHeight,
+                    width: imageWidth,
+                  ),
+                ],
               ),
             ),
             Positioned(
-              right: 113,
-              top: 38,
+              right: imageRight,
+              top: imageTop,
               child: Image.asset(
                 'assets/images/wakeup.png',
-                height: 23,
-                width: 23,
+                height: imageHeight,
+                width: imageWidth,
               ),
             ),
           ],

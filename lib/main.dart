@@ -13,8 +13,14 @@ import '../pages/namepage.dart';
 import '../pages/datepicker.dart';
 import '../pages/home.dart';
 import '../pages/testing.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize date formatting for the 'id' locale
+  await initializeDateFormatting('id', null);
   runApp(
     MultiProvider(
       providers: [

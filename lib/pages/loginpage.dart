@@ -1,16 +1,74 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 import 'package:sleepys/pages/namepage.dart';
 import 'package:sleepys/pages/singup.dart';
+import 'package:http/http.dart' as http;
 import '../widgets/signupprovider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPages extends StatelessWidget {
   LoginPages({Key? key}) : super(key: key);
 
+  Future<void> _login(BuildContext context) async {
+    final signupForm = Provider.of<SignupFormProvider>(context, listen: false);
+    final email = signupForm.email1;
+    final password = signupForm.password1;
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Email dan password harus diisi")),
+      );
+      return;
+    }
+
+    final url = Uri.parse('http://localhost:8000/login/');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'email': email,
+        'password': password,
+      }),
+    );
+
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      final token = responseData['access_token'];
+
+      // Simpan token ke tempat penyimpanan yang sesuai (misalnya SharedPreferences)
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('token', token);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Login successful")),
+      );
+      // Navigate to NamePage on successful login
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Namepage()),
+      );
+    } else {
+      final errorResponse = json.decode(response.body);
+      final errorMessage = errorResponse['detail'];
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final signupForm = Provider.of<SignupFormProvider>(context);
+    final screenSize = MediaQuery.of(context).size;
+
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
@@ -19,7 +77,8 @@ class LoginPages extends StatelessWidget {
         backgroundColor: const Color(0xFF1E1D42),
         body: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
+            padding: EdgeInsets.symmetric(
+                vertical: 15, horizontal: screenSize.width * 0.1),
             child: CustomScrollView(
               slivers: [
                 SliverFillRemaining(
@@ -30,34 +89,39 @@ class LoginPages extends StatelessWidget {
                       children: <Widget>[
                         Image.asset(
                           'assets/images/sleepypanda.png',
-                          height: 170,
-                          width: 170,
+                          height: screenSize.width * 0.35,
+                          width: screenSize.width * 0.35,
                         ),
-                        const Text(
+                        SizedBox(height: screenSize.height * 0.02),
+                        Text(
                           'Masuk menggunakan akun yang \nsudah kamu daftarkan',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 21,
+                            fontSize: screenSize.width * 0.05,
                             fontFamily: 'Urbanist',
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 40),
+                        SizedBox(height: screenSize.height * 0.05),
                         Container(
-                          height: 50,
+                          height: screenSize.height * 0.07,
                           child: TextField(
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: const Color(0xFF2D2C4E),
                               hintText: 'Email',
-                              hintStyle: const TextStyle(
+                              hintStyle: TextStyle(
                                 color: Colors.white,
                                 fontFamily: 'Urbanist',
+                                fontSize: screenSize.width * 0.04,
                               ),
                               prefixIcon: Padding(
-                                padding: const EdgeInsets.all(16),
+                                padding:
+                                    EdgeInsets.all(screenSize.width * 0.04),
                                 child: Image.asset(
                                   'assets/images/email.png',
+                                  height: screenSize.width * 0.06,
+                                  width: screenSize.width * 0.06,
                                 ),
                               ),
                               border: OutlineInputBorder(
@@ -65,9 +129,10 @@ class LoginPages extends StatelessWidget {
                                 borderSide: BorderSide.none,
                               ),
                             ),
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
                               fontFamily: 'Urbanist',
+                              fontSize: screenSize.width * 0.04,
                             ),
                             onChanged: (value) {
                               signupForm.updateEmail1(value);
@@ -81,23 +146,27 @@ class LoginPages extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: screenSize.height * 0.03),
                         Container(
-                          height: 50,
+                          height: screenSize.height * 0.07,
                           child: TextField(
                             obscureText: true,
                             decoration: InputDecoration(
                               filled: true,
                               fillColor: const Color(0xFF2D2C4E),
                               hintText: 'Password',
-                              hintStyle: const TextStyle(
+                              hintStyle: TextStyle(
                                 color: Colors.white,
                                 fontFamily: 'Urbanist',
+                                fontSize: screenSize.width * 0.04,
                               ),
                               prefixIcon: Padding(
-                                padding: const EdgeInsets.all(15),
+                                padding:
+                                    EdgeInsets.all(screenSize.width * 0.04),
                                 child: Image.asset(
                                   'assets/images/lock.png',
+                                  height: screenSize.width * 0.06,
+                                  width: screenSize.width * 0.06,
                                 ),
                               ),
                               border: OutlineInputBorder(
@@ -105,9 +174,10 @@ class LoginPages extends StatelessWidget {
                                 borderSide: BorderSide.none,
                               ),
                             ),
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
                               fontFamily: 'Urbanist',
+                              fontSize: screenSize.width * 0.04,
                             ),
                             onChanged: (value) {
                               signupForm.updatePassword1(value);
@@ -121,7 +191,7 @@ class LoginPages extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        SizedBox(height: screenSize.height * 0.02),
                         Align(
                           alignment: Alignment.centerRight,
                           child: GestureDetector(
@@ -134,50 +204,56 @@ class LoginPages extends StatelessWidget {
                                 },
                               );
                             },
-                            child: const Text(
+                            child: Text(
                               'Lupa password?',
                               style: TextStyle(
                                 color: Color(0xFF00D0C0),
                                 fontFamily: 'Urbanist',
+                                fontSize: screenSize.width * 0.04,
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 130),
+                        SizedBox(height: screenSize.height * 0.15),
                         ElevatedButton(
                           onPressed: () {
-                            Navigator.pushReplacementNamed(context, '/name');
+                            _login(context);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF009090),
-                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            padding: EdgeInsets.symmetric(
+                                vertical: screenSize.height * 0.02),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
-                            minimumSize: const Size(double.infinity, 50),
+                            minimumSize:
+                                Size(double.infinity, screenSize.height * 0.07),
                           ),
-                          child: const Text(
+                          child: Text(
                             'Masuk',
                             style: TextStyle(
                               fontFamily: 'Urbanist',
                               color: Colors.white,
+                              fontSize: screenSize.width * 0.045,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: screenSize.height * 0.02),
                         RichText(
                           text: TextSpan(
                             text: 'Belum memiliki akun? ',
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
                               fontFamily: 'Urbanist',
+                              fontSize: screenSize.width * 0.04,
                             ),
                             children: <TextSpan>[
                               TextSpan(
                                   text: 'Daftar sekarang',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Color(0xFF00D0C0),
                                     fontFamily: 'Urbanist',
+                                    fontSize: screenSize.width * 0.04,
                                   ),
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
@@ -221,18 +297,18 @@ class ForgotPasswordBottomSheet extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              width: 50,
+              width: screenWidth * 0.1,
               height: 4,
               color: const Color(0xFF009090),
             ),
             const SizedBox(
               height: 10,
             ),
-            const Text(
+            Text(
               'Lupa Password?',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: screenWidth * 0.06,
                 fontFamily: 'Urbanist',
                 fontWeight: FontWeight.bold,
               ),
@@ -240,61 +316,66 @@ class ForgotPasswordBottomSheet extends StatelessWidget {
             const SizedBox(
               height: 10,
             ),
-            const Text(
-              'Instruksi untuk melakukan reset password akan \ndikirim melalui email yang kamu gunakan untuk \nmendaftar.',
+            Text(
+              'Instruksi untuk melakukan reset password akan dikirim melalui email yang kamu gunakan untuk mendaftar.',
               style: TextStyle(
                 fontFamily: 'Urbanist',
-                fontSize: 18,
+                fontSize: screenWidth * 0.04,
                 color: Colors.white,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: screenWidth * 0.05),
             Container(
-              height: 50,
+              height: screenWidth * 0.12,
               width: screenWidth * 0.85,
               child: TextField(
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
                   hintText: 'Email',
-                  hintStyle: const TextStyle(
+                  hintStyle: TextStyle(
                     color: Color(0xFF333333),
                     fontFamily: 'Urbanist',
+                    fontSize: screenWidth * 0.04,
                   ),
                   prefixIcon: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(screenWidth * 0.04),
                     child: Image.asset('assets/images/email1.png'),
+                    height: screenWidth * 0.08,
+                    width: screenWidth * 0.08,
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     borderSide: BorderSide.none,
                   ),
                 ),
-                style: const TextStyle(
+                style: TextStyle(
                   color: Color(0xFF333333),
                   fontFamily: 'Urbanist',
+                  fontSize: screenWidth * 0.04,
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: screenWidth * 0.03),
             Container(
-              height: 50,
+              height: screenWidth * 0.12,
               width: screenWidth * 0.85,
               child: ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF009090),
-                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  padding: EdgeInsets.symmetric(vertical: screenWidth * 0.02),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10.0),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'Kirim',
                   style: TextStyle(
                     fontFamily: 'Urbanist',
                     color: Colors.white,
+                    fontSize: screenWidth * 0.04,
                   ),
                 ),
               ),

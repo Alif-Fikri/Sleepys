@@ -5,77 +5,81 @@ class SleepProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xFF20223F),
-        automaticallyImplyLeading: false,
-      ),
       backgroundColor: Color(0xFF20223F), // Set background color to dark blue
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Sebelum melanjutkan..',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontFamily: 'Urbanist',
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 20),
-            InfoItem(
-              text:
-                  'Sleepy Panda bertujuan untuk memberikan edukasi dan informasi. Sleepy Panda \nberusaha untuk memberikan pemahaman \nlebih tentang pola tidur kamu. Tetapi, \nSleepy Panda bukanlah alat diagnostik \natau pengganti konsultasi dengan dokter.',
-            ),
-            InfoItem(
-              text:
-                  'Profil tidur yang disediakan oleh Sleepy \nPanda berdasarkan data tidur yang kamu \nberikan, dan bertujuan untuk memberikan \nrekomendasi terkait pola tidur atau potensi \nkesehatan.',
-            ),
-            InfoItem(
-              text:
-                  'Kami selalu menyarankan untuk \nberkonsultasi dengan dokter atau ahli tidur \njika mengalami masalah tidur yang serius \natau berkelanjutan.',
-            ),
-            InfoItem(
-              text: 'Hasil profil tidur dapat berubah seiring \nwaktu.',
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 200),
-                child: Center(
-                  child: Container(
-                    height: 50,
-                    width: 350,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => SleepProfileA()));
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF00A99D), // Button color
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          double padding = constraints.maxWidth * 0.10;
+          double fontSize = constraints.maxWidth * 0.05;
+          double buttonHeight = constraints.maxHeight * 0.07;
+          double buttonWidth = constraints.maxWidth * 0.9;
+
+          return SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: padding),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sebelum melanjutkan..',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: fontSize,
+                      fontFamily: 'Urbanist',
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  InfoItem(
+                    text:
+                        'Sleepy Panda bertujuan untuk memberikan edukasi dan informasi. Sleepy Panda berusaha untuk memberikan pemahaman lebih tentang pola tidur kamu. Tetapi, Sleepy Panda bukanlah alat diagnostik atau pengganti konsultasi dengan dokter.',
+                  ),
+                  InfoItem(
+                    text:
+                        'Profil tidur yang disediakan oleh Sleepy Panda berdasarkan data tidur yang kamu berikan, dan bertujuan untuk memberikan rekomendasi terkait pola tidur atau potensi kesehatan.',
+                  ),
+                  InfoItem(
+                    text:
+                        'Kami selalu menyarankan untuk berkonsultasi dengan dokter atau ahli tidur jika mengalami masalah tidur yang serius atau berkelanjutan.',
+                  ),
+                  InfoItem(
+                    text: 'Hasil profil tidur dapat berubah seiring waktu.',
+                  ),
+                  SizedBox(height: 20),
+                  Center(
+                    child: Container(
+                      height: buttonHeight,
+                      width: buttonWidth,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => SleepProfileA()));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF00A99D), // Button color
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        'Ya, saya mengerti',
-                        style: TextStyle(
-                            fontSize: 18,
+                        child: Text(
+                          'Ya, saya mengerti',
+                          style: TextStyle(
+                            fontSize: fontSize * 0.6,
                             fontFamily: 'Urbanist',
                             fontWeight: FontWeight.bold,
-                            color: Colors.white),
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -103,7 +107,10 @@ class InfoItem extends StatelessWidget {
             child: Text(
               text,
               style: TextStyle(
-                  color: Colors.white, fontSize: 15, fontFamily: 'Urbanist'),
+                color: Colors.white,
+                fontSize: MediaQuery.of(context).size.width * 0.04,
+                fontFamily: 'Urbanist',
+              ),
             ),
           ),
         ],
@@ -115,177 +122,208 @@ class InfoItem extends StatelessWidget {
 class SleepProfileA extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    var screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Color(0xFF20223F),
-      appBar: AppBar(
-        backgroundColor: Color(0xFF20223F),
-        elevation: 0,
-        automaticallyImplyLeading: false,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.only(right: 40, left: 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Text('Profil Tidur Kamu',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Urbanist',
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold)),
-            SizedBox(
-              height: 36,
-            ),
-            Container(
-              height: 650,
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Color(0xFF272E49),
-                borderRadius: BorderRadius.circular(10),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Image.asset(
-                        'assets/images/baik.png',
-                        height: 20,
-                        width: 20,
+              child: Padding(
+                padding:
+                    EdgeInsets.symmetric(horizontal: screenSize.width * 0.1),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    SizedBox(height: screenSize.height * 0.05),
+                    Text(
+                      'Profil Tidur Kamu',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: 'Urbanist',
+                        fontSize: screenSize.width * 0.06,
+                        fontWeight: FontWeight.bold,
                       ),
-                      SizedBox(width: 10),
-                      Text('Baik',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: RichText(
-                        text: TextSpan(
-                            text: 'Selamat, kamu memiliki profil tidur \nyang ',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Urbanist',
-                                fontSize: 15),
-                            children: [
-                          TextSpan(
-                              text: 'baik',
-                              style: TextStyle(
+                    ),
+                    SizedBox(height: screenSize.height * 0.045),
+                    Container(
+                      padding: EdgeInsets.all(screenSize.width * 0.05),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF272E49),
+                        borderRadius:
+                            BorderRadius.circular(screenSize.width * 0.025),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Row(
+                            children: <Widget>[
+                              Image.asset(
+                                'assets/images/baik.png',
+                                height: screenSize.width * 0.05,
+                                width: screenSize.width * 0.05,
+                              ),
+                              SizedBox(width: screenSize.width * 0.025),
+                              Text(
+                                'Baik',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: screenSize.width * 0.045,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: screenSize.height * 0.0125),
+                          Padding(
+                            padding:
+                                EdgeInsets.only(left: screenSize.width * 0.075),
+                            child: RichText(
+                              text: TextSpan(
+                                text:
+                                    'Selamat, kamu memiliki profil tidur yang ',
+                                style: TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'Urbanist',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold)),
-                          TextSpan(
-                            text: '!',
-                            style: TextStyle(
+                                  fontSize: screenSize.width * 0.0375,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: 'baik',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Urbanist',
+                                      fontSize: screenSize.width * 0.0375,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: '!',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Urbanist',
+                                      fontSize: screenSize.width * 0.0375,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: screenSize.height * 0.0125),
+                          Padding(
+                            padding:
+                                EdgeInsets.only(left: screenSize.width * 0.075),
+                            child: Text(
+                              'Kamu dapat tidur dengan nyenyak dan tanpa atau dengan sedikit gangguan.',
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontFamily: 'Urbanist',
-                                fontSize: 15),
-                          )
-                        ])),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: Text(
-                      'Kamu dapat tidur dengan nyenyak \ndan tanpa atau dengan sedikit \ngangguan.',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Urbanist',
-                          fontSize: 15),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: Text(
-                      'Durasi tidur kamu memadai dan \nberkualitas. Profil tidur baik \nmengindikasikan kesehatan fisik dan \nmental yang stabil.',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Urbanist',
-                          fontSize: 15),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: Text('Saran untuk kamu,',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Urbanist')),
-                  ),
-                  SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: InfoBaik(
-                        text: 'Tetap jaga rutinitas tidur yang \nkonsisten.'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: InfoBaik(
-                        text:
-                            'Memastikan lingkungan tidur mu \nnyaman, gelap, sejuk, dan tenang.'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: InfoBaik(
-                        text:
-                            'Hindari penggunaan smartphone atau \nkomputer di tempat tidur.'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: InfoBaik(
-                        text:
-                            'Lakukan aktivitas fisik/olahraga secara \nteratur.'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: InfoBaik(
-                        text:
-                            'Mengatur pola makan yang tepat, \nhindari makan besar sebelum tidur.'),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 45),
-              child: Center(
-                child: Container(
-                  height: 50,
-                  width: 350,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => SleepProfileB()));
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF009090),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                                fontSize: screenSize.width * 0.0375,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: screenSize.height * 0.0125),
+                          Padding(
+                            padding:
+                                EdgeInsets.only(left: screenSize.width * 0.075),
+                            child: Text(
+                              'Durasi tidur kamu memadai dan berkualitas. Profil tidur baik mengindikasikan kesehatan fisik dan mental yang stabil.',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Urbanist',
+                                fontSize: screenSize.width * 0.0375,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: screenSize.height * 0.025),
+                          Padding(
+                            padding:
+                                EdgeInsets.only(left: screenSize.width * 0.075),
+                            child: Text(
+                              'Saran untuk kamu,',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: screenSize.width * 0.045,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: 'Urbanist',
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: screenSize.height * 0.0125),
+                          Padding(
+                            padding: EdgeInsets.only(
+                                left: screenSize.width * 0.0375),
+                            child: Column(
+                              children: [
+                                InfoBaik(
+                                    text:
+                                        'Tetap jaga rutinitas tidur yang konsisten.',
+                                    screenSize: screenSize),
+                                InfoBaik(
+                                    text:
+                                        'Memastikan lingkungan tidur mu nyaman, gelap, sejuk, dan tenang.',
+                                    screenSize: screenSize),
+                                InfoBaik(
+                                    text:
+                                        'Hindari penggunaan smartphone atau komputer di tempat tidur.',
+                                    screenSize: screenSize),
+                                InfoBaik(
+                                    text:
+                                        'Lakukan aktivitas fisik/olahraga secara teratur.',
+                                    screenSize: screenSize),
+                                InfoBaik(
+                                    text:
+                                        'Mengatur pola makan yang tepat, hindari makan besar sebelum tidur.',
+                                    screenSize: screenSize),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Text('Kembali ke Jurnal Tidur',
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                            fontFamily: 'Urbanist',
-                            fontWeight: FontWeight.bold)),
-                  ),
+                    SizedBox(height: screenSize.height * 0.05625),
+                    Center(
+                      child: Container(
+                        height: screenSize.height * 0.0625,
+                        width: screenSize.width * 0.875,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => SleepProfileB()));
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFF009090),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: screenSize.width * 0.05,
+                                vertical: screenSize.height * 0.025),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  screenSize.width * 0.075),
+                            ),
+                          ),
+                          child: Text(
+                            'Kembali ke Jurnal Tidur',
+                            style: TextStyle(
+                              fontSize: screenSize.width * 0.045,
+                              color: Colors.white,
+                              fontFamily: 'Urbanist',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: screenSize.height * 0.0375),
+                  ],
                 ),
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -293,26 +331,30 @@ class SleepProfileA extends StatelessWidget {
 
 class InfoBaik extends StatelessWidget {
   final String text;
+  final Size screenSize;
 
-  InfoBaik({required this.text});
+  InfoBaik({required this.text, required this.screenSize});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.00625),
       child: Row(
         children: <Widget>[
           Image.asset(
             'assets/images/ceklis.png',
-            width: 20,
-            height: 20,
+            width: screenSize.width * 0.05,
+            height: screenSize.width * 0.05,
           ),
-          SizedBox(width: 10),
+          SizedBox(width: screenSize.width * 0.025),
           Expanded(
             child: Text(
               text,
               style: TextStyle(
-                  color: Colors.white, fontSize: 15, fontFamily: 'Urbanist'),
+                color: Colors.white,
+                fontSize: screenSize.width * 0.0375,
+                fontFamily: 'Urbanist',
+              ),
             ),
           ),
         ],
@@ -324,153 +366,167 @@ class InfoBaik extends StatelessWidget {
 class SleepProfileB extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    var screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Color(0xFF20223F),
-      appBar: AppBar(
-        backgroundColor: Color(0xFF20223F),
-        elevation: 0,
-        automaticallyImplyLeading: false,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.only(right: 40, left: 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Text('Profil Tidur Kamu',
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: screenSize.width * 0.1),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              SizedBox(height: screenSize.height * 0.05),
+              Text(
+                'Profil Tidur Kamu',
                 style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Urbanist',
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold)),
-            SizedBox(
-              height: 36,
-            ),
-            Container(
-              height: 650,
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Color(0xFF272E49),
-                borderRadius: BorderRadius.circular(10),
+                  color: Colors.white,
+                  fontFamily: 'Urbanist',
+                  fontSize: screenSize.width * 0.06,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Image.asset(
-                        'assets/images/gangguan.png',
-                        height: 20,
-                        width: 20,
-                      ),
-                      SizedBox(width: 10),
-                      RichText(
+              SizedBox(height: screenSize.height * 0.045),
+              Container(
+                padding: EdgeInsets.all(screenSize.width * 0.05),
+                decoration: BoxDecoration(
+                  color: Color(0xFF272E49),
+                  borderRadius: BorderRadius.circular(screenSize.width * 0.025),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Image.asset(
+                          'assets/images/gangguan.png',
+                          height: screenSize.width * 0.05,
+                          width: screenSize.width * 0.05,
+                        ),
+                        SizedBox(width: screenSize.width * 0.025),
+                        RichText(
                           text: TextSpan(
-                              text: 'Potensi gangguan: ',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Urbanist'),
-                              children: [
-                            TextSpan(
+                            text: 'Potensi gangguan: ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: screenSize.width * 0.040,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Urbanist',
+                            ),
+                            children: [
+                              TextSpan(
                                 text: 'Sleep Apnea',
                                 style: TextStyle(
-                                    fontFamily: 'Urbanist',
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    fontStyle: FontStyle.italic))
-                          ])),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: RichText(
+                                  fontFamily: 'Urbanist',
+                                  fontSize: screenSize.width * 0.040,
+                                  fontWeight: FontWeight.bold,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: screenSize.height * 0.0125),
+                    Padding(
+                      padding: EdgeInsets.only(left: screenSize.width * 0.075),
+                      child: RichText(
                         text: TextSpan(
-                            text: 'Kamu berpotensi memiliki gangguan:\n',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Urbanist',
-                                fontSize: 15),
-                            children: [
-                          TextSpan(
+                          text: 'Kamu berpotensi memiliki gangguan: ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Urbanist',
+                            fontSize: screenSize.width * 0.0375,
+                          ),
+                          children: [
+                            TextSpan(
                               text: 'Sleep apnea',
                               style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Urbanist',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  fontStyle: FontStyle.italic)),
-                        ])),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: Text(
-                      'Sleep apnea merupakan salah satu \nkondisi serius terhadap masalah tidur.',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Urbanist',
-                          fontSize: 15),
+                                color: Colors.white,
+                                fontFamily: 'Urbanist',
+                                fontSize: screenSize.width * 0.0375,
+                                fontWeight: FontWeight.bold,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: Text(
-                      'Segera konsultasikan dengan dokter \natau ahli tidur agar kamu \nmendapatkan bantuan profesional.',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Urbanist',
-                          fontSize: 15),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: Text('Saran untuk kamu,',
+                    SizedBox(height: screenSize.height * 0.0125),
+                    Padding(
+                      padding: EdgeInsets.only(left: screenSize.width * 0.075),
+                      child: Text(
+                        'Sleep apnea merupakan salah satu kondisi serius terhadap masalah tidur.',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Urbanist')),
-                  ),
-                  SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: InfoApnea(
-                        text:
-                            'Segera konsultasikan dengan dokter \nuntuk diagnosis yang tepat.'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: InfoApnea(
-                        text:
-                            'Hindari alkohol, dan merokok, serta \nmempertimbangkan untuk tidur dalam \nposisi yang lebih baik, seperti tidur \nmiring'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: InfoApnea(
-                        text:
-                            'Lakukan olahraga secara teratur, dan \nmenjaga pola makan yang seimbang.'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: InfoApnea(
-                        text:
-                            'Terus lakukan evaluasi dan \npemantauan berkala dengan dokter \natau ahli tidur untuk memastikan \nperubahan gaya hidup.'),
-                  ),
-                ],
+                          color: Colors.white,
+                          fontFamily: 'Urbanist',
+                          fontSize: screenSize.width * 0.0375,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: screenSize.height * 0.0125),
+                    Padding(
+                      padding: EdgeInsets.only(left: screenSize.width * 0.075),
+                      child: Text(
+                        'Segera konsultasikan dengan dokter atau ahli tidur agar kamu mendapatkan bantuan profesional.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Urbanist',
+                          fontSize: screenSize.width * 0.0375,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: screenSize.height * 0.025),
+                    Padding(
+                      padding: EdgeInsets.only(left: screenSize.width * 0.075),
+                      child: Text(
+                        'Saran untuk kamu,',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenSize.width * 0.045,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Urbanist',
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: screenSize.height * 0.0125),
+                    Padding(
+                      padding: EdgeInsets.only(left: screenSize.width * 0.0375),
+                      child: Column(
+                        children: [
+                          InfoApnea(
+                            text:
+                                'Segera konsultasikan dengan dokter untuk diagnosis yang tepat.',
+                            screenSize: screenSize,
+                          ),
+                          InfoApnea(
+                            text:
+                                'Hindari alkohol, dan merokok, serta mempertimbangkan untuk tidur dalam posisi yang lebih baik, seperti tidur miring.',
+                            screenSize: screenSize,
+                          ),
+                          InfoApnea(
+                            text:
+                                'Lakukan olahraga secara teratur, dan menjaga pola makan yang seimbang.',
+                            screenSize: screenSize,
+                          ),
+                          InfoApnea(
+                            text:
+                                'Terus lakukan evaluasi dan pemantauan berkala dengan dokter atau ahli tidur untuk memastikan perubahan gaya hidup.',
+                            screenSize: screenSize,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 45),
-              child: Center(
+              SizedBox(height: screenSize.height * 0.05625),
+              Center(
                 child: Container(
-                  height: 50,
-                  width: 350,
+                  height: screenSize.height * 0.0625,
+                  width: screenSize.width * 0.875,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).push(MaterialPageRoute(
@@ -478,23 +534,30 @@ class SleepProfileB extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF009090),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenSize.width * 0.05,
+                        vertical: screenSize.height * 0.025,
+                      ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius:
+                            BorderRadius.circular(screenSize.width * 0.075),
                       ),
                     ),
-                    child: Text('Kembali ke Jurnal Tidur',
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                            fontFamily: 'Urbanist',
-                            fontWeight: FontWeight.bold)),
+                    child: Text(
+                      'Kembali ke Jurnal Tidur',
+                      style: TextStyle(
+                        fontSize: screenSize.width * 0.045,
+                        color: Colors.white,
+                        fontFamily: 'Urbanist',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: screenSize.height * 0.0375),
+            ],
+          ),
         ),
       ),
     );
@@ -503,26 +566,30 @@ class SleepProfileB extends StatelessWidget {
 
 class InfoApnea extends StatelessWidget {
   final String text;
+  final Size screenSize;
 
-  InfoApnea({required this.text});
+  InfoApnea({required this.text, required this.screenSize});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.00625),
       child: Row(
         children: <Widget>[
           Image.asset(
             'assets/images/ceklis.png',
-            width: 20,
-            height: 20,
+            width: screenSize.width * 0.05,
+            height: screenSize.width * 0.05,
           ),
-          SizedBox(width: 10),
+          SizedBox(width: screenSize.width * 0.025),
           Expanded(
             child: Text(
               text,
               style: TextStyle(
-                  color: Colors.white, fontSize: 15, fontFamily: 'Urbanist'),
+                color: Colors.white,
+                fontSize: screenSize.width * 0.0375,
+                fontFamily: 'Urbanist',
+              ),
             ),
           ),
         ],
@@ -534,153 +601,167 @@ class InfoApnea extends StatelessWidget {
 class SleepProfileC extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    var screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Color(0xFF20223F),
-      appBar: AppBar(
-        backgroundColor: Color(0xFF20223F),
-        elevation: 0,
-        automaticallyImplyLeading: false,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.only(right: 40, left: 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Text('Profil Tidur Kamu',
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: screenSize.width * 0.1),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              SizedBox(height: screenSize.height * 0.05),
+              Text(
+                'Profil Tidur Kamu',
                 style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Urbanist',
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold)),
-            SizedBox(
-              height: 36,
-            ),
-            Container(
-              height: 650,
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Color(0xFF272E49),
-                borderRadius: BorderRadius.circular(10),
+                  color: Colors.white,
+                  fontFamily: 'Urbanist',
+                  fontSize: screenSize.width * 0.06,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Image.asset(
-                        'assets/images/gangguan.png',
-                        height: 20,
-                        width: 20,
-                      ),
-                      SizedBox(width: 10),
-                      RichText(
+              SizedBox(height: screenSize.height * 0.045),
+              Container(
+                padding: EdgeInsets.all(screenSize.width * 0.05),
+                decoration: BoxDecoration(
+                  color: Color(0xFF272E49),
+                  borderRadius: BorderRadius.circular(screenSize.width * 0.025),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Image.asset(
+                          'assets/images/gangguan.png',
+                          height: screenSize.width * 0.05,
+                          width: screenSize.width * 0.05,
+                        ),
+                        SizedBox(width: screenSize.width * 0.025),
+                        RichText(
                           text: TextSpan(
-                              text: 'Potensi gangguan: ',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: 'Urbanist'),
-                              children: [
-                            TextSpan(
+                            text: 'Potensi gangguan: ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: screenSize.width * 0.040,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Urbanist',
+                            ),
+                            children: [
+                              TextSpan(
                                 text: 'Insomnia',
                                 style: TextStyle(
-                                    fontFamily: 'Urbanist',
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    fontStyle: FontStyle.italic))
-                          ])),
-                    ],
-                  ),
-                  SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: RichText(
+                                  fontFamily: 'Urbanist',
+                                  fontSize: screenSize.width * 0.040,
+                                  fontWeight: FontWeight.bold,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: screenSize.height * 0.0125),
+                    Padding(
+                      padding: EdgeInsets.only(left: screenSize.width * 0.075),
+                      child: RichText(
                         text: TextSpan(
-                            text: 'Kamu berpotensi memiliki gangguan:\n',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Urbanist',
-                                fontSize: 15),
-                            children: [
-                          TextSpan(
+                          text: 'Kamu berpotensi memiliki gangguan: ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Urbanist',
+                            fontSize: screenSize.width * 0.0375,
+                          ),
+                          children: [
+                            TextSpan(
                               text: 'Insomnia',
                               style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Urbanist',
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.bold,
-                                  fontStyle: FontStyle.italic)),
-                        ])),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: Text(
-                      'Insomnia merupakan gangguan tidur \nyang melibatkan kesulitan tidur atau \nsering terbangun di tengah malam.',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Urbanist',
-                          fontSize: 15),
+                                color: Colors.white,
+                                fontFamily: 'Urbanist',
+                                fontSize: screenSize.width * 0.0375,
+                                fontWeight: FontWeight.bold,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: Text(
-                      'Segera konsultasikan dengan dokter \natau ahli tidur agar kamu \nmendapatkan bantuan profesional.',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Urbanist',
-                          fontSize: 15),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 30),
-                    child: Text('Saran untuk kamu,',
+                    SizedBox(height: screenSize.height * 0.0125),
+                    Padding(
+                      padding: EdgeInsets.only(left: screenSize.width * 0.075),
+                      child: Text(
+                        'Insomnia merupakan gangguan tidur yang melibatkan kesulitan tidur atau sering terbangun di tengah malam.',
                         style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Urbanist')),
-                  ),
-                  SizedBox(height: 10),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: InfoInsomnia(
-                        text:
-                            'Mengatur rutinitas tidur yang konsisten. \nMenerapkan jadwal tidur yang tepat, \ndan hindari tidur siang yang berlebihan.'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: InfoInsomnia(
-                        text:
-                            'Menghindari kafein, alkohol, dan \nmakanan berat beberapa jam sebelum \ntidur.'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: InfoInsomnia(
-                        text:
-                            'Melakukan aktivitas yang \nmenenangkan seperti membaca buku, \natau meditasi.'),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 15),
-                    child: InfoInsomnia(
-                        text:
-                            'Jika berlanjut, lakukan konsultasi \ndengan dokter untuk mencari \npenyebab dan pengobatan yang \nsesuai.'),
-                  ),
-                ],
+                          color: Colors.white,
+                          fontFamily: 'Urbanist',
+                          fontSize: screenSize.width * 0.0375,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: screenSize.height * 0.0125),
+                    Padding(
+                      padding: EdgeInsets.only(left: screenSize.width * 0.075),
+                      child: Text(
+                        'Segera konsultasikan dengan dokter atau ahli tidur agar kamu mendapatkan bantuan profesional.',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Urbanist',
+                          fontSize: screenSize.width * 0.0375,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: screenSize.height * 0.025),
+                    Padding(
+                      padding: EdgeInsets.only(left: screenSize.width * 0.075),
+                      child: Text(
+                        'Saran untuk kamu,',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenSize.width * 0.045,
+                          fontWeight: FontWeight.bold,
+                          fontFamily: 'Urbanist',
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: screenSize.height * 0.0125),
+                    Padding(
+                      padding: EdgeInsets.only(left: screenSize.width * 0.0375),
+                      child: Column(
+                        children: [
+                          InfoInsomnia(
+                            text:
+                                'Mengatur rutinitas tidur yang konsisten. Menerapkan jadwal tidur yang tepat, dan hindari tidur siang yang berlebihan.',
+                            screenSize: screenSize,
+                          ),
+                          InfoInsomnia(
+                            text:
+                                'Menghindari kafein, alkohol, dan makanan berat beberapa jam sebelum tidur.',
+                            screenSize: screenSize,
+                          ),
+                          InfoInsomnia(
+                            text:
+                                'Melakukan aktivitas yang menenangkan seperti membaca buku, atau meditasi.',
+                            screenSize: screenSize,
+                          ),
+                          InfoInsomnia(
+                            text:
+                                'Jika berlanjut, lakukan konsultasi dengan dokter untuk mencari penyebab dan pengobatan yang sesuai.',
+                            screenSize: screenSize,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 45),
-              child: Center(
+              SizedBox(height: screenSize.height * 0.05625),
+              Center(
                 child: Container(
-                  height: 50,
-                  width: 350,
+                  height: screenSize.height * 0.0625,
+                  width: screenSize.width * 0.875,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).push(
@@ -688,23 +769,30 @@ class SleepProfileC extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF009090),
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: screenSize.width * 0.05,
+                        vertical: screenSize.height * 0.025,
+                      ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius:
+                            BorderRadius.circular(screenSize.width * 0.075),
                       ),
                     ),
-                    child: Text('Kembali ke Jurnal Tidur',
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                            fontFamily: 'Urbanist',
-                            fontWeight: FontWeight.bold)),
+                    child: Text(
+                      'Kembali ke Jurnal Tidur',
+                      style: TextStyle(
+                        fontSize: screenSize.width * 0.045,
+                        color: Colors.white,
+                        fontFamily: 'Urbanist',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+              SizedBox(height: screenSize.height * 0.0375),
+            ],
+          ),
         ),
       ),
     );
@@ -713,26 +801,30 @@ class SleepProfileC extends StatelessWidget {
 
 class InfoInsomnia extends StatelessWidget {
   final String text;
+  final Size screenSize;
 
-  InfoInsomnia({required this.text});
+  InfoInsomnia({required this.text, required this.screenSize});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.00625),
       child: Row(
         children: <Widget>[
           Image.asset(
             'assets/images/ceklis.png',
-            width: 20,
-            height: 20,
+            width: screenSize.width * 0.05,
+            height: screenSize.width * 0.05,
           ),
-          SizedBox(width: 10),
+          SizedBox(width: screenSize.width * 0.025),
           Expanded(
             child: Text(
               text,
               style: TextStyle(
-                  color: Colors.white, fontSize: 15, fontFamily: 'Urbanist'),
+                color: Colors.white,
+                fontSize: screenSize.width * 0.0375,
+                fontFamily: 'Urbanist',
+              ),
             ),
           ),
         ],

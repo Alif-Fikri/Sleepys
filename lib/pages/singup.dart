@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:sleepys/pages/namepage.dart';
 import '../widgets/signupprovider.dart';
 import 'loginpage.dart';
@@ -10,14 +12,58 @@ class Signup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Singups(),
+    return ChangeNotifierProvider(
+      create: (_) => SignupFormProvider(),
+      child: const MaterialApp(
+        home: Singups(),
+      ),
     );
   }
 }
 
 class Singups extends StatelessWidget {
   const Singups({Key? key}) : super(key: key);
+
+  Future<void> _signup(BuildContext context) async {
+    final signupForm = Provider.of<SignupFormProvider>(context, listen: false);
+    final email = signupForm.email;
+    final password = signupForm.password;
+    final confirmPassword = signupForm.confirmPassword;
+
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Passwords do not match")),
+      );
+      return;
+    }
+
+    final url = Uri.parse('http://localhost:8000/register/');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'email': email,
+        'password': password,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Signup successful")),
+      );
+      // Navigate to NamePage on successful signup
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Namepage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Signup failed")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -160,13 +206,13 @@ class Singups extends StatelessWidget {
                               fontFamily: 'Urbanist',
                             ),
                             onChanged: (value) {
-                              signupForm.updatecPassword(value);
+                              signupForm.updateConfirmPassword(value);
                             },
                             controller: TextEditingController.fromValue(
                               TextEditingValue(
-                                text: signupForm.cpassword,
+                                text: signupForm.confirmPassword,
                                 selection: TextSelection.collapsed(
-                                    offset: signupForm.cpassword.length),
+                                    offset: signupForm.confirmPassword.length),
                               ),
                             ),
                           ),
@@ -174,7 +220,7 @@ class Singups extends StatelessWidget {
                         const SizedBox(height: 80),
                         ElevatedButton(
                           onPressed: () {
-                            Navigator.pushReplacementNamed(context, '/name');
+                            _signup(context);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF009090),

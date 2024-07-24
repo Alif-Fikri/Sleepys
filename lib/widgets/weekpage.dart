@@ -33,6 +33,8 @@ class _WeekPageState extends State<WeekPage> {
     final sleepData = [4.0, 3.0, 10.0, 8.0, 7.0, 6.0, 2.0];
     final lineData = [21.00, 22.50, 21.40, 24.00, 22.40, 24.50, 25.10];
     final lineData1 = [09.00, 06.00, 07.00, 06.15, 07.10, 06.00, 09.00];
+    final dateFormat = DateFormat('d MMMM', 'id');
+    double baseFontSize = MediaQuery.of(context).size.width * 0.04;
 
     return Scaffold(
       backgroundColor: Color(0xFF20223F),
@@ -48,7 +50,7 @@ class _WeekPageState extends State<WeekPage> {
                 year,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: baseFontSize,
                   color: Colors.white,
                   fontFamily: 'Urbanist',
                   fontWeight: FontWeight.bold,
@@ -74,9 +76,9 @@ class _WeekPageState extends State<WeekPage> {
                     },
                   ),
                   Text(
-                    '${DateFormat('d MMM').format(startDate)} - ${DateFormat('d MMM').format(endDate)}',
+                    '${dateFormat.format(startDate)} - ${dateFormat.format(endDate)}',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: baseFontSize,
                       color: Colors.white,
                       fontFamily: 'Urbanist',
                       fontWeight: FontWeight.bold,
@@ -106,7 +108,7 @@ class _WeekPageState extends State<WeekPage> {
                 child: Text(
                   'Durasi Tidur',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: baseFontSize,
                     color: Colors.white,
                     fontFamily: 'Urbanist',
                     fontWeight: FontWeight.bold,
@@ -114,7 +116,7 @@ class _WeekPageState extends State<WeekPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(right: 20, left: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Container(
                   decoration: BoxDecoration(
                     border: Border.all(color: Color(0xFF272E49)),
@@ -124,22 +126,21 @@ class _WeekPageState extends State<WeekPage> {
                   child: WeekBarChart(sleepData: sleepData),
                 ),
               ),
-              SizedBox(
-                height: 5,
-              ),
+              SizedBox(height: 5),
               Padding(
                 padding: const EdgeInsets.only(right: 200, top: 10),
                 child: Text(
                   'Mulai Tidur',
                   style: TextStyle(
-                      fontFamily: 'Urbanist',
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                    fontFamily: 'Urbanist',
+                    fontSize: baseFontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(right: 20, left: 20, top: 20),
+                padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
                 child: Container(
                   decoration: BoxDecoration(
                     border: Border.all(color: Color(0xFF272E49)),
@@ -154,20 +155,21 @@ class _WeekPageState extends State<WeekPage> {
                 child: Text(
                   'Bangun Tidur',
                   style: TextStyle(
-                      fontFamily: 'Urbanist',
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
+                    fontFamily: 'Urbanist',
+                    fontSize: baseFontSize,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(right: 20, left: 20, top: 20),
+                padding: const EdgeInsets.only(top: 20, left: 20, right: 20),
                 child: Container(
                   decoration: BoxDecoration(
                     border: Border.all(color: Color(0xFF272E49)),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: EdgeInsets.all(10),
+                  padding: EdgeInsets.all(15),
                   child: SleepLineChart1(data: lineData1),
                 ),
               ),
@@ -192,16 +194,18 @@ class WeekBarChart extends StatelessWidget {
             constraints.maxWidth * 0.9; // 90% of available width
         double chartHeight =
             constraints.maxHeight * 0.5; // 50% of available height
-        double barWidth = chartWidth / (6.5 * 1.5);
+        double barWidth = chartWidth / (6 * 1.5);
 
         if (constraints.maxHeight.isInfinite) {
           chartHeight = 200;
         }
 
+        double fontSize = MediaQuery.of(context).size.width * 0.03;
+
         return Center(
           child: SizedBox(
             width: chartWidth,
-            height: chartHeight, // Define a fixed height for the chart
+            height: chartHeight,
             child: BarChart(
               BarChartData(
                 barGroups: _createBarGroups(barWidth),
@@ -212,40 +216,68 @@ class WeekBarChart extends StatelessWidget {
                       getTitlesWidget: (value, meta) {
                         switch (value.toInt()) {
                           case 0:
-                            return Text('Sen',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Urbanist'));
+                            return FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Sen',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Urbanist',
+                                      fontSize: fontSize)),
+                            );
                           case 1:
-                            return Text('Sel',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Urbanist'));
+                            return FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Sel',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Urbanist',
+                                      fontSize: fontSize)),
+                            );
                           case 2:
-                            return Text('Rab',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Urbanist'));
+                            return FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Rab',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Urbanist',
+                                      fontSize: fontSize)),
+                            );
                           case 3:
-                            return Text('Kam',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Urbanist'));
+                            return FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Kam',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Urbanist',
+                                      fontSize: fontSize)),
+                            );
                           case 4:
-                            return Text('Jum',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Urbanist'));
+                            return FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Jum',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Urbanist',
+                                      fontSize: fontSize)),
+                            );
                           case 5:
-                            return Text('Sab',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Urbanist'));
+                            return FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Sab',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Urbanist',
+                                      fontSize: fontSize)),
+                            );
                           case 6:
-                            return Text('Min',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Urbanist'));
+                            return FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text('Min',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Urbanist',
+                                      fontSize: fontSize)),
+                            );
                           default:
                             return Text('',
                                 style: TextStyle(
@@ -260,20 +292,25 @@ class WeekBarChart extends StatelessWidget {
                         showTitles: true,
                         interval: 2,
                         getTitlesWidget: (value, meta) {
-                          return Text('${value.toInt()}j',
-                              style: TextStyle(
-                                  color: Colors.white, fontFamily: 'Urbanist'));
+                          return FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text('${value.toInt()}j',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Urbanist',
+                                    fontSize: fontSize)),
+                          );
                         }),
                   ),
                   topTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: false,
-                    ), // Set to false to hide top titles
+                    ),
                   ),
                   rightTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: false,
-                    ), // Set to false to hide right titles
+                    ),
                   ),
                 ),
                 borderData: FlBorderData(show: false),
@@ -333,152 +370,180 @@ class SleepLineChart extends StatefulWidget {
 class _SleepLineChartState extends State<SleepLineChart> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0), // Add padding for better spacing
-      child: SizedBox(
-        width: 315, // Adjust the width as needed
-        height: 200, // Adjust the height as needed
-        child: LineChart(
-          LineChartData(
-            gridData: FlGridData(
-              show: false,
-              drawVerticalLine: true,
-              getDrawingHorizontalLine: (value) {
-                return FlLine(
-                  color: Colors.white.withOpacity(0.2),
-                  strokeWidth: 1,
-                );
-              },
-              getDrawingVerticalLine: (value) {
-                return FlLine(
-                  color: Colors.white.withOpacity(0.2),
-                  strokeWidth: 1,
-                );
-              },
-            ),
-            titlesData: FlTitlesData(
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 22,
-                  getTitlesWidget: (value, meta) {
-                    String text;
-                    switch (value.toInt()) {
-                      case 0:
-                        text = 'Sen';
-                        break;
-                      case 1:
-                        text = 'Sel';
-                        break;
-                      case 2:
-                        text = 'Rab';
-                        break;
-                      case 3:
-                        text = 'Kam';
-                        break;
-                      case 4:
-                        text = 'Jum';
-                        break;
-                      case 5:
-                        text = 'Sab';
-                        break;
-                      case 6:
-                        text = 'Min';
-                        break;
-                      default:
-                        return Container();
-                    }
-                    return Text(text,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Urbanist',
-                        ));
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double chartWidth =
+            constraints.maxWidth * 0.9; // 90% of available width
+        double chartHeight =
+            constraints.maxHeight * 0.5; // 50% of available height
+
+        if (constraints.maxHeight.isInfinite) {
+          chartHeight = 200;
+        }
+
+        double fontSize = MediaQuery.of(context).size.width * 0.03;
+
+        return Padding(
+          padding: const EdgeInsets.all(16.0), // Add padding for better spacing
+          child: SizedBox(
+            width: chartWidth, // Adjust the width as needed
+            height: chartHeight, // Adjust the height as needed
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(
+                  show: false,
+                  drawVerticalLine: true,
+                  getDrawingHorizontalLine: (value) {
+                    return FlLine(
+                      color: Colors.white.withOpacity(0.2),
+                      strokeWidth: 1,
+                    );
                   },
-                ),
-              ),
-              leftTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 40,
-                  interval: 1,
-                  getTitlesWidget: (value, meta) {
-                    String text;
-                    switch (value.toInt()) {
-                      case 20:
-                        text = '20.00';
-                        break;
-                      case 21:
-                        text = '21.00';
-                        break;
-                      case 22:
-                        text = '22.00';
-                        break;
-                      case 23:
-                        text = '23.00';
-                        break;
-                      case 24:
-                        text = '24.00';
-                        break;
-                      case 25:
-                        text = '01.00';
-                        break;
-                      default:
-                        return Container();
-                    }
-                    return Text(text,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontFamily: 'Urbanist'));
-                  },
-                ),
-              ),
-              topTitles: AxisTitles(
-                sideTitles: SideTitles(showTitles: false), // Hide top titles
-              ),
-              rightTitles: AxisTitles(
-                sideTitles: SideTitles(showTitles: false), // Hide right titles
-              ),
-            ),
-            borderData: FlBorderData(
-              show: false,
-              border: Border.all(
-                color: const Color(0xff37434d),
-              ),
-            ),
-            minX: 0,
-            maxX: 6,
-            minY: 20, // Start from 20.00
-            maxY: 25, // End at 25 (which is 01.00)
-            lineBarsData: [
-              LineChartBarData(
-                spots: widget.data.asMap().entries.map((entry) {
-                  return FlSpot(entry.key.toDouble(), entry.value);
-                }).toList(),
-                isCurved: false,
-                color: Color(0xFFFF5999),
-                barWidth: 2,
-                isStrokeCapRound: false,
-                dotData: FlDotData(
-                  show: true,
-                  getDotPainter: (FlSpot spot, double xPercentage,
-                      LineChartBarData bar, int index) {
-                    return FlDotCirclePainter(
-                      radius: 2,
-                      color: Colors.white,
-                      strokeWidth: 2,
-                      strokeColor: Color.fromARGB(255, 255, 255, 255),
+                  getDrawingVerticalLine: (value) {
+                    return FlLine(
+                      color: Colors.white.withOpacity(0.2),
+                      strokeWidth: 1,
                     );
                   },
                 ),
-                belowBarData: BarAreaData(
-                  show: false,
+                titlesData: FlTitlesData(
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 22,
+                      getTitlesWidget: (value, meta) {
+                        String text;
+                        switch (value.toInt()) {
+                          case 0:
+                            text = 'Sen';
+                            break;
+                          case 1:
+                            text = 'Sel';
+                            break;
+                          case 2:
+                            text = 'Rab';
+                            break;
+                          case 3:
+                            text = 'Kam';
+                            break;
+                          case 4:
+                            text = 'Jum';
+                            break;
+                          case 5:
+                            text = 'Sab';
+                            break;
+                          case 6:
+                            text = 'Min';
+                            break;
+                          default:
+                            return Container();
+                        }
+                        return FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(text,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Urbanist',
+                                fontSize: fontSize,
+                              )),
+                        );
+                      },
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      interval: 1,
+                      getTitlesWidget: (value, meta) {
+                        String text;
+                        switch (value.toInt()) {
+                          case 20:
+                            text = '20.00';
+                            break;
+                          case 21:
+                            text = '21.00';
+                            break;
+                          case 22:
+                            text = '22.00';
+                            break;
+                          case 23:
+                            text = '23.00';
+                            break;
+                          case 24:
+                            text = '24.00';
+                            break;
+                          case 25:
+                            text = '01.00';
+                            break;
+                          default:
+                            return Container();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 15),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(text,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Urbanist',
+                                  fontSize: fontSize,
+                                )),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  topTitles: AxisTitles(
+                    sideTitles:
+                        SideTitles(showTitles: false), // Hide top titles
+                  ),
+                  rightTitles: AxisTitles(
+                    sideTitles:
+                        SideTitles(showTitles: false), // Hide right titles
+                  ),
                 ),
+                borderData: FlBorderData(
+                  show: false,
+                  border: Border.all(
+                    color: const Color(0xff37434d),
+                  ),
+                ),
+                minX: 0,
+                maxX: 6,
+                minY: 20, // Start from 20.00
+                maxY: 25, // End at 25 (which is 01.00)
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: widget.data.asMap().entries.map((entry) {
+                      return FlSpot(entry.key.toDouble(), entry.value);
+                    }).toList(),
+                    isCurved: false,
+                    color: Color(0xFFFF5999),
+                    barWidth: 2,
+                    isStrokeCapRound: false,
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (FlSpot spot, double xPercentage,
+                          LineChartBarData bar, int index) {
+                        return FlDotCirclePainter(
+                          radius: 2,
+                          color: Colors.white,
+                          strokeWidth: 2,
+                          strokeColor: Color.fromARGB(255, 255, 255, 255),
+                        );
+                      },
+                    ),
+                    belowBarData: BarAreaData(
+                      show: false,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -495,152 +560,178 @@ class SleepLineChart1 extends StatefulWidget {
 class _SleepLineChart1State extends State<SleepLineChart1> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0), // Add padding for better spacing
-      child: SizedBox(
-        width: 315, // Adjust the width as needed
-        height: 200, // Adjust the height as needed
-        child: LineChart(
-          LineChartData(
-            gridData: FlGridData(
-              show: false,
-              drawVerticalLine: true,
-              getDrawingHorizontalLine: (value) {
-                return FlLine(
-                  color: Colors.white.withOpacity(0.2),
-                  strokeWidth: 1,
-                );
-              },
-              getDrawingVerticalLine: (value) {
-                return FlLine(
-                  color: Colors.white.withOpacity(0.2),
-                  strokeWidth: 1,
-                );
-              },
-            ),
-            titlesData: FlTitlesData(
-              bottomTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 22,
-                  getTitlesWidget: (value, meta) {
-                    String text;
-                    switch (value.toInt()) {
-                      case 0:
-                        text = 'Sen';
-                        break;
-                      case 1:
-                        text = 'Sel';
-                        break;
-                      case 2:
-                        text = 'Rab';
-                        break;
-                      case 3:
-                        text = 'Kam';
-                        break;
-                      case 4:
-                        text = 'Jum';
-                        break;
-                      case 5:
-                        text = 'Sab';
-                        break;
-                      case 6:
-                        text = 'Min';
-                        break;
-                      default:
-                        return Container();
-                    }
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(text,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Urbanist',
-                          )),
-                    );
-                  },
-                ),
-              ),
-              leftTitles: AxisTitles(
-                sideTitles: SideTitles(
-                  showTitles: true,
-                  reservedSize: 40,
-                  interval: 1,
-                  getTitlesWidget: (value, meta) {
-                    String text;
-                    switch (value.toInt()) {
-                      case 6:
-                        text = '06:00';
-                        break;
-                      case 7:
-                        text = '07:00';
-                        break;
-                      case 8:
-                        text = '08:00';
-                        break;
-                      case 9:
-                        text = '09:00';
-                        break;
-                      case 10:
-                        text = '10:00';
-                        break;
-                      default:
-                        return Container();
-                    }
-                    return Text(text,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontFamily: 'Urbanist'));
-                  },
-                ),
-              ),
-              topTitles: AxisTitles(
-                sideTitles: SideTitles(showTitles: false), // Hide top titles
-              ),
-              rightTitles: AxisTitles(
-                sideTitles: SideTitles(showTitles: false), // Hide right titles
-              ),
-            ),
-            borderData: FlBorderData(
-              show: false,
-              border: Border.all(
-                color: const Color(0xff37434d),
-              ),
-            ),
-            minX: 0,
-            maxX: 6,
-            minY: 6, // Start from 6.00
-            maxY: 10, // End at 10.00
-            lineBarsData: [
-              LineChartBarData(
-                spots: widget.data.asMap().entries.map((entry) {
-                  return FlSpot(entry.key.toDouble(), entry.value);
-                }).toList(),
-                isCurved: false,
-                color: Color(0xFFFFC754),
-                barWidth: 2,
-                isStrokeCapRound: false,
-                dotData: FlDotData(
-                  show: true,
-                  getDotPainter: (FlSpot spot, double xPercentage,
-                      LineChartBarData bar, int index) {
-                    return FlDotCirclePainter(
-                      radius: 2,
-                      color: Colors.white,
-                      strokeWidth: 2,
-                      strokeColor: Color.fromARGB(255, 255, 255, 255),
-                    );
-                  },
-                ),
-                belowBarData: BarAreaData(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double chartWidth =
+            constraints.maxWidth * 0.9; // 90% of available width
+        double chartHeight =
+            constraints.maxHeight * 0.5; // 50% of available height
+
+        if (constraints.maxHeight.isInfinite) {
+          chartHeight = 200;
+        }
+
+        double fontSize = MediaQuery.of(context).size.width * 0.03;
+
+        return Padding(
+          padding: const EdgeInsets.all(16), // Add padding for better spacing
+          child: SizedBox(
+            width: chartWidth, // Adjust the width as needed
+            height: chartHeight, // Adjust the height as needed
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(
                   show: false,
+                  drawVerticalLine: true,
+                  getDrawingHorizontalLine: (value) {
+                    return FlLine(
+                      color: Colors.white.withOpacity(0.2),
+                      strokeWidth: 1,
+                    );
+                  },
+                  getDrawingVerticalLine: (value) {
+                    return FlLine(
+                      color: Colors.white.withOpacity(0.2),
+                      strokeWidth: 1,
+                    );
+                  },
                 ),
+                titlesData: FlTitlesData(
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 22,
+                      getTitlesWidget: (value, meta) {
+                        String text;
+                        switch (value.toInt()) {
+                          case 0:
+                            text = 'Sen';
+                            break;
+                          case 1:
+                            text = 'Sel';
+                            break;
+                          case 2:
+                            text = 'Rab';
+                            break;
+                          case 3:
+                            text = 'Kam';
+                            break;
+                          case 4:
+                            text = 'Jum';
+                            break;
+                          case 5:
+                            text = 'Sab';
+                            break;
+                          case 6:
+                            text = 'Min';
+                            break;
+                          default:
+                            return Container();
+                        }
+                        return FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(text,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Urbanist',
+                                fontSize: fontSize,
+                              )),
+                        );
+                      },
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      interval: 1,
+                      getTitlesWidget: (value, meta) {
+                        String text;
+                        switch (value.toInt()) {
+                          case 6:
+                            text = '06:00';
+                            break;
+                          case 7:
+                            text = '07:00';
+                            break;
+                          case 8:
+                            text = '08:00';
+                            break;
+                          case 9:
+                            text = '09:00';
+                            break;
+                          case 10:
+                            text = '10:00';
+                            break;
+                          default:
+                            return Container();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                              right: 15), // Adjust padding as needed
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(text,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Urbanist',
+                                  fontSize: fontSize,
+                                )),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  topTitles: AxisTitles(
+                    sideTitles:
+                        SideTitles(showTitles: false), // Hide top titles
+                  ),
+                  rightTitles: AxisTitles(
+                    sideTitles:
+                        SideTitles(showTitles: false), // Hide right titles
+                  ),
+                ),
+                borderData: FlBorderData(
+                  show: false,
+                  border: Border.all(
+                    color: const Color(0xff37434d),
+                  ),
+                ),
+                minX: 0,
+                maxX: 6,
+                minY: 6, // Start from 6.00
+                maxY: 10, // End at 10.00
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: widget.data.asMap().entries.map((entry) {
+                      return FlSpot(entry.key.toDouble(), entry.value);
+                    }).toList(),
+                    isCurved: false,
+                    color: Color(0xFFFFC754),
+                    barWidth: 2,
+                    isStrokeCapRound: false,
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (FlSpot spot, double xPercentage,
+                          LineChartBarData bar, int index) {
+                        return FlDotCirclePainter(
+                          radius: 2,
+                          color: Colors.white,
+                          strokeWidth: 2,
+                          strokeColor: Color.fromARGB(255, 255, 255, 255),
+                        );
+                      },
+                    ),
+                    belowBarData: BarAreaData(
+                      show: false,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
