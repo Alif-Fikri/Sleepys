@@ -3,6 +3,10 @@ import '../pages/home.dart';
 import 'alarmscreen.dart';
 
 class SleepPage extends StatefulWidget {
+  final String email; // tambahkan parameter email
+
+  SleepPage({required this.email}); // tambahkan parameter email di konstruktor
+
   @override
   _SleepPageState createState() => _SleepPageState();
 }
@@ -177,6 +181,8 @@ class _SleepPageState extends State<SleepPage> {
                           builder: (context) => AlarmScreen(
                             wakeUpTime:
                                 '${selectedWakeUpHour.toString().padLeft(2, '0')}:${selectedSleepMinute.toString().padLeft(2, '0')}',
+                            userName: widget.email,
+                            email: widget.email, // Perbaiki baris ini
                           ),
                         ),
                       );
@@ -202,7 +208,10 @@ class _SleepPageState extends State<SleepPage> {
               TextButton(
                 onPressed: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => HomePage()),
+                    MaterialPageRoute(
+                        builder: (context) => HomePage(
+                              userEmail: widget.email, // akses widget.email
+                            )),
                   );
                 },
                 child: Text(

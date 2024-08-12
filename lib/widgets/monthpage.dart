@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:sleepys/widgets/card_sleepprofile.dart';
 import '../pages/home.dart';
 
 class MonthPage extends StatefulWidget {
+    final String email;
+
+  MonthPage({required this.email});
   @override
   _MonthPageState createState() => _MonthPageState();
 }
@@ -45,7 +49,7 @@ class _MonthPageState extends State<MonthPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Infoprofile(),
+              MonthlySleepProfile(email: widget.email),
               SizedBox(height: 10),
               Text(
                 year,

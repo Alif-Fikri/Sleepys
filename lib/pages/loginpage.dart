@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
 import 'package:sleepys/pages/namepage.dart';
+import 'package:sleepys/pages/genderpage.dart';
+import 'package:sleepys/pages/workpage.dart';
+import 'package:sleepys/pages/datepicker.dart';
+import 'package:sleepys/pages/weightpage.dart';
+import 'package:sleepys/pages/heightselection.dart';
+import 'package:sleepys/pages/home.dart';
 import 'package:sleepys/pages/singup.dart';
 import 'package:http/http.dart' as http;
 import '../widgets/signupprovider.dart';
@@ -23,7 +29,8 @@ class LoginPages extends StatelessWidget {
       return;
     }
 
-    final url = Uri.parse('http://localhost:8000/login/');
+    final url = Uri.parse(
+        'http://10.0.2.2:8000/login/'); // Gunakan 10.0.2.2 untuk emulator Android
     final response = await http.post(
       url,
       headers: {
@@ -41,19 +48,82 @@ class LoginPages extends StatelessWidget {
     if (response.statusCode == 200) {
       final responseData = json.decode(response.body);
       final token = responseData['access_token'];
+      final name = responseData['name'];
+      final gender = responseData['gender'];
+      final work = responseData['work'];
+      final dateOfBirth = responseData['date_of_birth'];
+      final height = responseData['height'];
+      final weight = responseData['weight'];
 
-      // Simpan token ke tempat penyimpanan yang sesuai (misalnya SharedPreferences)
+      // Save token to SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', token);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Login successful")),
       );
-      // Navigate to NamePage on successful login
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => Namepage()),
-      );
+
+      // Check and navigate based on the registration status of each step
+      if (name == null || name.isEmpty) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => Namepage(email: email)),
+        );
+      } else if (gender == null || gender.isEmpty) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => Genderpage(name: name, email: email)),
+        );
+      } else if (work == null || work.isEmpty) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  Workpage(name: name, email: email, gender: gender)),
+        );
+      } else if (dateOfBirth == null || dateOfBirth.isEmpty) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => Datepicker(
+                  name: name, email: email, gender: gender, work: work)),
+        );
+      } else if (weight == null || weight == 0) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => Weightpage(
+                    name: name,
+                    email: email,
+                    gender: gender,
+                    work: work,
+                    date_of_birth: dateOfBirth,
+                    height: height ?? 0,
+                    userEmail: email,
+                  )),
+        );
+      } else if (height == null || height == 0) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => HeightSelection(
+                  name: name,
+                  email: email,
+                  gender: gender,
+                  work: work,
+                  date_of_birth: dateOfBirth)),
+        );
+      } else {
+        print("Navigating to Jurnaltidur");
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => HomePage(
+                    userEmail: email,
+                  )),
+        );
+      }
     } else {
       final errorResponse = json.decode(response.body);
       final errorMessage = errorResponse['detail'];
@@ -117,7 +187,7 @@ class LoginPages extends StatelessWidget {
                               ),
                               prefixIcon: Padding(
                                 padding:
-                                    EdgeInsets.all(screenSize.width * 0.04),
+                                    EdgeInsets.all(screenSize.width * 0.035),
                                 child: Image.asset(
                                   'assets/images/email.png',
                                   height: screenSize.width * 0.06,
@@ -146,7 +216,7 @@ class LoginPages extends StatelessWidget {
                             ),
                           ),
                         ),
-                        SizedBox(height: screenSize.height * 0.03),
+                        SizedBox(height: screenSize.height * 0.02),
                         Container(
                           height: screenSize.height * 0.07,
                           child: TextField(
@@ -162,7 +232,7 @@ class LoginPages extends StatelessWidget {
                               ),
                               prefixIcon: Padding(
                                 padding:
-                                    EdgeInsets.all(screenSize.width * 0.04),
+                                    EdgeInsets.all(screenSize.width * 0.035),
                                 child: Image.asset(
                                   'assets/images/lock.png',
                                   height: screenSize.width * 0.06,
@@ -191,7 +261,7 @@ class LoginPages extends StatelessWidget {
                             ),
                           ),
                         ),
-                        SizedBox(height: screenSize.height * 0.02),
+                        SizedBox(height: screenSize.height * 0.01),
                         Align(
                           alignment: Alignment.centerRight,
                           child: GestureDetector(
@@ -222,7 +292,7 @@ class LoginPages extends StatelessWidget {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF009090),
                             padding: EdgeInsets.symmetric(
-                                vertical: screenSize.height * 0.02),
+                                vertical: screenSize.height * 0.01),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),

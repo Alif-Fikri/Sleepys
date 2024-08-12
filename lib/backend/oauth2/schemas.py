@@ -4,15 +4,24 @@ from datetime import date
 class UserCreate(BaseModel):
     email: str
     password: str
-    name: str
-    gender: str
-    birth_date: date
-    weight: float
-    height: float
-    blood_pressure_systolic: int
-    blood_pressure_diastolic: int
-    daily_steps: int
 
 class Token(BaseModel):
     access_token: str
     token_type: str
+    
+class NameRequest(BaseModel):
+    name: str
+    email: str
+        
+class UserUpdate(BaseModel):
+    name: str = None
+    email: str = None
+    gender: str = None
+    work: str = None
+    date_of_birth: str = None
+    weight: int = None
+    height: int = None
+    upper_pressure: int = None
+    lower_pressure: int = None
+    daily_steps: int = None
+    

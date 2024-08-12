@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:sleepys/widgets/card_sleepprofile.dart';
 import '../pages/home.dart';
 
 class WeekPage extends StatefulWidget {
+  final String email;
+
+  WeekPage({required this.email});
   @override
   _WeekPageState createState() => _WeekPageState();
 }
@@ -44,7 +48,7 @@ class _WeekPageState extends State<WeekPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Infoprofile(),
+              WeeklySleepProfile(email: widget.email),
               SizedBox(height: 10),
               Text(
                 year,

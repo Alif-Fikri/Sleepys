@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sleepys/widgets/bloodpressure.dart';
+import 'package:sleepys/widgets/card_sleepprofile.dart';
 import 'package:sleepys/widgets/sleeppage.dart';
 import '../widgets/weekpage.dart';
 import '../widgets/monthpage.dart';
@@ -7,6 +8,10 @@ import '../widgets/profilepage.dart';
 import '../widgets/sleepprofile.dart';
 
 class HomePage extends StatefulWidget {
+  final String userEmail;
+
+  HomePage({required this.userEmail});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -14,11 +19,18 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  static List<Widget> _widgetOptions = <Widget>[
-    JurnalTidurPage(),
-    Bloodpressure(),
-    ProfilePage(),
-  ];
+  late List<Widget> _widgetOptions;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize the _widgetOptions list with the pages you want to display for each tab
+    _widgetOptions = <Widget>[
+      JurnalTidurPage(email: widget.userEmail), // Page for Jurnal Tidur
+      Bloodpressure(email: widget.userEmail), // Page for Blood Pressure
+      ProfilePage(email: widget.userEmail), // Page for Profile
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -28,43 +40,45 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false,
-      child: Scaffold(
-        backgroundColor: Color(0xFF20223F),
-        body: _widgetOptions.elementAt(_selectedIndex),
-        bottomNavigationBar: ClipRRect(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(10),
-            topRight: Radius.circular(10),
+    return Scaffold(
+      backgroundColor: Color(0xFF20223F),
+      // Display the selected page
+      body: _widgetOptions[_selectedIndex],
+      bottomNavigationBar: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(10),
+          topRight: Radius.circular(10),
+        ),
+        child: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: ImageIcon(AssetImage('assets/images/book.png')),
+              label: 'Jurnal Tidur',
+            ),
+            BottomNavigationBarItem(
+              icon: ImageIcon(AssetImage('assets/images/sleep.png')),
+              label: 'Sleep',
+            ),
+            BottomNavigationBarItem(
+              icon: ImageIcon(AssetImage('assets/images/profile.png')),
+              label: 'Profile',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          backgroundColor: Color(0xFF272E49),
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Color(0xFF627EAE),
+          selectedLabelStyle: TextStyle(
+            color: Color(0xFF627EAE),
+            fontFamily: 'Urbanist',
           ),
-          child: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: ImageIcon(AssetImage('assets/images/book.png')),
-                label: 'Jurnal Tidur',
-              ),
-              BottomNavigationBarItem(
-                icon: ImageIcon(AssetImage('assets/images/sleep.png')),
-                label: 'Sleep',
-              ),
-              BottomNavigationBarItem(
-                icon: ImageIcon(AssetImage('assets/images/profile.png')),
-                label: 'Profile',
-              ),
-            ],
-            currentIndex: _selectedIndex,
-            backgroundColor: Color(0xFF272E49),
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Color(0xFF627EAE),
-            selectedLabelStyle:
-                TextStyle(color: Color(0xFF627EAE), fontFamily: 'Urbanist'),
-            unselectedLabelStyle:
-                TextStyle(color: Color(0xFF627EAE), fontFamily: 'Urbanist'),
-            selectedIconTheme: IconThemeData(color: Color(0xFFFFC754)),
-            unselectedIconTheme: IconThemeData(color: Color(0xFF627EAE)),
-            onTap: _onItemTapped,
+          unselectedLabelStyle: TextStyle(
+            color: Color(0xFF627EAE),
+            fontFamily: 'Urbanist',
           ),
+          selectedIconTheme: IconThemeData(color: Color(0xFFFFC754)),
+          unselectedIconTheme: IconThemeData(color: Color(0xFF627EAE)),
+          onTap: _onItemTapped,
         ),
       ),
     );
@@ -72,6 +86,10 @@ class _HomePageState extends State<HomePage> {
 }
 
 class JurnalTidurPage extends StatefulWidget {
+  final String email;
+
+  JurnalTidurPage({required this.email});
+
   @override
   _JurnalTidurPageState createState() => _JurnalTidurPageState();
 }
@@ -107,7 +125,7 @@ class _JurnalTidurPageState extends State<JurnalTidurPage>
             fontWeight: FontWeight.bold,
           ),
         ),
-        centerTitle: true, // Adding shadow to the app bar
+        centerTitle: true,
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(50),
           child: Align(
@@ -147,9 +165,9 @@ class _JurnalTidurPageState extends State<JurnalTidurPage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          DailyPage(),
-          WeekPage(),
-          MonthPage(),
+          DailyPage(email: widget.email), // Corrected email reference
+          WeekPage(email: widget.email), // Corrected email reference
+          MonthPage(email: widget.email), // Corrected email reference
         ],
       ),
     );
@@ -157,6 +175,10 @@ class _JurnalTidurPageState extends State<JurnalTidurPage>
 }
 
 class DailyPage extends StatelessWidget {
+  final String email;
+
+  DailyPage({required this.email});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -164,7 +186,7 @@ class DailyPage extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
         children: [
-          Infoprofile(),
+          DailySleepProfile(email: email),
           SleepEntry(
             date: "14 Agustus 2023",
             duration: "7 jam 11 menit",
@@ -177,66 +199,6 @@ class DailyPage extends StatelessWidget {
           ),
           // Add more SleepEntry widgets here...
         ],
-      ),
-    );
-  }
-}
-
-class Infoprofile extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    double baseFontSize = MediaQuery.of(context).size.width * 0.035;
-    double buttonFontSize = baseFontSize * 0.65;
-
-    return Padding(
-      padding: const EdgeInsets.only(left: 20, right: 20),
-      child: Card(
-        color: Color(0xFF272E49),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Untuk hasil analisa yang lebih baik, akurat, dan bermanfaat. Profil tidur hanya bisa diakses setelah kamu melakukan pelacakan tidur paling tidak 30 hari.',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: baseFontSize,
-                  fontFamily: 'Urbanist',
-                ),
-              ),
-              SizedBox(height: 5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Container(
-                    height: 20,
-                    width: 130,
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF009090),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => SleepProfile()));
-                      },
-                      child: Text(
-                        'Lihat profil tidur',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Urbanist',
-                          fontSize: buttonFontSize,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -369,3 +331,4 @@ class SleepEntry extends StatelessWidget {
     );
   }
 }
+

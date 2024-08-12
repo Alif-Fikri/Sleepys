@@ -1,22 +1,80 @@
 import 'package:flutter/material.dart';
-import 'package:sleepys/pages/datepicker.dart';
+import '../pages/datepicker.dart';
+import '../widgets/note_card.dart';
 
 class Workpage extends StatelessWidget {
-  const Workpage({super.key});
+  final String email;
+  final String name;
+  final String gender;
+
+  const Workpage(
+      {super.key,
+      required this.name,
+      required this.gender,
+      required this.email});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Workpages(),
+      home: Workpages(name: name, gender: gender, email: email),
     );
   }
 }
 
-class Workpages extends StatelessWidget {
-  Workpages({super.key});
+class Workpages extends StatefulWidget {
+  final String name;
+  final String gender;
+  final String email;
+
+  const Workpages(
+      {super.key,
+      required this.name,
+      required this.gender,
+      required this.email});
+
+  @override
+  _WorkpagesState createState() => _WorkpagesState();
+}
+
+class _WorkpagesState extends State<Workpages> {
+  String? selectedWork;
+  final List<String> occupations = [
+    'Accountant',
+    'Doctor',
+    'Engineer',
+    'Lawyer',
+    'Manager',
+    'Nurse',
+    'Sales Representative',
+    'Salesperson',
+    'Scientist',
+    'Software Engineer',
+    'Teacher'
+  ];
+
+  void onOccupationSelected(String work) {
+    Future.delayed(Duration(seconds: 2), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Datepicker(
+            name: widget.name,
+            email: widget.email,
+            gender: widget.gender,
+            work: work,
+          ),
+        ),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    // MediaQuery for responsive sizing
+    final double deviceWidth = MediaQuery.of(context).size.width;
+    final double titleFontSize = deviceWidth * 0.06;
+    final double subtitleFontSize = deviceWidth * 0.04;
+
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
@@ -25,13 +83,10 @@ class Workpages extends StatelessWidget {
         ),
         backgroundColor: Color(0xFF20223F),
         body: Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 20), // Add horizontal padding
+          padding: EdgeInsets.symmetric(horizontal: deviceWidth * 0.05),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment
-                .start, // Align children to the start vertically
-            crossAxisAlignment: CrossAxisAlignment
-                .start, // Align children to the start horizontally
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'Sleepy Panda ingin mengenalmu!',
@@ -39,51 +94,69 @@ class Workpages extends StatelessWidget {
                   fontFamily: 'Urbanist',
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  fontSize: 24,
+                  fontSize: titleFontSize,
                 ),
               ),
-              SizedBox(height: 5), // Add spacing between the texts
+              SizedBox(height: deviceWidth * 0.02),
               Text(
                 'Apa Pekerjaan anda sekarang?',
                 style: TextStyle(
                   fontFamily: 'Urbanist',
-                  fontSize: 18,
+                  fontSize: subtitleFontSize,
                   color: Colors.white,
                 ),
+              ),
+              SizedBox(height: deviceWidth * 0.03),
+              NoteCard(
+                text:
+                    'Pilih pekerjaan Anda dari daftar di bawah ini. Jika pekerjaan Anda tidak ada di daftar, pilih yang paling mendekati.',
               ),
               Expanded(
                 child: Center(
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 100),
+                    padding: EdgeInsets.only(bottom: deviceWidth * 0.35),
                     child: Container(
-                      width: 350, // Make the TextField take the full width
-                      height: 55,
-                      child: TextField(
-                        textInputAction: TextInputAction.done,
-                        onSubmitted: (value) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Datepicker(),
+                      width: deviceWidth * 0.8,
+                      height: deviceWidth * 0.15,
+                      padding:
+                          EdgeInsets.symmetric(horizontal: deviceWidth * 0.04),
+                      decoration: BoxDecoration(
+                        color: Color(0xFF272E49),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: selectedWork,
+                          hint: Text(
+                            'Pilih Pekerjaan',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Urbanist',
+                              fontSize: subtitleFontSize,
                             ),
-                          );
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Color(0xFF272E49),
-                          hintText: 'Pekerjaan',
-                          hintStyle: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Urbanist',
                           ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10.0),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Urbanist',
+                          dropdownColor: Color(0xFF272E49),
+                          items: occupations.map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(
+                                value,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Urbanist',
+                                  fontSize: subtitleFontSize,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedWork = newValue;
+                              if (selectedWork != null) {
+                                onOccupationSelected(selectedWork!);
+                              }
+                            });
+                          },
                         ),
                       ),
                     ),

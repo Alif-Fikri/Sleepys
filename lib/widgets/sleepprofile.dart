@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../pages/home.dart';
 
 class SleepProfile extends StatelessWidget {
+  final String email;
+
+  SleepProfile({required this.email, Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,7 +56,9 @@ class SleepProfile extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => SleepProfileA()));
+                              builder: (context) => SleepProfileA(
+                                    email: email,
+                                  )));
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xFF00A99D), // Button color
@@ -120,6 +125,9 @@ class InfoItem extends StatelessWidget {
 }
 
 class SleepProfileA extends StatelessWidget {
+  final String email;
+
+  SleepProfileA({required this.email, Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
@@ -293,13 +301,15 @@ class SleepProfileA extends StatelessWidget {
                         child: ElevatedButton(
                           onPressed: () {
                             Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => SleepProfileB()));
+                                builder: (context) => SleepProfileB(
+                                      email: email,
+                                    )));
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Color(0xFF009090),
                             padding: EdgeInsets.symmetric(
-                                horizontal: screenSize.width * 0.05,
-                                vertical: screenSize.height * 0.025),
+                              horizontal: screenSize.width * 0.1,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
                                   screenSize.width * 0.075),
@@ -364,6 +374,9 @@ class InfoBaik extends StatelessWidget {
 }
 
 class SleepProfileB extends StatelessWidget {
+  final String email;
+
+  SleepProfileB({required this.email, Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
@@ -530,13 +543,12 @@ class SleepProfileB extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => SleepProfileC()));
+                          builder: (context) => SleepProfileC(email: email)));
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF009090),
                       padding: EdgeInsets.symmetric(
-                        horizontal: screenSize.width * 0.05,
-                        vertical: screenSize.height * 0.025,
+                        horizontal: screenSize.width * 0.01,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius:
@@ -599,6 +611,10 @@ class InfoApnea extends StatelessWidget {
 }
 
 class SleepProfileC extends StatelessWidget {
+  final String email;
+
+  SleepProfileC({required this.email, Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
@@ -765,13 +781,16 @@ class SleepProfileC extends StatelessWidget {
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).push(
-                          MaterialPageRoute(builder: (context) => HomePage()));
+                        MaterialPageRoute(
+                          builder: (context) => HomePage(
+                              userEmail: email), // Gunakan parameter email
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Color(0xFF009090),
                       padding: EdgeInsets.symmetric(
-                        horizontal: screenSize.width * 0.05,
-                        vertical: screenSize.height * 0.025,
+                        horizontal: screenSize.width * 0.01,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius:

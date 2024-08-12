@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:sleepys/pages/home.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:sleepys/widgets/dailystep.dart';
-import 'package:sleepys/widgets/sleeppage.dart';
 
 class Bloodpressure extends StatefulWidget {
-  Bloodpressure({super.key});
+  final String email;
+  Bloodpressure({required this.email, Key? key}) : super(key: key);
 
   @override
   _BloodpressureState createState() => _BloodpressureState();
@@ -34,14 +35,48 @@ class _BloodpressureState extends State<Bloodpressure> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => Dailystep(),
+        builder: (context) => Dailystep(
+          email: widget.email,
+        ),
       ),
     );
   }
 
+  Future<void> _saveBloodPressure() async {
+    int upperPressure = int.tryParse(_upperPressureController.text) ?? 0;
+    int lowerPressure = int.tryParse(_lowerPressureController.text) ?? 0;
+
+    try {
+      final response = await http.put(
+        Uri.parse('http://10.0.2.2:8000/save-blood-pressure/'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'email': widget.email,
+          'upperPressure': upperPressure,
+          'lowerPressure': lowerPressure,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print(
+            'Blood pressure saved successfully: ${jsonDecode(response.body)}');
+      } else {
+        print('Failed to save blood pressure: ${response.body}');
+        throw Exception('Failed to save blood pressure');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+  }
+
   void _saveAndNavigate() {
-    // Add your save logic here
-    _navigateToSleepPage();
+    _saveBloodPressure().then((_) {
+      _navigateToSleepPage();
+    }).catchError((error) {
+      print('Error: $error');
+    });
   }
 
   void _skipAndNavigate() {
@@ -89,7 +124,7 @@ class _BloodpressureState extends State<Bloodpressure> {
                     controller: _upperPressureController,
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
-                    onSubmitted: (value) => _navigateToSleepPage(),
+                    onSubmitted: (value) => _saveAndNavigate(),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color(0xFF272E49),
@@ -131,7 +166,7 @@ class _BloodpressureState extends State<Bloodpressure> {
                     controller: _lowerPressureController,
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
-                    onSubmitted: (value) => _navigateToSleepPage(),
+                    onSubmitted: (value) => _saveAndNavigate(),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color(0xFF272E49),
@@ -174,7 +209,7 @@ class _BloodpressureState extends State<Bloodpressure> {
                       height: 50,
                       width: 350,
                       child: ElevatedButton(
-                        onPressed: _skipAndNavigate,
+                        onPressed: _saveAndNavigate,
                         child: Text('Next'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xFF009090), // Button color

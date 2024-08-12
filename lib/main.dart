@@ -12,9 +12,9 @@ import '../pages/heightselection.dart';
 import '../pages/namepage.dart';
 import '../pages/datepicker.dart';
 import '../pages/home.dart';
-import '../pages/testing.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:sleepys/widgets/profilepage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,9 +40,6 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => SplashScreen(),
-        '/login': (context) => LoginPages(),
-        '/sign': (context) => Signup(),
-        '/name': (context) => Namepage(),
       },
       theme: ThemeData(
         fontFamily: 'Urbanist',

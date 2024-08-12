@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'package:sleepys/widgets/sleeppage.dart';
-import 'package:sleepys/widgets/bloodpressure.dart';
 
 class Dailystep extends StatefulWidget {
-  Dailystep({super.key});
+  final String email;
+  Dailystep({required this.email, Key? key}) : super(key: key);
 
   @override
   _DailystepState createState() => _DailystepState();
 }
 
 class _DailystepState extends State<Dailystep> {
-  TextEditingController _upperPressureController = TextEditingController();
-  TextEditingController _lowerPressureController = TextEditingController();
+  TextEditingController _stepsController = TextEditingController();
 
   void _increment(TextEditingController controller) {
     setState(() {
@@ -33,18 +34,51 @@ class _DailystepState extends State<Dailystep> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SleepPage(),
+        builder: (context) => SleepPage(email: widget.email),
       ),
     );
   }
 
-  void _saveAndNavigate() {
-    // Add your save logic here
-    _navigateToSleepPage();
+  Future<void> _saveDailySteps() async {
+    int dailySteps = int.tryParse(_stepsController.text) ?? 0;
+
+    try {
+      final response = await http.put(
+        Uri.parse('http://10.0.2.2:8000/save-daily-steps/'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'email': widget.email,
+          'dailySteps': dailySteps,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print('Daily steps saved successfully: ${jsonDecode(response.body)}');
+      } else {
+        print('Failed to save daily steps: ${response.body}');
+        throw Exception('Failed to save daily steps');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
   }
 
-  void _NextAndNavigate() {
-    _navigateToSleepPage();
+  void _saveAndNavigate() {
+    _saveDailySteps().then((_) {
+      _navigateToSleepPage();
+    }).catchError((error) {
+      print('Error: $error');
+    });
+  }
+
+  void _nextAndNavigate() {
+    _saveDailySteps().then((_) {
+      _navigateToSleepPage();
+    }).catchError((error) {
+      print('Error: $error');
+    });
   }
 
   @override
@@ -72,7 +106,7 @@ class _DailystepState extends State<Dailystep> {
             ),
             SizedBox(height: 5), // Add spacing between the texts
             Text(
-              'Berapa Jumlah langkah hari ini?',
+              'Berapa jumlah langkah hari ini?',
               style: TextStyle(
                 fontFamily: 'Urbanist',
                 fontSize: 18,
@@ -85,14 +119,14 @@ class _DailystepState extends State<Dailystep> {
               children: [
                 Expanded(
                   child: TextField(
-                    controller: _upperPressureController,
+                    controller: _stepsController,
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
-                    onSubmitted: (value) => _navigateToSleepPage(),
+                    onSubmitted: (value) => _nextAndNavigate(),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color(0xFF272E49),
-                      hintText: 'Jumlah langkah ',
+                      hintText: 'Jumlah langkah',
                       hintStyle: TextStyle(
                         color: Colors.white,
                         fontFamily: 'Urbanist',
@@ -111,11 +145,11 @@ class _DailystepState extends State<Dailystep> {
                 Row(
                   children: [
                     IconButton(
-                      onPressed: () => _decrement(_upperPressureController),
+                      onPressed: () => _decrement(_stepsController),
                       icon: Icon(Icons.remove, color: Colors.white),
                     ),
                     IconButton(
-                      onPressed: () => _increment(_upperPressureController),
+                      onPressed: () => _increment(_stepsController),
                       icon: Icon(Icons.add, color: Colors.white),
                     ),
                   ],
@@ -131,7 +165,7 @@ class _DailystepState extends State<Dailystep> {
                       height: 50,
                       width: 350,
                       child: ElevatedButton(
-                        onPressed: _NextAndNavigate,
+                        onPressed: _nextAndNavigate,
                         child: Text('Next'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Color(0xFF009090), // Button color

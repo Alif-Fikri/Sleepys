@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from . import models, schemas, utils, database
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from fastapi import Request
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -25,21 +26,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# OAuth2 scheme
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
 # JWT configuration
 SECRET_KEY = "2&aSeI[]ILhEP-I"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+# Utility functions
+def create_access_token(data: dict, expires_delta: timedelta = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
 class LoginRequest(BaseModel):
     email: str
     password: str
-
-class NameRequest(BaseModel):
-    name: str
-
+    
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+@app.post("/logout/")
+async def logout(token: str = Depends(oauth2_scheme)):
+    # Tambahkan logika untuk menghapus sesi pengguna atau token
+    return {"msg": "Logout successful"}
+    
 @app.post("/login/")
 async def login(request: LoginRequest, db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(models.User.email == request.email).first()
@@ -47,12 +59,31 @@ async def login(request: LoginRequest, db: Session = Depends(database.get_db)):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Email tidak terdaftar")
     if not utils.verify_password(request.password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Password salah")
+    
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
-    return {"access_token": access_token, "token_type": "bearer"}
+    
+    # Menyertakan informasi tambahan
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "name": user.name,
+        "gender": user.gender,
+        "work": user.work,
+        "date_of_birth": user.date_of_birth,
+        "height": user.height,
+        "weight": user.weight,
+        "upper_pressure": user.upper_pressure,
+        "lower_pressure": user.lower_pressure,
+    }
+
 
 @app.post("/register/")
 def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
+    existing_user = db.query(models.User).filter(models.User.email == user.email).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
     hashed_password = utils.get_password_hash(user.password)
     db_user = models.User(
         email=user.email,
@@ -61,10 +92,18 @@ def register(user: schemas.UserCreate, db: Session = Depends(database.get_db)):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    return db_user
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(data={"sub": db_user.email}, expires_delta=access_token_expires)
+    
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": db_user
+    }
+
 
 @app.put("/save-name/")
-async def save_name(name_request: NameRequest, db: Session = Depends(database.get_db)):
+async def save_name(name_request: schemas.NameRequest, db: Session = Depends(database.get_db)):
     logger.info(f"Received request to save name: {name_request.name} for email: {name_request.email}")
     try:
         user = db.query(models.User).filter(models.User.email == name_request.email).first()
@@ -81,6 +120,198 @@ async def save_name(name_request: NameRequest, db: Session = Depends(database.ge
     except Exception as e:
         logger.error(f"Error saving name: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to save name: {e}")
+
+
+@app.put("/save-gender/")
+async def save_gender(user_data: schemas.UserUpdate, db: Session = Depends(database.get_db)):
+    logger.info(f"Received request to update user data: {user_data}")
+    try:
+        user = db.query(models.User).filter(models.User.name == user_data.name).first()
+        if user:
+            logger.info(f"Found user: {user.email}")
+            if user_data.gender:
+                user.gender = user_data.gender
+            db.commit()
+            db.refresh(user)
+            logger.info("Gender saved successfully")
+            return {"message": "Gender saved successfully", "user": user}
+        else:
+            logger.warning("User not found")
+            raise HTTPException(status_code=404, detail="User not found")
+    except Exception as e:
+        logger.error(f"Error updating user data: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to update user data: {e}")
+
+
+@app.put("/save-dob/")
+async def save_dob(user_data: schemas.UserUpdate, db: Session = Depends(database.get_db)):
+    logger.info(f"Received request to update user data: {user_data}")
+    try:
+        user = db.query(models.User).filter(models.User.name == user_data.name).first()
+        if user:
+            logger.info(f"Found user: {user.email}")
+            if user_data.date_of_birth:
+                user.date_of_birth = user_data.date_of_birth
+                logger.info(f"Setting date_of_birth to: {user_data.date_of_birth}")
+            db.commit()
+            db.refresh(user)
+            logger.info(f"User after refresh: {user}")
+            logger.info("Date of birth saved successfully")
+            return {"message": "Date of birth saved successfully", "user": user}
+        else:
+            logger.warning("User not found")
+            raise HTTPException(status_code=404, detail="User not found")
+    except Exception as e:
+        logger.error(f"Error updating user data: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to update user data: {e}")
+
+
+@app.put("/save-weight/")
+async def save_weight(user_data: schemas.UserUpdate, db: Session = Depends(database.get_db)):
+    logger.info(f"Received request to update user data: {user_data}")
+    try:
+        user = db.query(models.User).filter(models.User.name == user_data.name).first()
+        if user:
+            logger.info(f"Found user: {user.email}")
+            if user_data.weight:
+                user.weight = user_data.weight
+            db.commit()
+            db.refresh(user)
+            logger.info("Weight saved successfully")
+            return {"message": "Weight saved successfully", "user": user}
+        else:
+            logger.warning("User not found")
+            raise HTTPException(status_code=404, detail="User not found")
+    except Exception as e:
+        logger.error(f"Error updating user data: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to update user data: {e}")
+
+
+@app.put("/save-height/")
+async def save_height(user_data: schemas.UserUpdate, db: Session = Depends(database.get_db)):
+    logger.info(f"Received request to update user data: {user_data}")
+    try:
+        user = db.query(models.User).filter(models.User.name == user_data.name).first()
+        if user:
+            logger.info(f"Found user: {user.email}")
+            if user_data.height:
+                user.height = user_data.height
+            db.commit()
+            db.refresh(user)
+            logger.info("Height saved successfully")
+            return {"message": "Height saved successfully", "user": user}
+        else:
+            logger.warning("User not found")
+            raise HTTPException(status_code=404, detail="User not found")
+    except Exception as e:
+        logger.error(f"Error updating user data: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to update user data: {e}")
+
+
+@app.put("/save-blood-pressure/")
+async def save_blood_pressure(request: Request, db: Session = Depends(database.get_db)):
+    data = await request.json()
+    email = data.get('email')
+    upper_pressure = data.get('upperPressure')
+    lower_pressure = data.get('lowerPressure')
+
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    try:
+        user.upper_pressure = upper_pressure
+        user.lower_pressure = lower_pressure
+        db.commit()
+        db.refresh(user)
+        return {"message": "Blood pressure saved successfully", "user": user}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to save blood pressure: {e}")
+    
+@app.put("/save-daily-steps/")
+async def save_daily_steps(request: Request, db: Session = Depends(database.get_db)):
+    data = await request.json()
+    email = data.get('email')
+    daily_steps = data.get('dailySteps')
+
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    try:
+        user.daily_steps = daily_steps
+        db.commit()
+        db.refresh(user)
+        return {"message": "Daily steps saved successfully", "user": user}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to save daily steps: {e}")
+
+async def update_user_data(request: schemas.UserUpdate, db: Session):
+    logger.info(f"Received request to update user data: {request}")
+    try:
+        user = db.query(models.User).filter(models.User.email == request.email).first()
+        if user:
+            if request.name is not None:
+                user.name = request.name
+            if request.gender is not None:
+                user.gender = request.gender
+            if request.pekerjaan is not None:
+                user.pekerjaan = request.pekerjaan
+            if request.tanggal_lahir is not None:
+                user.tanggal_lahir = request.tanggal_lahir
+            if request.berat_badan is not None:
+                user.berat_badan = request.berat_badan
+            if request.tinggi_badan is not None:
+                user.tinggi_badan = request.tinggi_badan
+            db.commit()
+            db.refresh(user)
+            logger.info("User data updated successfully")
+            return {"message": "User data updated successfully", "user": user}
+        else:
+            logger.warning("User not found")
+            raise HTTPException(status_code=404, detail="User not found")
+    except Exception as e:
+        logger.error(f"Error updating user data: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to update user data: {e}")
+
+@app.get("/user-profile/")
+async def get_user_profile(email: str, db: Session = Depends(database.get_db)):
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if user:
+        return user
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+@app.put("/user-profile/update")
+async def update_user_profile(user_data: schemas.UserUpdate, db: Session = Depends(database.get_db)):
+    user = db.query(models.User).filter(models.User.email == user_data.email).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if user_data.name:
+        user.name = user_data.name
+    if user_data.gender:
+        user.gender = user_data.gender
+    if user_data.work:
+        user.work = user_data.work
+    if user_data.date_of_birth:
+        user.date_of_birth = user_data.date_of_birth
+    if user_data.weight:
+        user.weight = user_data.weight
+    if user_data.height:
+        user.height = user_data.height
+    if user_data.upper_pressure:
+        user.upper_pressure = user_data.upper_pressure
+    if user_data.lower_pressure:
+        user.lower_pressure = user_data.lower_pressure
+
+    db.commit()
+    db.refresh(user)
+    return {"message": "User profile updated successfully", "user": user}
+
+
 
 @app.post("/token", response_model=schemas.Token)
 def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
@@ -102,13 +333,3 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
-
-def create_access_token(data: dict, expires_delta: timedelta = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt

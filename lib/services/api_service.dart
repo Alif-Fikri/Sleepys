@@ -2,7 +2,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ApiService {
-  static const String _baseUrl = 'http://localhost:8000';
+  static const String _baseUrl = 'http://10.0.2.2:8000';
 
   static Future<void> saveName(String name) async {
     final url = Uri.parse('$_baseUrl/save-name/');

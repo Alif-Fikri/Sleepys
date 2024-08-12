@@ -44,8 +44,10 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
-      backgroundColor: Color(0xFF20223F),
+      backgroundColor: const Color(0xFF20223F),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -54,8 +56,8 @@ class _SplashScreenState extends State<SplashScreen>
               opacity: _animation,
               child: Image.asset(
                 'assets/images/sleepypanda.png',
-                height: 150,
-                width: 150,
+                height: screenSize.width * 0.4,
+                width: screenSize.width * 0.4,
               ),
             ),
             FadeTransition(
@@ -63,17 +65,18 @@ class _SplashScreenState extends State<SplashScreen>
               child: Text(
                 'Sleepy Panda',
                 style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 40,
-                    fontWeight: FontWeight.w900,
-                    fontFamily: 'Urbanist',
-                    shadows: [
-                      Shadow(
-                        blurRadius: 10.0,
-                        color: Colors.black.withOpacity(0.5),
-                        offset: Offset(2.0, 2.0),
-                      )
-                    ]),
+                  color: Colors.white,
+                  fontSize: screenSize.width * 0.1,
+                  fontWeight: FontWeight.w900,
+                  fontFamily: 'Urbanist',
+                  shadows: [
+                    Shadow(
+                      blurRadius: 10.0,
+                      color: Colors.black.withOpacity(0.5),
+                      offset: Offset(2.0, 2.0),
+                    )
+                  ],
+                ),
               ),
             ),
           ],
@@ -86,101 +89,118 @@ class _SplashScreenState extends State<SplashScreen>
 class ScreenOpsi extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
-        backgroundColor: Color(0xFF1E1D42),
-        body: Center(
-            child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
-                child: CustomScrollView(slivers: [
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Image.asset(
-                            'assets/images/sleepypanda.png',
-                            height: 170,
-                            width: 170,
-                          ),
-                          Text('Sleepy Panda',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.w900,
-                                  fontFamily: 'Urbanist',
-                                  shadows: [
-                                    Shadow(
-                                      blurRadius: 10.0,
-                                      color: Colors.black.withOpacity(0.5),
-                                      offset: Offset(2.0, 2.0),
-                                    ),
-                                  ]),
-                              textAlign: TextAlign.center),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 200),
-                            child: Text(
-                              'Mulai dengan masuk atau \nmendaftar untuk melihat analisa \ntidur mu.',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontFamily: 'Urbanist'),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushReplacementNamed(context, '/login');
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF009090),
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              minimumSize: const Size(double.infinity, 50),
-                            ),
-                            child: const Text(
-                              'Masuk',
-                              style: TextStyle(
-                                fontFamily: 'Urbanist',
-                                fontSize: 18,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10,
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushReplacementNamed(context, '/sign');
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10.0),
-                              ),
-                              minimumSize: const Size(double.infinity, 50),
-                            ),
-                            child: const Text(
-                              'Daftar',
-                              style: TextStyle(
-                                fontFamily: 'Urbanist',
-                                fontSize: 18,
-                                color: Color(0xFF009090),
-                              ),
-                            ),
-                          ),
-                        ],
+      backgroundColor: const Color(0xFF1E1D42),
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+              vertical: 15, horizontal: screenSize.width * 0.1),
+          child: CustomScrollView(
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Image.asset(
+                        'assets/images/sleepypanda.png',
+                        height: screenSize.width * 0.4,
+                        width: screenSize.width * 0.4,
                       ),
-                    ),
-                  )
-                ]))));
+                      Text(
+                        'Sleepy Panda',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: screenSize.width * 0.1,
+                          fontWeight: FontWeight.w900,
+                          fontFamily: 'Urbanist',
+                          shadows: [
+                            Shadow(
+                              blurRadius: 10.0,
+                              color: Colors.black.withOpacity(0.5),
+                              offset: Offset(2.0, 2.0),
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(top: screenSize.height * 0.2),
+                        child: Text(
+                          'Mulai dengan masuk atau \nmendaftar untuk melihat analisa \ntidur mu.',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: screenSize.width * 0.05,
+                            fontFamily: 'Urbanist',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      SizedBox(height: screenSize.height * 0.03),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginPages()));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF009090),
+                          padding: EdgeInsets.symmetric(
+                              vertical: screenSize.height * 0.01),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          minimumSize:
+                              Size(double.infinity, screenSize.height * 0.07),
+                        ),
+                        child: Text(
+                          'Masuk',
+                          style: TextStyle(
+                            fontFamily: 'Urbanist',
+                            fontSize: screenSize.width * 0.045,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screenSize.height * 0.015),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => Signup()));
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(
+                              vertical: screenSize.height * 0.01),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          minimumSize:
+                              Size(double.infinity, screenSize.height * 0.07),
+                        ),
+                        child: Text(
+                          'Daftar',
+                          style: TextStyle(
+                            fontFamily: 'Urbanist',
+                            fontSize: screenSize.width * 0.045,
+                            color: const Color(0xFF009090),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

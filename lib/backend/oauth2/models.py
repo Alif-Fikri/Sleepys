@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date, Enum
+from sqlalchemy import Column, Integer, String, Float, Date, Enum, ForeignKey
 from .database import Base
 
 class User(Base):
@@ -8,10 +8,13 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     name = Column(String, nullable=True)
-    gender = Column(Enum('male', 'female'), nullable=True)
-    birth_date = Column(Date, nullable=True)
+    gender = Column(Enum('female', 'male'), nullable=True)
+    work = Column(String, nullable=True)
+    date_of_birth = Column(Date, nullable=True)
     weight = Column(Float, nullable=True)
     height = Column(Float, nullable=True)
-    blood_pressure_systolic = Column(Integer, nullable=True)
-    blood_pressure_diastolic = Column(Integer, nullable=True)
+    upper_pressure = Column(Integer, nullable=True)
+    lower_pressure = Column(Integer, nullable=True)
     daily_steps = Column(Integer, nullable=True)
+
+    
