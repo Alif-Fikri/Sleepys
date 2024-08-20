@@ -18,10 +18,11 @@ class AlarmScreen extends StatefulWidget {
 class _AlarmScreenState extends State<AlarmScreen>
     with SingleTickerProviderStateMixin {
   String _currentTime = '';
-  bool _isWakeUpTime = false; // Track if it's wake-up time
+  bool _isWakeUpTime = false;
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
+  double _dragOffset = 0.0;
   late AnimationController _controller;
   late Animation<double> _animation;
   late Animation<Color?> _colorAnimation;
@@ -29,9 +30,6 @@ class _AlarmScreenState extends State<AlarmScreen>
   @override
   void initState() {
     super.initState();
-    _initNotification();
-    _updateTime();
-
     _controller = AnimationController(
       duration: const Duration(seconds: 2),
       vsync: this,
@@ -40,6 +38,9 @@ class _AlarmScreenState extends State<AlarmScreen>
     _animation = Tween<double>(begin: 20.0, end: 0.0).animate(_controller);
     _colorAnimation =
         ColorTween(begin: Colors.white, end: Colors.grey).animate(_controller);
+
+    _initNotification();
+    _updateTime();
   }
 
   @override
@@ -104,7 +105,7 @@ class _AlarmScreenState extends State<AlarmScreen>
         builder: (context) => HomePage(
           userEmail: widget.email,
         ),
-      )); 
+      ));
     }
   }
 
@@ -116,8 +117,8 @@ class _AlarmScreenState extends State<AlarmScreen>
       body: GestureDetector(
         onVerticalDragEnd: (details) {
           if (_isWakeUpTime && details.primaryVelocity! < -1000) {
-            // Check the speed of the vertical drag
-            _onSwipeUp(); // Call function to stop alarm and possibly navigate away
+            // Cek kecepatan gesekan vertikal
+            _onSwipeUp(); // Panggil fungsi untuk menghentikan alarm dan mungkin bernavigasi ke layar lain
           }
         },
         child: Stack(
@@ -167,7 +168,7 @@ class _AlarmScreenState extends State<AlarmScreen>
                   padding: EdgeInsets.only(top: screenSize.height * 0.10),
                   child: Image.asset('assets/images/line.png'),
                 ),
-                if (_isWakeUpTime) // Only show this section if it's wake-up time
+                if (_isWakeUpTime) // Hanya tampilkan bagian ini jika sudah waktu bangun
                   Padding(
                     padding: EdgeInsets.only(top: screenSize.height * 0.20),
                     child: Center(
@@ -175,20 +176,20 @@ class _AlarmScreenState extends State<AlarmScreen>
                         animation: _controller,
                         builder: (context, child) {
                           return Transform.translate(
-                            offset:
-                                Offset(0, _animation.value), // Move vertically
+                            offset: Offset(
+                                0, _animation.value), // Pindah secara vertikal
                             child: Icon(
                               Icons.keyboard_arrow_up,
                               color: _colorAnimation.value,
                               size: screenSize.width *
-                                  0.08, // Responsive icon size
+                                  0.08, // Ukuran ikon responsif
                             ),
                           );
                         },
                       ),
                     ),
                   ),
-                if (_isWakeUpTime) // Only show this section if it's wake-up time
+                if (_isWakeUpTime) // Hanya tampilkan bagian ini jika sudah waktu bangun
                   Center(
                     child: Text(
                       'Geser ke atas untuk bangun',

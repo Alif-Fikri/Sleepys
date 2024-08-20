@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter_holo_date_picker/flutter_holo_date_picker.dart';
 import '../pages/heightselection.dart';
 
 class Datepicker extends StatelessWidget {
@@ -50,19 +51,11 @@ class Datepickers extends StatefulWidget {
 
 class _DatepickersState extends State<Datepickers> {
   DateTime selectedDate = DateTime.now(); // Default date
-  final TextEditingController _controller = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _controller.text =
-        "${selectedDate.day.toString().padLeft(2, '0')} / ${selectedDate.month.toString().padLeft(2, '0')} / ${selectedDate.year}";
-  }
 
   Future<void> saveDateOfBirth(String dateofbirth) async {
     try {
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:8000/save-dob/'),
+        Uri.parse('http://localhost:8000/save-dob/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -88,12 +81,9 @@ class _DatepickersState extends State<Datepickers> {
 
   @override
   Widget build(BuildContext context) {
-    // MediaQuery for responsive sizing
     final double deviceWidth = MediaQuery.of(context).size.width;
     final double titleFontSize = deviceWidth * 0.06;
     final double subtitleFontSize = deviceWidth * 0.04;
-    final double inputHeight = deviceWidth * 0.14;
-    final double inputWidth = deviceWidth * 0.85;
 
     return WillPopScope(
       onWillPop: () async => false,
@@ -132,36 +122,26 @@ class _DatepickersState extends State<Datepickers> {
                     padding: EdgeInsets.only(bottom: deviceWidth * 0.25),
                     child: GestureDetector(
                       onTap: () async {
-                        final DateTime? picked = await showDatePicker(
-                          context: context,
+                        var picked = await DatePicker.showSimpleDatePicker(
+                          context,
                           initialDate: selectedDate,
                           firstDate: DateTime(1900),
                           lastDate: DateTime.now(),
-                          builder: (BuildContext context, Widget? child) {
-                            return Theme(
-                              data: ThemeData.dark().copyWith(
-                                colorScheme: ColorScheme.dark(
-                                  primary: const Color(0xFFFFFFFF),
-                                  onPrimary: const Color(0xFF272E49),
-                                  surface: const Color(0xFF272E49),
-                                  onSurface: const Color(0xFFFFFFFF),
-                                ),
-                              ),
-                              child: child!,
-                            );
-                          },
+                          dateFormat: "dd-MMMM-yyyy",
+                          locale: DateTimePickerLocale.en_us,
+                          looping: true,
                         );
-                        if (picked != null && picked != selectedDate) {
+
+                        if (picked != null) {
                           setState(() {
                             selectedDate = picked;
-                            _controller.text =
-                                "${picked.day.toString().padLeft(2, '0')} / ${picked.month.toString().padLeft(2, '0')} / ${picked.year}";
                           });
+
                           String formattedDate =
                               "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
                           await saveDateOfBirth(formattedDate);
-                          await Future.delayed(
-                              const Duration(seconds: 2)); // Menunggu 2 detik
+                          await Future.delayed(const Duration(seconds: 2)); // Menunggu 2 detik
+
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
@@ -176,36 +156,22 @@ class _DatepickersState extends State<Datepickers> {
                           );
                         }
                       },
-                      child: AbsorbPointer(
-                        child: Container(
-                          width: inputWidth,
-                          height: inputHeight,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF272E49),
-                            borderRadius: BorderRadius.circular(10.0),
-                          ),
-                          child: Center(
-                            child: TextField(
-                              controller: _controller,
-                              textInputAction: TextInputAction.done,
-                              decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: Colors.transparent,
-                                hintText: 'DD / MM / YYYY',
-                                hintStyle: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Urbanist',
-                                ),
-                                border: InputBorder.none,
-                              ),
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Urbanist',
-                                fontWeight: FontWeight.bold,
-                                fontSize: subtitleFontSize * 1.4,
-                              ),
-                              textAlign: TextAlign.center,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF272E49),
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Text(
+                            "${selectedDate.day.toString().padLeft(2, '0')} / ${selectedDate.month.toString().padLeft(2, '0')} / ${selectedDate.year}",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Urbanist',
+                              fontWeight: FontWeight.bold,
+                              fontSize: subtitleFontSize * 1.4,
                             ),
+                            textAlign: TextAlign.center,
                           ),
                         ),
                       ),

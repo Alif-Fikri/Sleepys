@@ -17,20 +17,74 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LoginPages extends StatelessWidget {
   LoginPages({Key? key}) : super(key: key);
 
+  bool isValidEmail(String email) {
+    String pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$';
+    RegExp regex = RegExp(pattern);
+    return regex.hasMatch(email);
+  }
+
+  void showCustomSnackBar(BuildContext context, String message) {
+    final screenSize = MediaQuery.of(context).size;
+
+    final snackBar = SnackBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      content: Container(
+        padding: EdgeInsets.symmetric(
+          vertical: screenSize.height * 0.015,
+          horizontal: screenSize.width * 0.05,
+        ),
+        decoration: BoxDecoration(
+          color: Color(0xFF2D2C4E),
+          borderRadius: BorderRadius.circular(screenSize.width * 0.04),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.info_outline,
+              color: Colors.white,
+              size: screenSize.width * 0.05,
+            ),
+            SizedBox(width: screenSize.width * 0.03),
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: screenSize.width * 0.035,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.symmetric(
+        vertical: screenSize.height * 0.02,
+        horizontal: screenSize.width * 0.04,
+      ),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   Future<void> _login(BuildContext context) async {
     final signupForm = Provider.of<SignupFormProvider>(context, listen: false);
     final email = signupForm.email1;
     final password = signupForm.password1;
 
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Email dan password harus diisi")),
-      );
+      showCustomSnackBar(context, "Email dan password harus diisi");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      showCustomSnackBar(context, "Format email tidak valid");
       return;
     }
 
     final url = Uri.parse(
-        'http://10.0.2.2:8000/login/'); // Gunakan 10.0.2.2 untuk emulator Android
+        'http://localhost:8000/login/'); // Gunakan localhost untuk emulator Android
     final response = await http.post(
       url,
       headers: {
@@ -55,15 +109,13 @@ class LoginPages extends StatelessWidget {
       final height = responseData['height'];
       final weight = responseData['weight'];
 
-      // Save token to SharedPreferences
+      // Simpan token ke SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', token);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Login successful")),
-      );
+      showCustomSnackBar(context, "Login berhasil");
 
-      // Check and navigate based on the registration status of each step
+      // Memeriksa dan bernavigasi berdasarkan status pendaftaran setiap langkah
       if (name == null || name.isEmpty) {
         Navigator.pushReplacement(
           context,
@@ -128,9 +180,7 @@ class LoginPages extends StatelessWidget {
       final errorResponse = json.decode(response.body);
       final errorMessage = errorResponse['detail'];
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMessage)),
-      );
+      showCustomSnackBar(context, errorMessage);
     }
   }
 
@@ -291,13 +341,11 @@ class LoginPages extends StatelessWidget {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF009090),
-                            padding: EdgeInsets.symmetric(
-                                vertical: screenSize.height * 0.01),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                             minimumSize:
-                                Size(double.infinity, screenSize.height * 0.07),
+                                Size(double.infinity, screenSize.height * 0.06),
                           ),
                           child: Text(
                             'Masuk',
@@ -327,10 +375,9 @@ class LoginPages extends StatelessWidget {
                                   ),
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
-                                      Navigator.of(context)
-                                          .push(MaterialPageRoute(
-                                        builder: (context) => Signup(),
-                                      ));
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (context) => Signup()));
                                     }),
                             ],
                           ),

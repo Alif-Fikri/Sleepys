@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import '../pages/home.dart';
+import 'package:sleepys/widgets/note_card.dart';
 
 class Weightpage extends StatefulWidget {
   final String name;
@@ -42,7 +43,8 @@ class _WeightpageState extends State<Weightpage> {
   Future<void> saveWeight(int weight) async {
     try {
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:8000/save-weight/'), // Update the URL as needed
+        Uri.parse(
+            'http://localhost:8000/save-weight/'), // Update the URL as needed
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -135,6 +137,10 @@ class _WeightpageState extends State<Weightpage> {
                       fontSize: subtitleFontSize,
                     ),
                   ),
+                  SizedBox(height: deviceWidth * 0.02),
+                  NoteCard(
+                      text:
+                          'Lakukan Scrolling untuk menentukan Berat Badan kamu!')
                 ],
               ),
             ),
@@ -178,7 +184,8 @@ class _WeightpageState extends State<Weightpage> {
                                   ),
                                 );
                               },
-                              childCount: 200, // This gives a range from 0 kg to 199 kg
+                              childCount:
+                                  200, // This gives a range from 0 kg to 199 kg
                             ),
                           ),
                         ),

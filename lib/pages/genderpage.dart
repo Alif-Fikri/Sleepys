@@ -61,7 +61,7 @@ class _GenderpagesState extends State<Genderpages> {
   Future<void> saveGender(String name, String email, String gender) async {
     try {
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:8000/save-gender/'),
+        Uri.parse('http://localhost:8000/save-gender/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

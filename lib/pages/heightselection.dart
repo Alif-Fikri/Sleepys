@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
 import '../pages/weightpage.dart';
+import 'package:sleepys/widgets/note_card.dart';
 
 class HeightSelection extends StatelessWidget {
   final String name;
@@ -70,7 +71,7 @@ class _HeightSelectionPageState extends State<HeightSelectionPage> {
     try {
       final response = await http.put(
         Uri.parse(
-            'http://10.0.2.2:8000/save-height/'), // Ubah URL sesuai kebutuhan
+            'http://localhost:8000/save-height/'), // Ubah URL sesuai kebutuhan
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -169,6 +170,10 @@ class _HeightSelectionPageState extends State<HeightSelectionPage> {
                       fontSize: subtitleFontSize,
                     ),
                   ),
+                  SizedBox(height: deviceWidth * 0.02),
+                  NoteCard(
+                      text:
+                          'Lakukan Scrolling untuk menentukan Tinggi Badan kamu!')
                 ],
               ),
             ),

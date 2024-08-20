@@ -13,6 +13,26 @@ class Dailystep extends StatefulWidget {
 
 class _DailystepState extends State<Dailystep> {
   TextEditingController _stepsController = TextEditingController();
+  bool _isButtonEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _stepsController.addListener(_updateButtonState);
+  }
+
+  @override
+  void dispose() {
+    _stepsController.removeListener(_updateButtonState);
+    _stepsController.dispose();
+    super.dispose();
+  }
+
+  void _updateButtonState() {
+    setState(() {
+      _isButtonEnabled = _stepsController.text.isNotEmpty;
+    });
+  }
 
   void _increment(TextEditingController controller) {
     setState(() {
@@ -44,7 +64,7 @@ class _DailystepState extends State<Dailystep> {
 
     try {
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:8000/save-daily-steps/'),
+        Uri.parse('http://localhost:8000/save-daily-steps/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -73,16 +93,21 @@ class _DailystepState extends State<Dailystep> {
     });
   }
 
-  void _nextAndNavigate() {
-    _saveDailySteps().then((_) {
-      _navigateToSleepPage();
-    }).catchError((error) {
-      print('Error: $error');
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Get the width and height of the screen
+    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
+
+    // Define adaptive font sizes based on screen width
+    double fontSizeTitle = screenWidth * 0.06;
+    double fontSizeSubtitle = screenWidth * 0.045;
+    double fontSizeButton = screenWidth * 0.04;
+
+    // Define adaptive padding and spacing
+    double verticalPadding = screenHeight * 0.02;
+    double horizontalPadding = screenWidth * 0.05;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF20223F),
@@ -90,31 +115,31 @@ class _DailystepState extends State<Dailystep> {
       ),
       backgroundColor: Color(0xFF20223F),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            SizedBox(height: verticalPadding), // Adjusted spacing
             Text(
               'Saya ingin tau tentang kamu,',
               style: TextStyle(
                 fontFamily: 'Urbanist',
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
-                fontSize: 24,
+                fontSize: fontSizeTitle, // Adjusted font size
               ),
             ),
-            SizedBox(height: 5), // Add spacing between the texts
+            SizedBox(height: verticalPadding * 0.5), // Adjusted spacing
             Text(
               'Berapa jumlah langkah hari ini?',
               style: TextStyle(
                 fontFamily: 'Urbanist',
-                fontSize: 18,
+                fontSize: fontSizeSubtitle, // Adjusted font size
                 color: Colors.white,
               ),
             ),
-            SizedBox(
-                height: 20), // Add spacing between the texts and text fields
+            SizedBox(height: verticalPadding), // Adjusted spacing
             Row(
               children: [
                 Expanded(
@@ -122,7 +147,7 @@ class _DailystepState extends State<Dailystep> {
                     controller: _stepsController,
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
-                    onSubmitted: (value) => _nextAndNavigate(),
+                    onSubmitted: (value) => _saveAndNavigate(),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color(0xFF272E49),
@@ -158,26 +183,21 @@ class _DailystepState extends State<Dailystep> {
             ),
             Expanded(
               child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      height: 50,
-                      width: 350,
-                      child: ElevatedButton(
-                        onPressed: _nextAndNavigate,
-                        child: Text('Next'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF009090), // Button color
-                          textStyle: TextStyle(
-                            fontFamily: 'Urbanist',
-                            fontSize: 16,
-                          ),
-                          foregroundColor: Colors.white,
-                        ),
+                child: Container(
+                  height: screenHeight * 0.07, // Adjusted button height
+                  width: screenWidth * 0.8, // Adjusted button width
+                  child: ElevatedButton(
+                    onPressed: _isButtonEnabled ? _saveAndNavigate : null,
+                    child: Text('Next'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFF009090), // Button color
+                      textStyle: TextStyle(
+                        fontFamily: 'Urbanist',
+                        fontSize: fontSizeButton, // Adjusted font size
                       ),
+                      foregroundColor: Colors.white,
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),

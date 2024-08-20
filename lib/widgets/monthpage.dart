@@ -1,16 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:sleepys/widgets/card_sleepprofile.dart';
-import '../pages/home.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class MonthPage extends StatefulWidget {
-    final String email;
+  final String email;
 
   MonthPage({required this.email});
+
   @override
   _MonthPageState createState() => _MonthPageState();
+}
+
+Future<Map<String, dynamic>> fetchMonthlyData(
+    String email, String startDate, String endDate) async {
+  // Extracting month and year from the startDate for the query parameters
+  DateTime startDateTime = DateTime.parse(startDate);
+  String month = startDateTime.month
+      .toString()
+      .padLeft(2, '0'); // Ensure month is two digits
+  String year = startDateTime.year.toString();
+
+  // Constructing the URL with the required month and year parameters
+  final url = Uri.parse(
+      'http://localhost:8000/get-monthly-sleep-data/$email?start_date=$startDate&end_date=$endDate&month=$month&year=$year');
+
+  final response = await http.get(url);
+
+  print('Request URL: $url');
+  print('Response Status Code: ${response.statusCode}');
+  print('Response Body: ${response.body}');
+
+  if (response.statusCode == 200) {
+    return jsonDecode(response.body);
+  } else {
+    throw Exception(
+        'Failed to load sleep data: ${response.statusCode} - ${response.reasonPhrase}');
+  }
 }
 
 class _MonthPageState extends State<MonthPage> {
@@ -18,16 +46,50 @@ class _MonthPageState extends State<MonthPage> {
   bool _isNextButtonPressed = false;
   DateTime startDate =
       DateTime.now().subtract(Duration(days: DateTime.now().day - 1));
+  Map<String, dynamic> monthlyData = {};
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+  void _fetchData() async {
+    setState(() {
+      isLoading = true; // Set loading to true before fetching data
+    });
+
+    try {
+      DateTime endDate = DateTime(startDate.year, startDate.month + 1, 0);
+      String startDateStr = DateFormat('yyyy-MM-dd').format(startDate);
+      String endDateStr = DateFormat('yyyy-MM-dd').format(endDate);
+
+      Map<String, dynamic> data =
+          await fetchMonthlyData(widget.email, startDateStr, endDateStr);
+      setState(() {
+        monthlyData = data;
+      });
+    } catch (e) {
+      print("Error fetching data: $e");
+    } finally {
+      setState(() {
+        isLoading = false; // Ensure loading is false after fetching
+      });
+    }
+  }
 
   void _previousMonth() {
     setState(() {
       startDate = DateTime(startDate.year, startDate.month - 1, 1);
+      _fetchData();
     });
   }
 
   void _nextMonth() {
     setState(() {
       startDate = DateTime(startDate.year, startDate.month + 1, 1);
+      _fetchData();
     });
   }
 
@@ -35,12 +97,59 @@ class _MonthPageState extends State<MonthPage> {
   Widget build(BuildContext context) {
     DateTime endDate = DateTime(startDate.year, startDate.month + 1, 0);
     String year = DateFormat('yyyy').format(startDate);
-    final sleepData = [62.0, 54.0, 60.0, 65.0];
-    final lineData = [20.20, 23.10, 22.40, 24.50, 25.10];
-    final lineData1 = [06.00, 07.45, 06.00, 08.30];
     double baseFontSize = MediaQuery.of(context).size.width * 0.04;
     final dateFormat = DateFormat('MMMM', 'id');
 
+    // Generate sleep data
+    final sleepData = (monthlyData.containsKey('weekly_sleep_durations') &&
+            monthlyData['weekly_sleep_durations'] is List)
+        ? List<double>.generate(
+            4,
+            (index) => (monthlyData['weekly_sleep_durations'][index] ?? 0.0)
+                .toDouble())
+        : List<double>.filled(4, 0.0);
+
+    final sleepStartTimes =
+        (monthlyData.containsKey('weekly_sleep_start_times') &&
+                monthlyData['weekly_sleep_start_times'] is Map)
+            ? List<double?>.generate(4, (index) {
+                List<dynamic>? times =
+                    monthlyData['weekly_sleep_start_times'][index.toString()];
+                if (times != null && times.isNotEmpty) {
+                  String time = times[0] as String;
+                  double hours = double.parse(time.split(":")[0]);
+                  double minutes = double.parse(time.split(":")[1]) / 60;
+                  return hours + minutes;
+                } else {
+                  return null; // Return null if there's no data
+                }
+              })
+            : List<double?>.filled(
+                4, null); // Use List<double?> for nullable values
+
+    final wakeUpTimes = (monthlyData.containsKey('weekly_wake_times') &&
+            monthlyData['weekly_wake_times'] is Map)
+        ? List<double?>.generate(4, (index) {
+            List<dynamic>? times =
+                monthlyData['weekly_wake_times'][index.toString()];
+            if (times != null && times.isNotEmpty) {
+              String time = times[0] as String;
+              double hours = double.parse(time.split(":")[0]);
+              double minutes = double.parse(time.split(":")[1]) / 60;
+              return hours + minutes;
+            } else {
+              return null; // Return null if there's no data
+            }
+          })
+        : List<double?>.filled(
+            4, null); // Use List<double?> for nullable values
+
+    if (isLoading) {
+      return Scaffold(
+        backgroundColor: Color(0xFF20223F),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
     return Scaffold(
       backgroundColor: Color(0xFF20223F),
       body: SingleChildScrollView(
@@ -49,7 +158,11 @@ class _MonthPageState extends State<MonthPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              MonthlySleepProfile(email: widget.email),
+              MonthlySleepProfile(
+                email: widget.email,
+                hasSleepData: monthlyData
+                    .isNotEmpty, // Determine if the user has sleep data
+              ),
               SizedBox(height: 10),
               Text(
                 year,
@@ -107,7 +220,20 @@ class _MonthPageState extends State<MonthPage> {
                   ),
                 ],
               ),
-              SleepEntryGrid(),
+              monthlyData.isNotEmpty
+                  ? SleepEntryGrid(monthlyData: monthlyData)
+                  : Padding(
+                      padding: const EdgeInsets.only(top: 20),
+                      child: Text(
+                        'Belum ada catatan tidur untuk minggu ini.',
+                        style: TextStyle(
+                          fontSize: baseFontSize,
+                          color: Colors.white,
+                          fontFamily: 'Urbanist',
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
               Padding(
                 padding: const EdgeInsets.only(right: 200, bottom: 20),
                 child: Text(
@@ -128,7 +254,23 @@ class _MonthPageState extends State<MonthPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: EdgeInsets.all(15),
-                  child: MonthBarChart(sleepData: sleepData),
+                  child: monthlyData.isNotEmpty
+                      ? MonthBarChart(
+                          sleepData: sleepData,
+                          startDate: startDate,
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: Text(
+                            'Belum ada catatan tidur untuk minggu ini.',
+                            style: TextStyle(
+                              fontSize: baseFontSize,
+                              color: Colors.white,
+                              fontFamily: 'Urbanist',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                 ),
               ),
               SizedBox(height: 5),
@@ -152,7 +294,23 @@ class _MonthPageState extends State<MonthPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: EdgeInsets.all(15),
-                  child: MonthLineChart(data: lineData),
+                  child: monthlyData.isNotEmpty
+                      ? MonthLineChart(
+                          data: sleepStartTimes,
+                          startDate: startDate,
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: Text(
+                            'Belum ada catatan tidur untuk minggu ini.',
+                            style: TextStyle(
+                              fontSize: baseFontSize,
+                              color: Colors.white,
+                              fontFamily: 'Urbanist',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                 ),
               ),
               Padding(
@@ -175,7 +333,23 @@ class _MonthPageState extends State<MonthPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: EdgeInsets.all(15),
-                  child: MonthLineChart1(data: lineData1),
+                  child: monthlyData.isNotEmpty
+                      ? MonthLineChart1(
+                          data: wakeUpTimes,
+                          startDate: startDate,
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: Text(
+                            'Belum ada catatan tidur untuk minggu ini.',
+                            style: TextStyle(
+                              fontSize: baseFontSize,
+                              color: Colors.white,
+                              fontFamily: 'Urbanist',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                 ),
               ),
             ],
@@ -183,557 +357,6 @@ class _MonthPageState extends State<MonthPage> {
         ),
       ),
     );
-  }
-}
-
-class MonthBarChart extends StatelessWidget {
-  final List<double> sleepData;
-
-  MonthBarChart({required this.sleepData});
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double chartWidth =
-            constraints.maxWidth * 0.9; // 90% of available width
-        double chartHeight =
-            constraints.maxHeight * 0.5; // 50% of available height
-        double barWidth = chartWidth / (4 * 1.5);
-        double fontSize = MediaQuery.of(context).size.width * 0.03;
-
-        if (constraints.maxHeight.isInfinite) {
-          chartHeight = 200;
-        }
-
-        return SizedBox(
-          width: constraints.maxWidth,
-          height: chartHeight, // Use calculated chartHeight
-          child: BarChart(
-            BarChartData(
-              barGroups: _createBarGroups(barWidth),
-              titlesData: FlTitlesData(
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    getTitlesWidget: (value, meta) {
-                      switch (value.toInt()) {
-                        case 0:
-                          return Text('Week 1',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Urbanist',
-                                  fontSize:
-                                      fontSize)); // Use calculated fontSize
-                        case 1:
-                          return Text('Week 2',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Urbanist',
-                                  fontSize: fontSize));
-                        case 2:
-                          return Text('Week 3',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Urbanist',
-                                  fontSize: fontSize));
-                        case 3:
-                          return Text('Week 4',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Urbanist',
-                                  fontSize: fontSize));
-                        default:
-                          return Text('',
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Urbanist',
-                                  fontSize: fontSize));
-                      }
-                    },
-                  ),
-                ),
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    interval: 5,
-                    getTitlesWidget: (value, meta) {
-                      switch (value.toInt()) {
-                        case 40:
-                          return Text(
-                            '40j',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Urbanist',
-                              fontSize: fontSize *
-                                  0.8, // Adjust for better readability
-                            ),
-                            textAlign: TextAlign.center,
-                          );
-                        case 45:
-                          return Text(
-                            '45j',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Urbanist',
-                              fontSize: fontSize * 0.8,
-                            ),
-                            textAlign: TextAlign.center,
-                          );
-                        case 50:
-                          return Text(
-                            '50j',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Urbanist',
-                              fontSize: fontSize * 0.8,
-                            ),
-                            textAlign: TextAlign.center,
-                          );
-                        case 55:
-                          return Text(
-                            '55j',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Urbanist',
-                              fontSize: fontSize * 0.8,
-                            ),
-                            textAlign: TextAlign.center,
-                          );
-                        case 60:
-                          return Text(
-                            '60j',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Urbanist',
-                              fontSize: fontSize * 0.8,
-                            ),
-                            textAlign: TextAlign.center,
-                          );
-                        case 65:
-                          return Text(
-                            '65j',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Urbanist',
-                              fontSize: fontSize * 0.8,
-                            ),
-                            textAlign: TextAlign.center,
-                          );
-                        default:
-                          return Container();
-                      }
-                    },
-                    reservedSize:
-                        40, // Ensure there's enough space for the text
-                  ),
-                ),
-                topTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: false,
-                  ), // Set to false to hide top titles
-                ),
-                rightTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: false,
-                  ), // Set to false to hide right titles
-                ),
-              ),
-              borderData: FlBorderData(show: false),
-              gridData: FlGridData(show: false),
-              barTouchData: BarTouchData(
-                touchTooltipData: BarTouchTooltipData(
-                  tooltipPadding: EdgeInsets.all(5),
-                  tooltipMargin: 8,
-                  getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                    return BarTooltipItem(
-                      '${rod.toY.toInt()}j',
-                      TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: fontSize, // Use calculated fontSize
-                      ),
-                    );
-                  },
-                ),
-              ),
-              maxY: 65, // Set slightly higher to ensure space for the top label
-              minY:
-                  35, // Set slightly lower to ensure space for the bottom label
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  List<BarChartGroupData> _createBarGroups(double barWidth) {
-    return List.generate(4, (index) {
-      return BarChartGroupData(
-        x: index,
-        barRods: [
-          BarChartRodData(
-            toY: sleepData[index],
-            color: index == 3 ? Colors.red : Color(0xFF60354A),
-            width: barWidth,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(8),
-              topRight: Radius.circular(8),
-            ),
-          ),
-        ],
-      );
-    });
-  }
-}
-
-class MonthLineChart extends StatefulWidget {
-  final List<double> data;
-
-  MonthLineChart({required this.data});
-
-  @override
-  _MonthLineChartState createState() => _MonthLineChartState();
-}
-
-class _MonthLineChartState extends State<MonthLineChart> {
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double chartWidth =
-            constraints.maxWidth * 0.9; // 90% of available width
-        double chartHeight =
-            constraints.maxHeight * 0.5; // 50% of available height
-        double fontSize = MediaQuery.of(context).size.width * 0.03;
-
-        if (constraints.maxHeight.isInfinite) {
-          chartHeight = 200;
-        }
-
-        return Padding(
-          padding: const EdgeInsets.all(16.0), // Add padding for better spacing
-          child: SizedBox(
-            width: chartWidth, // Use calculated chartWidth
-            height: chartHeight, // Use calculated chartHeight
-            child: LineChart(
-              LineChartData(
-                gridData: FlGridData(
-                  show: false,
-                  drawVerticalLine: true,
-                  getDrawingHorizontalLine: (value) {
-                    return FlLine(
-                      color: Colors.white.withOpacity(0.2),
-                      strokeWidth: 1,
-                    );
-                  },
-                  getDrawingVerticalLine: (value) {
-                    return FlLine(
-                      color: Colors.white.withOpacity(0.2),
-                      strokeWidth: 1,
-                    );
-                  },
-                ),
-                titlesData: FlTitlesData(
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      interval: 1,
-                      getTitlesWidget: (value, meta) {
-                        String text;
-                        switch (value.toInt()) {
-                          case 0:
-                            text = 'Week 1';
-                            break;
-                          case 1:
-                            text = 'Week 2';
-                            break;
-                          case 2:
-                            text = 'Week 3';
-                            break;
-                          case 3:
-                            text = 'Week 4';
-                            break;
-                          default:
-                            return Container();
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.only(
-                              left: 30), // Add padding to the top
-                          child: Text(
-                            text,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Urbanist',
-                              fontSize: fontSize, // Use calculated fontSize
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 40,
-                      interval: 1,
-                      getTitlesWidget: (value, meta) {
-                        String text;
-                        switch (value.toInt()) {
-                          case 20:
-                            text = '20.00';
-                            break;
-                          case 21:
-                            text = '21.00';
-                            break;
-                          case 22:
-                            text = '22.00';
-                            break;
-                          case 23:
-                            text = '23.00';
-                            break;
-                          case 24:
-                            text = '24.00';
-                            break;
-                          case 25:
-                            text = '01.00';
-                            break;
-                          default:
-                            return Container();
-                        }
-                        return Text(
-                          text,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Urbanist',
-                            fontSize:
-                                fontSize * 0.8, // Adjust for better readability
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  topTitles: AxisTitles(
-                    sideTitles:
-                        SideTitles(showTitles: false), // Hide top titles
-                  ),
-                  rightTitles: AxisTitles(
-                    sideTitles:
-                        SideTitles(showTitles: false), // Hide right titles
-                  ),
-                ),
-                borderData: FlBorderData(
-                  show: false,
-                  border: Border.all(
-                    color: const Color(0xff37434d),
-                  ),
-                ),
-                minX: 0,
-                maxX: 4, // Change maxX to 3 to show 4 weeks (0, 1, 2, 3)
-                minY: 20, // Start from 20.00
-                maxY: 25, // End at 25 (which is 01.00)
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: widget.data.asMap().entries.map((entry) {
-                      return FlSpot(entry.key.toDouble(), entry.value);
-                    }).toList(),
-                    isCurved: false,
-                    color: Color(0xFFFF5999),
-                    barWidth: 2,
-                    isStrokeCapRound: false,
-                    dotData: FlDotData(
-                      show: true,
-                      getDotPainter: (FlSpot spot, double xPercentage,
-                          LineChartBarData bar, int index) {
-                        return FlDotCirclePainter(
-                          radius: 2,
-                          color: Colors.white,
-                          strokeWidth: 2,
-                          strokeColor: Color.fromARGB(255, 255, 255, 255),
-                        );
-                      },
-                    ),
-                    belowBarData: BarAreaData(
-                      show: false,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class MonthLineChart1 extends StatefulWidget {
-  final List<double> data;
-
-  MonthLineChart1({required this.data});
-
-  @override
-  _MonthLineChart1State createState() => _MonthLineChart1State();
-}
-
-class _MonthLineChart1State extends State<MonthLineChart1> {
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      double chartWidth = constraints.maxWidth * 0.9; // 90% of available width
-      double chartHeight =
-          constraints.maxHeight * 0.5; // 50% of available height
-      double fontSize = MediaQuery.of(context).size.width * 0.03;
-
-      if (constraints.maxHeight.isInfinite) {
-        chartHeight = 200;
-      }
-
-      return Padding(
-        padding: const EdgeInsets.all(16.0), // Add padding for better spacing
-        child: SizedBox(
-          width: chartWidth, // Adjust the width as needed
-          height: chartHeight, // Adjust the height as needed
-          child: LineChart(
-            LineChartData(
-              gridData: FlGridData(
-                show: false,
-                drawVerticalLine: true,
-                getDrawingHorizontalLine: (value) {
-                  return FlLine(
-                    color: Colors.white.withOpacity(0.2),
-                    strokeWidth: 1,
-                  );
-                },
-                getDrawingVerticalLine: (value) {
-                  return FlLine(
-                    color: Colors.white.withOpacity(0.2),
-                    strokeWidth: 1,
-                  );
-                },
-              ),
-              titlesData: FlTitlesData(
-                bottomTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    interval: 1,
-                    getTitlesWidget: (value, meta) {
-                      String text;
-                      switch (value.toInt()) {
-                        case 0:
-                          text = 'Week 1';
-                          break;
-                        case 1:
-                          text = 'Week 2';
-                          break;
-                        case 2:
-                          text = 'Week 3';
-                          break;
-                        case 3:
-                          text = 'Week 4';
-                          break;
-                        default:
-                          return Container();
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.only(
-                            left: 30), // Add padding to the top
-                        child: Text(text,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Urbanist',
-                              fontSize: fontSize,
-                            )),
-                      );
-                    },
-                  ),
-                ),
-                leftTitles: AxisTitles(
-                  sideTitles: SideTitles(
-                    showTitles: true,
-                    reservedSize: 40,
-                    interval: 1,
-                    getTitlesWidget: (value, meta) {
-                      String text;
-                      switch (value.toInt()) {
-                        case 6:
-                          text = '06:00';
-                          break;
-                        case 7:
-                          text = '07:00';
-                          break;
-                        case 8:
-                          text = '08:00';
-                          break;
-                        case 9:
-                          text = '09:00';
-                          break;
-                        case 10:
-                          text = '10:00';
-                          break;
-                        case 11:
-                          text = '11:00';
-                          break;
-                        default:
-                          return Container();
-                      }
-                      return Text(text,
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: fontSize * 0.8,
-                              fontFamily: 'Urbanist'));
-                    },
-                  ),
-                ),
-                topTitles: AxisTitles(
-                  sideTitles: SideTitles(showTitles: false), // Hide top titles
-                ),
-                rightTitles: AxisTitles(
-                  sideTitles:
-                      SideTitles(showTitles: false), // Hide right titles
-                ),
-              ),
-              borderData: FlBorderData(
-                show: false,
-                border: Border.all(
-                  color: const Color(0xff37434d),
-                ),
-              ),
-              minX: 0,
-              maxX: 4,
-              minY: 6, // Start from 20.00
-              maxY: 11, // End at 25 (which is 01.00)
-              lineBarsData: [
-                LineChartBarData(
-                  spots: widget.data.asMap().entries.map((entry) {
-                    return FlSpot(entry.key.toDouble(), entry.value);
-                  }).toList(),
-                  isCurved: false,
-                  color: Color(0xFFFFC754),
-                  barWidth: 2,
-                  isStrokeCapRound: false,
-                  dotData: FlDotData(
-                    show: true,
-                    getDotPainter: (FlSpot spot, double xPercentage,
-                        LineChartBarData bar, int index) {
-                      return FlDotCirclePainter(
-                        radius: 2,
-                        color: Colors.white,
-                        strokeWidth: 2,
-                        strokeColor: Color.fromARGB(255, 255, 255, 255),
-                      );
-                    },
-                  ),
-                  belowBarData: BarAreaData(
-                    show: false,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    });
   }
 }
 
@@ -829,41 +452,16 @@ class SleepEntry extends StatelessWidget {
 }
 
 class SleepEntryGrid extends StatelessWidget {
-  final List<SleepEntry> sleepEntries = [
-    SleepEntry(
-      content: 'Average',
-      title: 'Durasi tidur',
-      value: '8 jam 2 menit',
-      imageAsset: 'assets/images/clock.png',
-    ),
-    SleepEntry(
-      content: 'Total',
-      title: 'Durasi tidur',
-      value: '240 jam 51 menit',
-      imageAsset: 'assets/images/wakeup.png',
-    ),
-    SleepEntry(
-      content: 'Average',
-      title: 'Mulai tidur',
-      value: '21:08',
-      imageAsset: 'assets/images/bed.png',
-    ),
-    SleepEntry(
-      content: 'Average',
-      title: 'Bangun tidur',
-      value: '06:30',
-      imageAsset: 'assets/images/sun.png',
-    ),
-  ];
+  final Map<String, dynamic> monthlyData;
+
+  SleepEntryGrid({required this.monthlyData});
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        double maxItemWidth =
-            constraints.maxWidth / 2 - 10; // 2 items per row with spacing
-        double itemHeight =
-            maxItemWidth * 0.55; // Adjust the aspect ratio as needed
+        double maxItemWidth = constraints.maxWidth / 2 - 10;
+        double itemHeight = maxItemWidth * 0.55;
 
         return Center(
           child: Padding(
@@ -877,14 +475,623 @@ class SleepEntryGrid extends StatelessWidget {
                 mainAxisSpacing: 5,
                 crossAxisSpacing: 5,
               ),
-              itemCount: sleepEntries.length,
+              itemCount: 4,
               itemBuilder: (context, index) {
-                return sleepEntries[index];
+                switch (index) {
+                  case 0:
+                    return SleepEntry(
+                      content: 'Average',
+                      title: 'Durasi tidur',
+                      value: monthlyData['avg_duration'] ?? 'N/A',
+                      imageAsset: 'assets/images/clock.png',
+                    );
+                  case 1:
+                    return SleepEntry(
+                      content: 'Total',
+                      title: 'Durasi tidur',
+                      value: monthlyData['total_duration'] ?? 'N/A',
+                      imageAsset: 'assets/images/wakeup.png',
+                    );
+                  case 2:
+                    return SleepEntry(
+                      content: 'Average',
+                      title: 'Mulai tidur',
+                      value: monthlyData['avg_sleep_time'] ?? 'N/A',
+                      imageAsset: 'assets/images/bed.png',
+                    );
+                  case 3:
+                    return SleepEntry(
+                      content: 'Average',
+                      title: 'Bangun tidur',
+                      value: monthlyData['avg_wake_time'] ?? 'N/A',
+                      imageAsset: 'assets/images/sun.png',
+                    );
+                  default:
+                    return SizedBox.shrink();
+                }
               },
             ),
           ),
         );
       },
     );
+  }
+}
+
+class MonthBarChart extends StatefulWidget {
+  final List<double> sleepData;
+  final DateTime startDate;
+
+  MonthBarChart({required this.sleepData, required this.startDate});
+
+  @override
+  _MonthBarChartState createState() => _MonthBarChartState();
+}
+
+class _MonthBarChartState extends State<MonthBarChart> {
+  int touchedIndex = -1;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double chartWidth = constraints.maxWidth * 0.9;
+        double chartHeight = constraints.maxHeight * 0.5;
+        double barWidth =
+            chartWidth / (4 * 1.5); // 4 minggu dengan jarak antar bar
+
+        if (constraints.maxHeight.isInfinite) {
+          chartHeight = 200;
+        }
+
+        double fontSize = MediaQuery.of(context).size.width * 0.02;
+
+        double minY = 40.0;
+        double maxY = 90.0;
+
+        return Center(
+          child: SizedBox(
+            width: chartWidth,
+            height: chartHeight,
+            child: BarChart(
+              BarChartData(
+                barGroups: _createBarGroups(barWidth),
+                titlesData: FlTitlesData(
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        String weekText = 'Week ${value.toInt() + 1}';
+                        return FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(weekText,
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Urbanist',
+                                  fontSize: fontSize)),
+                        );
+                      },
+                    ),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      interval: 10, // Menampilkan setiap interval 5 jam
+                      getTitlesWidget: (value, meta) {
+                        if (value < 40 || value > 90) return Container();
+
+                        String hourText = '${value.toInt()}j';
+                        return FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(hourText,
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Urbanist',
+                                  fontSize: fontSize)),
+                        );
+                      },
+                    ),
+                  ),
+                  topTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: false,
+                    ),
+                  ),
+                  rightTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: false,
+                    ),
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                gridData: FlGridData(show: false),
+                barTouchData: BarTouchData(
+                  touchCallback: (event, response) {
+                    setState(() {
+                      if (response != null && response.spot != null) {
+                        touchedIndex = response.spot!.touchedBarGroupIndex;
+                      } else {
+                        touchedIndex = -1;
+                      }
+                    });
+                  },
+                  touchTooltipData: BarTouchTooltipData(
+                    tooltipPadding: EdgeInsets.all(5),
+                    tooltipMargin: 8,
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      return BarTooltipItem(
+                        '${rod.toY.toInt()}j',
+                        TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                minY: minY, // Set minY ke 40j
+                maxY: maxY, // Set maxY ke 65j
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<BarChartGroupData> _createBarGroups(double barWidth) {
+    return List.generate(4, (index) {
+      return BarChartGroupData(
+        x: index,
+        barRods: [
+          BarChartRodData(
+            toY: widget.sleepData[index],
+            color: index == touchedIndex
+                ? Colors.red
+                : Color(0xFF60354A), // Mengubah warna saat disentuh
+            width: barWidth,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(8),
+              topRight: Radius.circular(8),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+}
+
+class MonthLineChart extends StatefulWidget {
+  final List<double?>
+      data; // Nullable double untuk mengindikasikan ketiadaan data
+  final DateTime startDate; // Tambahkan startDate
+
+  MonthLineChart({required this.data, required this.startDate});
+
+  @override
+  _MonthLineChartState createState() => _MonthLineChartState();
+}
+
+class _MonthLineChartState extends State<MonthLineChart> {
+  @override
+  Widget build(BuildContext context) {
+    print("Line Chart Data: ${widget.data}"); // Debug print
+
+    // Rentang waktu tetap: dari jam 20:00 hingga 01:00 (keesokan harinya)
+    final double minY = 20.0; // 20:00 (8 PM)
+    final double maxY =
+        25.0; // 25:00 yang berarti 01:00 (1 AM keesokan harinya)
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double chartWidth =
+            constraints.maxWidth * 0.9; // 90% dari lebar yang tersedia
+        double chartHeight =
+            constraints.maxHeight * 0.5; // 50% dari tinggi yang tersedia
+
+        if (constraints.maxHeight.isInfinite) {
+          chartHeight = 200;
+        }
+
+        double fontSize = MediaQuery.of(context).size.width * 0.02;
+
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: SizedBox(
+            width: chartWidth,
+            height: chartHeight,
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(
+                  show: false,
+                  drawVerticalLine: true,
+                  getDrawingHorizontalLine: (value) {
+                    return FlLine(
+                      color: Colors.white.withOpacity(0.2),
+                      strokeWidth: 1,
+                    );
+                  },
+                  getDrawingVerticalLine: (value) {
+                    return FlLine(
+                      color: Colors.white.withOpacity(0.2),
+                      strokeWidth: 1,
+                    );
+                  },
+                ),
+                titlesData: FlTitlesData(
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 22,
+                        getTitlesWidget: (value, meta) {
+                          String weekText = '';
+                          if (value == 0) {
+                            weekText = 'Week 1';
+                          } else if (value == 1) {
+                            weekText = 'Week 2';
+                          } else if (value == 2) {
+                            weekText = 'Week 3';
+                          } else if (value == 3) {
+                            weekText = 'Week 4';
+                          }
+
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                                left: 15.0), // Adjust this value as needed
+                            child: Text(
+                              weekText,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Urbanist',
+                                fontSize: fontSize,
+                              ),
+                            ),
+                          );
+                        }),
+                  ),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 40,
+                      interval: 1, // Interval dalam 1 jam
+                      getTitlesWidget: (value, meta) {
+                        int hours = value.toInt();
+                        int minutes = ((value - hours) * 60).toInt();
+
+                        // Konversi 24-25 ke 00-01 untuk visualisasi
+                        if (hours >= 24) {
+                          hours -= 24;
+                        }
+
+                        String text =
+                            '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 15),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(text,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Urbanist',
+                                  fontSize: fontSize,
+                                )),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  topTitles: AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  rightTitles: AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                ),
+                borderData: FlBorderData(
+                  show: false,
+                  border: Border.all(
+                    color: const Color(0xff37434d),
+                  ),
+                ),
+                minX: 0,
+                maxX:
+                    3, // Ubah maxX menjadi 3 untuk menampilkan 4 minggu (0, 1, 2, 3)
+                minY: minY, // Dari 20:00 (8 PM)
+                maxY: maxY, // Hingga 25:00 (01:00 keesokan harinya)
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: _createSpots(), // Generate spots berdasarkan data
+                    isCurved: false,
+                    color: Color(0xFFFF5999),
+                    barWidth: 2,
+                    isStrokeCapRound: false,
+                    dotData: FlDotData(
+                      show: true,
+                      getDotPainter: (FlSpot spot, double xPercentage,
+                          LineChartBarData bar, int index) {
+                        return FlDotCirclePainter(
+                          radius: 2,
+                          color: Colors.white,
+                          strokeWidth: 2,
+                          strokeColor: Color.fromARGB(255, 255, 255, 255),
+                        );
+                      },
+                    ),
+                    belowBarData: BarAreaData(
+                      show: false,
+                    ),
+                    preventCurveOverShooting: true,
+                  ),
+                ],
+                lineTouchData: LineTouchData(
+                  touchTooltipData: LineTouchTooltipData(
+                    getTooltipItems: (touchedSpots) {
+                      return touchedSpots.map((spot) {
+                        int hours = spot.y.toInt();
+                        int minutes = ((spot.y - hours) * 60).toInt();
+
+                        // Konversi 24-25 ke 00-01 untuk visualisasi
+                        if (hours >= 24) {
+                          hours -= 24;
+                        }
+
+                        String timeText =
+                            '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+
+                        return LineTooltipItem(
+                          '$timeText\n',
+                          const TextStyle(
+                            color: Colors.pink,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        );
+                      }).toList();
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  List<FlSpot> _createSpots() {
+    double minY = 20.0; // 20:00 (8 PM)
+    double maxY = 25.0; // 25:00 yang berarti 01:00 (1 AM keesokan harinya)
+
+    List<FlSpot> spots = [];
+
+    for (int i = 0; i < widget.data.length; i++) {
+      if (widget.data[i] != null) {
+        double yValue = widget.data[i]!;
+        if (yValue < 6) {
+          yValue += 24; // Tambahkan 24 jika waktu setelah tengah malam
+        }
+
+        // Debug output untuk memeriksa nilai y
+        print('Hari ke-$i (index $i): yValue = $yValue');
+
+        if (yValue >= minY && yValue <= maxY) {
+          spots.add(FlSpot(i.toDouble(), yValue));
+        }
+      }
+    }
+
+    // Menangani kasus ketika hanya ada satu titik di dalam rentang
+    if (spots.length == 1) {
+      spots.add(FlSpot(spots[0].x + 0.1, spots[0].y));
+    }
+
+    return spots;
+  }
+}
+
+class MonthLineChart1 extends StatefulWidget {
+  final List<double?> data;
+  final DateTime startDate;
+
+  MonthLineChart1({required this.data, required this.startDate});
+
+  @override
+  _MonthLineChart1State createState() => _MonthLineChart1State();
+}
+
+class _MonthLineChart1State extends State<MonthLineChart1> {
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(builder: (context, constraints) {
+      double chartWidth = constraints.maxWidth * 0.9; // 90% of available width
+      double chartHeight =
+          constraints.maxHeight * 0.5; // 50% of available height
+
+      if (constraints.maxHeight.isInfinite) {
+        chartHeight = 200;
+      }
+
+      double fontSize = MediaQuery.of(context).size.width * 0.02;
+
+      // Set minY and maxY to match the range from 06:00 to 12:00
+      double minY = 6.0;
+      double maxY = 12.0;
+
+      // Generate the list of hours based on minY and maxY with a 1-hour interval
+      List<double> yAxisLabels = [];
+      for (double i = minY; i <= maxY; i += 1) {
+        yAxisLabels.add(i);
+      }
+
+      return Padding(
+        padding: const EdgeInsets.all(16), // Add padding for better spacing
+        child: SizedBox(
+          width: chartWidth, // Adjust the width as needed
+          height: chartHeight, // Adjust the height as needed
+          child: LineChart(
+            LineChartData(
+              gridData: FlGridData(
+                show: false,
+                drawVerticalLine: true,
+                getDrawingHorizontalLine: (value) {
+                  return FlLine(
+                    color: Colors.white.withOpacity(0.2),
+                    strokeWidth: 1,
+                  );
+                },
+                getDrawingVerticalLine: (value) {
+                  return FlLine(
+                    color: Colors.white.withOpacity(0.2),
+                    strokeWidth: 1,
+                  );
+                },
+              ),
+              titlesData: FlTitlesData(
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 22,
+                      getTitlesWidget: (value, meta) {
+                        String weekText = '';
+                        if (value == 0) {
+                          weekText = 'Week 1';
+                        } else if (value == 1) {
+                          weekText = 'Week 2';
+                        } else if (value == 2) {
+                          weekText = 'Week 3';
+                        } else if (value == 3) {
+                          weekText = 'Week 4';
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.only(
+                              left: 15.0), // Adjust this value as needed
+                          child: Text(
+                            weekText,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Urbanist',
+                              fontSize: fontSize,
+                            ),
+                          ),
+                        );
+                      }),
+                ),
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    reservedSize: 40,
+                    interval: 1, // Show every hour
+                    getTitlesWidget: (value, meta) {
+                      if (!yAxisLabels.contains(value)) return Container();
+
+                      String hourText =
+                          '${value.toInt().toString().padLeft(2, '0')}:00';
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 15),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(hourText,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Urbanist',
+                                fontSize: fontSize,
+                              )),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false), // Hide top titles
+                ),
+                rightTitles: AxisTitles(
+                  sideTitles:
+                      SideTitles(showTitles: false), // Hide right titles
+                ),
+              ),
+              borderData: FlBorderData(
+                show: false,
+                border: Border.all(
+                  color: const Color(0xff37434d),
+                ),
+              ),
+              minX: 0,
+              maxX: 3, // 4 weeks (Week 0, Week 1, Week 2, Week 3)
+              minY: minY, // Set minY to 06:00
+              maxY: maxY, // Set maxY to 12:00
+              lineBarsData: [
+                LineChartBarData(
+                  spots: _createSpots(),
+                  isCurved: false,
+                  color: Color(0xFFFFC754),
+                  barWidth: 2,
+                  isStrokeCapRound: false,
+                  dotData: FlDotData(
+                    show: true,
+                    getDotPainter: (FlSpot spot, double xPercentage,
+                        LineChartBarData bar, int index) {
+                      return FlDotCirclePainter(
+                        radius: 2,
+                        color: Colors.white,
+                        strokeWidth: 2,
+                        strokeColor: Color.fromARGB(255, 255, 255, 255),
+                      );
+                    },
+                  ),
+                  belowBarData: BarAreaData(
+                    show: false,
+                  ),
+                ),
+              ],
+              lineTouchData: LineTouchData(
+                touchTooltipData: LineTouchTooltipData(
+                  getTooltipItems: (touchedSpots) {
+                    return touchedSpots.map((spot) {
+                      int hours = spot.y.toInt();
+                      int minutes = ((spot.y - hours) * 60).toInt();
+
+                      String timeText =
+                          '${hours.toString().padLeft(2, '0')}:${minutes.toString().padLeft(2, '0')}';
+
+                      return LineTooltipItem(
+                        '$timeText\n',
+                        const TextStyle(
+                          color: Color(0xFFFFC754),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    }).toList();
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    });
+  }
+
+  List<FlSpot> _createSpots() {
+    List<FlSpot> spots = [];
+
+    for (int i = 0; i < widget.data.length; i++) {
+      if (widget.data[i] != null) {
+        double yValue = widget.data[i]!;
+
+        // Adjust yValue to fit within the 06:00 to 12:00 range
+        if (yValue >= 0 && yValue < 6) {
+          yValue += 24; // Shift times between 00:00 and 06:00 to after 24:00
+        } else if (yValue > 12 && yValue < 24) {
+          yValue -=
+              24; // Shift times between 12:00 and 24:00 back to the 0-12 range
+        }
+
+        print(
+            'Week $i: Adjusted yValue = $yValue'); // Debugging: see the yValue after adjustment
+        spots.add(FlSpot(i.toDouble(), yValue));
+      }
+    }
+
+    return spots;
   }
 }

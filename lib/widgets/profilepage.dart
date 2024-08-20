@@ -26,7 +26,7 @@ class ProfilePage extends StatelessWidget {
               backgroundColor: Colors.grey,
               child: Icon(
                 Icons.person,
-                size: screenSize.width * 0.1,
+                size: screenSize.width * 0.15,
                 color: Colors.white,
               ),
             ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:intl/intl.dart';
+import 'package:art_sweetalert/art_sweetalert.dart';
+import 'package:flutter_holo_date_picker/flutter_holo_date_picker.dart';
 
 class Userprofile extends StatefulWidget {
   final String email;
@@ -15,9 +17,9 @@ class Userprofile extends StatefulWidget {
 class _UserprofileState extends State<Userprofile> {
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
-  TextEditingController genderController = TextEditingController();
   TextEditingController dobController = TextEditingController();
 
+  String? selectedGender;
   bool isLoading = true;
 
   @override
@@ -29,7 +31,7 @@ class _UserprofileState extends State<Userprofile> {
   Future<void> getUserData() async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:8000/user-profile?email=${widget.email}'),
+        Uri.parse('http://localhost:8000/user-profile?email=${widget.email}'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -40,9 +42,8 @@ class _UserprofileState extends State<Userprofile> {
         setState(() {
           nameController.text = data['name'] ?? 'N/A';
           emailController.text = data['email'] ?? 'N/A';
-          genderController.text = data['gender'] ?? 'N/A';
+          selectedGender = data['gender'];
 
-          // Convert date of birth to format dd/MM/yyyy
           if (data['date_of_birth'] != null) {
             DateTime dob = DateTime.parse(data['date_of_birth']);
             dobController.text = DateFormat('dd/MM/yyyy').format(dob);
@@ -73,14 +74,14 @@ class _UserprofileState extends State<Userprofile> {
 
     try {
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:8000/user-profile/update'),
+        Uri.parse('http://localhost:8000/user-profile/update'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
           'email': widget.email,
           'name': nameController.text,
-          'gender': genderController.text,
+          'gender': selectedGender ?? '',
           'date_of_birth': DateFormat('yyyy-MM-dd')
               .format(DateFormat('dd/MM/yyyy').parse(dobController.text)),
         }),
@@ -88,12 +89,36 @@ class _UserprofileState extends State<Userprofile> {
 
       if (response.statusCode == 200) {
         print('User data updated successfully');
-        Navigator.pop(context); // Navigate back to the previous screen
+        await ArtSweetAlert.show(
+          context: context,
+          artDialogArgs: ArtDialogArgs(
+            type: ArtSweetAlertType.success,
+            title: "Berhasil!",
+            text: "Data telah diperbarui.",
+          ),
+        );
+        Navigator.pop(context);
       } else {
         print('Failed to update user data');
+        await ArtSweetAlert.show(
+          context: context,
+          artDialogArgs: ArtDialogArgs(
+            type: ArtSweetAlertType.danger,
+            title: "Gagal!",
+            text: "Gagal memperbarui data.",
+          ),
+        );
       }
     } catch (error) {
       print('Error: $error');
+      await ArtSweetAlert.show(
+        context: context,
+        artDialogArgs: ArtDialogArgs(
+          type: ArtSweetAlertType.danger,
+          title: "Kesalahan!",
+          text: "Terjadi kesalahan, coba lagi nanti.",
+        ),
+      );
     } finally {
       setState(() {
         isLoading = false;
@@ -120,16 +145,19 @@ class _UserprofileState extends State<Userprofile> {
                   CircleAvatar(
                     radius: screenSize.width * 0.1,
                     backgroundColor: Colors.grey,
+                    child: Icon(
+                      Icons.person,
+                      size: screenSize.width * 0.15,
+                      color: Colors.white,
+                    ),
                   ),
                   SizedBox(height: screenSize.height * 0.02),
                   buildProfileItem('assets/images/detil.png', 'Nama',
                       nameController, true, screenSize),
                   buildProfileItem('assets/images/email.png', 'Email',
-                      emailController, true, screenSize),
-                  buildProfileItem('assets/images/dob.png', 'Gender',
-                      genderController, false, screenSize),
-                  buildProfileItem('assets/images/calendar.png',
-                      'date_of_birth', dobController, false, screenSize),
+                      emailController, false, screenSize),
+                  buildGenderDropdown(screenSize),
+                  buildDatePicker(screenSize),
                   SizedBox(height: screenSize.height * 0.03),
                   Center(
                     child: SizedBox(
@@ -137,7 +165,6 @@ class _UserprofileState extends State<Userprofile> {
                       width: screenSize.width * 0.875,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Save action
                           updateUserData();
                         },
                         style: ElevatedButton.styleFrom(
@@ -183,13 +210,13 @@ class _UserprofileState extends State<Userprofile> {
             ),
             SizedBox(height: screenSize.height * 0.01),
             Container(
-              width: screenSize.width *
-                  0.875, // Make the TextField take the full width
+              width: screenSize.width * 0.875,
               height: screenSize.height * 0.06875,
               child: TextField(
                 controller: controller,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (value) {},
+                readOnly: label == 'Email', // Membuat email tidak bisa diedit
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Color(0xFF272E49),
@@ -207,7 +234,7 @@ class _UserprofileState extends State<Userprofile> {
                       color: Colors.white,
                     ),
                   ),
-                  suffixIcon: showPencilIcon
+                  suffixIcon: showPencilIcon && label != 'Email'
                       ? Padding(
                           padding: EdgeInsets.all(screenSize.width * 0.035),
                           child: Image.asset(
@@ -228,6 +255,134 @@ class _UserprofileState extends State<Userprofile> {
                   color: Colors.white,
                   fontFamily: 'Urbanist',
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildGenderDropdown(Size screenSize) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.01),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Gender',
+              style: TextStyle(
+                fontFamily: 'Urbanist',
+                color: Colors.white,
+                fontSize: screenSize.width * 0.035,
+              ),
+            ),
+            SizedBox(height: screenSize.height * 0.01),
+            Container(
+              width: screenSize.width * 0.875,
+              height: screenSize.height * 0.06875,
+              child: DropdownButtonFormField<String>(
+                value: selectedGender,
+                hint: Text(
+                  'Pilih Gender',
+                  style: TextStyle(color: Colors.white),
+                ),
+                dropdownColor: Color(0xFF272E49),
+                items: ['male', 'female'].map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value, style: TextStyle(color: Colors.white)),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    selectedGender = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Color(0xFF272E49),
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(screenSize.width * 0.025),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildDatePicker(Size screenSize) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.01),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Tanggal Lahir',
+              style: TextStyle(
+                fontFamily: 'Urbanist',
+                color: Colors.white,
+                fontSize: screenSize.width * 0.035,
+              ),
+            ),
+            SizedBox(height: screenSize.height * 0.01),
+            Container(
+              width: screenSize.width * 0.875,
+              height: screenSize.height * 0.06875,
+              child: TextField(
+                controller: dobController,
+                onTap: () async {
+                  DateTime? date = await DatePicker.showSimpleDatePicker(
+                    context,
+                    initialDate: DateTime(1994),
+                    firstDate: DateTime(1960),
+                    lastDate: DateTime(2012),
+                    dateFormat: "dd-MMMM-yyyy",
+                    locale: DateTimePickerLocale.id,
+                    looping: true,
+                  );
+                  if (date != null) {
+                    setState(() {
+                      dobController.text =
+                          DateFormat('dd/MM/yyyy').format(date);
+                    });
+                  }
+                },
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Color(0xFF272E49),
+                  hintText: 'Tanggal Lahir',
+                  hintStyle: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Urbanist',
+                  ),
+                  prefixIcon: Padding(
+                    padding: EdgeInsets.all(screenSize.width * 0.03),
+                    child: Image.asset(
+                      'assets/images/calendar.png',
+                      width: screenSize.width * 0.06,
+                      height: screenSize.width * 0.06,
+                      color: Colors.white,
+                    ),
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius:
+                        BorderRadius.circular(screenSize.width * 0.025),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontFamily: 'Urbanist',
+                ),
+                readOnly: true,
               ),
             ),
           ],

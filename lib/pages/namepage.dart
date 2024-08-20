@@ -12,7 +12,7 @@ class Namepage extends StatelessWidget {
   Future<void> saveName(BuildContext context, String name, String email) async {
     try {
       final response = await http.put(
-        Uri.parse('http://10.0.2.2:8000/save-name/'),
+        Uri.parse('http://localhost:8000/save-name/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

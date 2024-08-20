@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sleepys/pages/home.dart';
+import 'package:sleepys/widgets/profilepage.dart';
 import 'namepage.dart';
 import 'loginpage.dart';
 import '../widgets/signupprovider.dart';
@@ -15,7 +17,7 @@ class Signup extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => SignupFormProvider(),
-      child: const MaterialApp(
+      child: MaterialApp(
         home: Signups(),
       ),
     );
@@ -25,22 +27,81 @@ class Signup extends StatelessWidget {
 class Signups extends StatelessWidget {
   const Signups({Key? key}) : super(key: key);
 
+  bool _isValidEmail(String email) {
+    final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    return regex.hasMatch(email);
+  }
+
+  void showCustomSnackBar(BuildContext context, String message) {
+    final screenSize = MediaQuery.of(context).size;
+
+    final snackBar = SnackBar(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      content: Container(
+        padding: EdgeInsets.symmetric(
+          vertical: screenSize.height * 0.015,
+          horizontal: screenSize.width * 0.05,
+        ),
+        decoration: BoxDecoration(
+          color: Color(0xFF2D2C4E),
+          borderRadius: BorderRadius.circular(screenSize.width * 0.04),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.info_outline,
+              color: Colors.white,
+              size: screenSize.width * 0.05,
+            ),
+            SizedBox(width: screenSize.width * 0.03),
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: screenSize.width * 0.035,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      behavior: SnackBarBehavior.floating,
+      margin: EdgeInsets.symmetric(
+        vertical: screenSize.height * 0.02,
+        horizontal: screenSize.width * 0.04,
+      ),
+    );
+
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   Future<void> _signup(BuildContext context) async {
     final signupForm = Provider.of<SignupFormProvider>(context, listen: false);
     final email = signupForm.email;
     final password = signupForm.password;
     final confirmPassword = signupForm.confirmPassword;
 
-    if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Passwords do not match")),
-      );
+    if (!_isValidEmail(email)) {
+      showCustomSnackBar(context, "Format email tidak valid");
       return;
     }
 
+    if (password.isEmpty) {
+      showCustomSnackBar(context, "Password tidak boleh kosong");
+      return;
+    }
+
+    if (password != confirmPassword) {
+      showCustomSnackBar(context, "Password tidak cocok");
+      return;
+    }
+
+    // Lanjutkan dengan proses signup seperti biasa
     try {
       final url = Uri.parse(
-          'http://10.0.2.2:8000/register/'); // Use the correct IP for your setup
+          'http://localhost:8000/register/'); // Ganti dengan URL yang sesuai
       final response = await http.post(
         url,
         headers: {
@@ -63,9 +124,7 @@ class Signups extends StatelessWidget {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('token', token);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Signup successful")),
-          );
+          showCustomSnackBar(context, "Pendaftaran berhasil");
 
           Navigator.pushReplacement(
             context,
@@ -75,12 +134,12 @@ class Signups extends StatelessWidget {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Error: Token not found")),
+            const SnackBar(content: Text("Error: Token tidak ditemukan")),
           );
         }
       } else {
         final errorResponse = json.decode(response.body);
-        final errorMessage = errorResponse['detail'] ?? 'An error occurred';
+        final errorMessage = errorResponse['detail'] ?? 'Terjadi kesalahan';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMessage)),
         );
@@ -88,7 +147,7 @@ class Signups extends StatelessWidget {
     } catch (e) {
       print('Error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred: $e')),
+        SnackBar(content: Text('Terjadi kesalahan: $e')),
       );
     }
   }
@@ -120,7 +179,7 @@ class Signups extends StatelessWidget {
                           width: screenSize.width * 0.35,
                         ),
                         Text(
-                          'Daftar menggunakan email yang\n valid',
+                          'Daftar menggunakan email yang valid',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: screenSize.width * 0.05,
@@ -269,13 +328,11 @@ class Signups extends StatelessWidget {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF009090),
-                            padding: EdgeInsets.symmetric(
-                                vertical: screenSize.height * 0.01),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.0),
                             ),
                             minimumSize:
-                                Size(double.infinity, screenSize.height * 0.07),
+                                Size(double.infinity, screenSize.height * 0.06),
                           ),
                           child: Text(
                             'Daftar',
@@ -305,7 +362,7 @@ class Signups extends StatelessWidget {
                                 ),
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () {
-                                    Navigator.of(context).pushReplacement(
+                                    Navigator.of(context).push(
                                       MaterialPageRoute(
                                         builder: (context) => LoginPages(),
                                       ),

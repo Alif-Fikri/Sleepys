@@ -1,19 +1,56 @@
 import 'package:flutter/material.dart';
 import '../pages/home.dart';
 import 'alarmscreen.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class SleepPage extends StatefulWidget {
-  final String email; // tambahkan parameter email
+  final String email;
 
-  SleepPage({required this.email}); // tambahkan parameter email di konstruktor
+  SleepPage({required this.email});
 
   @override
   _SleepPageState createState() => _SleepPageState();
 }
 
 class _SleepPageState extends State<SleepPage> {
-  int selectedWakeUpHour = 7;
-  int selectedSleepMinute = 30;
+  int? selectedWakeUpHour;
+  int? selectedSleepMinute;
+
+  bool isHourSelected = false;
+  bool isMinuteSelected = false;
+
+  Future<void> saveSleepData() async {
+    final sleepTime = DateTime.now();
+    final wakeTime = DateTime(
+      sleepTime.year,
+      sleepTime.month,
+      sleepTime.day,
+      selectedWakeUpHour ?? 0,
+      selectedSleepMinute ?? 0,
+    );
+
+    final url = Uri.parse('http://localhost:8000/save-sleep-record/');
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'email': widget.email,
+        'sleep_time': sleepTime.toIso8601String(),
+        'wake_time': wakeTime.toIso8601String(),
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // Successfully saved the data
+      print('Sleep data saved successfully');
+    } else {
+      // Failed to save the data
+      print('Failed to save sleep data: ${response.body}');
+    }
+  }
 
   List<Widget> generateMinutes(Size screenSize) {
     return List<Widget>.generate(60, (int index) {
@@ -119,6 +156,7 @@ class _SleepPageState extends State<SleepPage> {
                       onSelectedItemChanged: (index) {
                         setState(() {
                           selectedWakeUpHour = index;
+                          isHourSelected = true;
                         });
                       },
                       childDelegate: ListWheelChildLoopingListDelegate(
@@ -142,6 +180,7 @@ class _SleepPageState extends State<SleepPage> {
                       onSelectedItemChanged: (index) {
                         setState(() {
                           selectedSleepMinute = index;
+                          isMinuteSelected = true;
                         });
                       },
                       childDelegate: ListWheelChildLoopingListDelegate(
@@ -175,18 +214,21 @@ class _SleepPageState extends State<SleepPage> {
                   height: screenSize.height * 0.0625,
                   width: screenSize.width * 0.875,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => AlarmScreen(
-                            wakeUpTime:
-                                '${selectedWakeUpHour.toString().padLeft(2, '0')}:${selectedSleepMinute.toString().padLeft(2, '0')}',
-                            userName: widget.email,
-                            email: widget.email, // Perbaiki baris ini
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: isHourSelected && isMinuteSelected
+                        ? () {
+                            saveSleepData(); // Panggil fungsi untuk menyimpan data
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => AlarmScreen(
+                                  wakeUpTime:
+                                      '${selectedWakeUpHour.toString().padLeft(2, '0')}:${selectedSleepMinute.toString().padLeft(2, '0')}',
+                                  userName: widget.email,
+                                  email: widget.email,
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
                     child: Text(
                       'Tidur sekarang',
                       style: TextStyle(
@@ -210,7 +252,7 @@ class _SleepPageState extends State<SleepPage> {
                   Navigator.of(context).push(
                     MaterialPageRoute(
                         builder: (context) => HomePage(
-                              userEmail: widget.email, // akses widget.email
+                              userEmail: widget.email,
                             )),
                   );
                 },

@@ -130,7 +130,7 @@ class ScreenOpsi extends StatelessWidget {
                       Padding(
                         padding: EdgeInsets.only(top: screenSize.height * 0.2),
                         child: Text(
-                          'Mulai dengan masuk atau \nmendaftar untuk melihat analisa \ntidur mu.',
+                          'Mulai dengan masuk atau \nmendaftar untuk melihat analisa tidur mu.',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: screenSize.width * 0.05,
@@ -139,7 +139,7 @@ class ScreenOpsi extends StatelessWidget {
                           textAlign: TextAlign.center,
                         ),
                       ),
-                      SizedBox(height: screenSize.height * 0.03),
+                      SizedBox(height: screenSize.height * 0.02),
                       ElevatedButton(
                         onPressed: () {
                           Navigator.push(
@@ -149,13 +149,11 @@ class ScreenOpsi extends StatelessWidget {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF009090),
-                          padding: EdgeInsets.symmetric(
-                              vertical: screenSize.height * 0.01),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           minimumSize:
-                              Size(double.infinity, screenSize.height * 0.07),
+                              Size(double.infinity, screenSize.height * 0.06),
                         ),
                         child: Text(
                           'Masuk',
@@ -176,13 +174,11 @@ class ScreenOpsi extends StatelessWidget {
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(
-                              vertical: screenSize.height * 0.01),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           minimumSize:
-                              Size(double.infinity, screenSize.height * 0.07),
+                              Size(double.infinity, screenSize.height * 0.06),
                         ),
                         child: Text(
                           'Daftar',

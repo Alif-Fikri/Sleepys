@@ -3,8 +3,9 @@ import 'package:sleepys/widgets/sleepprofile.dart'; // Pastikan Anda mengganti i
 
 class DailySleepProfile extends StatelessWidget {
   final String email;
+  final bool hasSleepData;
 
-  DailySleepProfile({required this.email});
+  DailySleepProfile({required this.email, required this.hasSleepData});
 
   @override
   Widget build(BuildContext context) {
@@ -29,37 +30,38 @@ class DailySleepProfile extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Container(
-                    height: 33,
-                    width: 130,
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF009090),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => SleepProfile(
-                            email: email,
-                          ),
-                        ));
-                      },
-                      child: Text(
-                        'Lihat profil tidur harian',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Urbanist',
-                          fontSize: buttonFontSize,
+              if (hasSleepData) // Show the button only if the user has sleep data
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      height: 33,
+                      width: 130,
+                      margin: EdgeInsets.only(bottom: 10),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF009090),
                         ),
-                        textAlign: TextAlign.center,
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => SleepProfile(
+                              email: email,
+                            ),
+                          ));
+                        },
+                        child: Text(
+                          'Lihat profil tidur harian',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Urbanist',
+                            fontSize: buttonFontSize,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
             ],
           ),
         ),
@@ -70,8 +72,9 @@ class DailySleepProfile extends StatelessWidget {
 
 class WeeklySleepProfile extends StatelessWidget {
   final String email;
+  final bool hasSleepData; // Add this flag to control button visibility
 
-  WeeklySleepProfile({required this.email});
+  WeeklySleepProfile({required this.email, required this.hasSleepData});
 
   @override
   Widget build(BuildContext context) {
@@ -96,37 +99,38 @@ class WeeklySleepProfile extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Container(
-                    height: 33,
-                    width: 130,
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF009090),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => SleepProfile(
-                            email: email,
-                          ),
-                        ));
-                      },
-                      child: Text(
-                        'Lihat profil tidur mingguan',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Urbanist',
-                          fontSize: buttonFontSize,
+              if (hasSleepData) // Show the button only if the user has sleep data
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      height: 33,
+                      width: 130,
+                      margin: EdgeInsets.only(bottom: 10),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF009090),
                         ),
-                        textAlign: TextAlign.center,
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => SleepProfile(
+                              email: email,
+                            ),
+                          ));
+                        },
+                        child: Text(
+                          'Lihat profil tidur mingguan',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Urbanist',
+                            fontSize: buttonFontSize,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
             ],
           ),
         ),
@@ -137,8 +141,9 @@ class WeeklySleepProfile extends StatelessWidget {
 
 class MonthlySleepProfile extends StatelessWidget {
   final String email;
+  final bool hasSleepData; // Add this flag to control button visibility
 
-  MonthlySleepProfile({required this.email});
+  MonthlySleepProfile({required this.email, required this.hasSleepData});
 
   @override
   Widget build(BuildContext context) {
@@ -163,37 +168,38 @@ class MonthlySleepProfile extends StatelessWidget {
                 ),
               ),
               SizedBox(height: 5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  Container(
-                    height: 33,
-                    width: 130,
-                    margin: EdgeInsets.only(bottom: 10),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF009090),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => SleepProfile(
-                            email: email,
-                          ),
-                        ));
-                      },
-                      child: Text(
-                        'Lihat profil tidur bulanan',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Urbanist',
-                          fontSize: buttonFontSize,
+              if (hasSleepData) // Show the button only if the user has sleep data
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      height: 33,
+                      width: 130,
+                      margin: EdgeInsets.only(bottom: 10),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF009090),
                         ),
-                        textAlign: TextAlign.center,
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => SleepProfile(
+                              email: email,
+                            ),
+                          ));
+                        },
+                        child: Text(
+                          'Lihat profil tidur bulanan',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Urbanist',
+                            fontSize: buttonFontSize,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
             ],
           ),
         ),

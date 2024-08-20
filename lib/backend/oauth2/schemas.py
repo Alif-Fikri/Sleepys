@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from datetime import date
+from datetime import date, datetime, time
 
 class UserCreate(BaseModel):
     email: str
@@ -24,4 +24,17 @@ class UserUpdate(BaseModel):
     upper_pressure: int = None
     lower_pressure: int = None
     daily_steps: int = None
+    sleep_time: int = None
+    wake_time: int = None
     
+class SleepData(BaseModel):
+    email: str
+    sleep_time: datetime
+    wake_time: datetime
+    
+class SleepDataResponse(BaseModel):
+    sleep_time: str
+    wake_time: str
+    
+    class Config:
+        orm_mode = True

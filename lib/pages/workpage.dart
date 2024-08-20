@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:async';
 import '../pages/datepicker.dart';
 import '../widgets/note_card.dart';
 
@@ -52,19 +55,48 @@ class _WorkpagesState extends State<Workpages> {
     'Teacher'
   ];
 
-  void onOccupationSelected(String work) {
-    Future.delayed(Duration(seconds: 2), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Datepicker(
-            name: widget.name,
-            email: widget.email,
-            gender: widget.gender,
-            work: work,
-          ),
-        ),
+  Future<void> saveWork(String work) async {
+    try {
+      final response = await http.put(
+        Uri.parse('http://localhost:8000/save-work/'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'name': widget.name,
+          'email': widget.email,
+          'gender': widget.gender,
+          'work': work,
+        }),
       );
+
+      if (response.statusCode == 200) {
+        print('Work saved successfully: ${jsonDecode(response.body)}');
+      } else {
+        print('Failed to save work: ${response.body}');
+        throw Exception('Failed to save work');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+  }
+
+  void onOccupationSelected(String work) {
+    saveWork(work).then((_) {
+      Future.delayed(Duration(seconds: 2), () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Datepicker(
+                name: widget.name,
+                email: widget.email,
+                gender: widget.gender,
+                work: work),
+          ),
+        );
+      });
+    }).catchError((error) {
+      print('Error: $error');
     });
   }
 
