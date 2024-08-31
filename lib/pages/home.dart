@@ -3,8 +3,8 @@ import 'package:sleepys/widgets/bloodpressure.dart';
 import 'package:sleepys/widgets/card_sleepprofile.dart';
 import 'package:sleepys/widgets/sleeppage.dart';
 import 'package:sleepys/widgets/dailypage.dart';
-import '../widgets/weekpage.dart';
-import '../widgets/monthpage.dart';
+import 'weekchart/weekpage.dart';
+import 'monthchart/monthpage.dart';
 import '../widgets/profilepage.dart';
 import '../widgets/sleepprofile.dart';
 

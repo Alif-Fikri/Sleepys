@@ -59,10 +59,12 @@ class _DatepickersState extends State<Datepickers> {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, String>{
+        body: jsonEncode(<String, dynamic>{
+          // Ubah di sini menjadi dynamic agar gender bisa integer
           'name': widget.name,
           'email': widget.email,
-          'gender': widget.gender,
+          'gender':
+              int.parse(widget.gender), // Ubah string gender menjadi integer
           'work': widget.work,
           'date_of_birth': dateofbirth,
         }),
@@ -140,7 +142,8 @@ class _DatepickersState extends State<Datepickers> {
                           String formattedDate =
                               "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
                           await saveDateOfBirth(formattedDate);
-                          await Future.delayed(const Duration(seconds: 2)); // Menunggu 2 detik
+                          await Future.delayed(
+                              const Duration(seconds: 2)); // Menunggu 2 detik
 
                           Navigator.pushReplacement(
                             context,

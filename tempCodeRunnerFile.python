@@ -1,14 +1,3 @@
-import cv2
+import urllib.parse
 
-# Membaca gambar
-img = cv2.imread('superman.jpg')
-
-# Mengatur ukuran baru dalam piksel
-new_width = 1920  # Ganti dengan lebar yang diinginkan dalam piksel
-new_height = 1080  # Ganti dengan tinggi yang diinginkan dalam piksel
-
-# Mengubah ukuran gambar
-resized_img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_CUBIC)
-
-# Menyimpan gambar yang telah diubah ukurannya
-cv2.imwrite('resized_output.jpg', resized_img)
+reset_link = f"sleepypanda://resetpassword?token={urllib.parse.quote(token)}"

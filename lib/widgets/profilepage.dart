@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sleepys/widgets/user_profile.dart';
 import 'package:sleepys/widgets/logout_button.dart';
+import 'package:sleepys/pages/feedback.dart';
 
 class ProfilePage extends StatelessWidget {
   final String email;
@@ -131,7 +132,11 @@ class ProfilePage extends StatelessWidget {
                         width: screenSize.width * 0.08,
                       ),
                       onTap: () {
-                        // Tambahkan aksi untuk "Feedback"
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => FeedbackPage()),
+                        );
                       },
                     ),
                   ],

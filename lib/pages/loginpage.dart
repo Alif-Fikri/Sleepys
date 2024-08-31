@@ -13,6 +13,7 @@ import 'package:sleepys/pages/singup.dart';
 import 'package:http/http.dart' as http;
 import '../widgets/signupprovider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:art_sweetalert/art_sweetalert.dart';
 
 class LoginPages extends StatelessWidget {
   LoginPages({Key? key}) : super(key: key);
@@ -83,10 +84,9 @@ class LoginPages extends StatelessWidget {
       return;
     }
 
-    final url = Uri.parse(
-        'http://localhost:8000/login/'); // Gunakan localhost untuk emulator Android
+    final loginUrl = Uri.parse('http://localhost:8000/login/');
     final response = await http.post(
-      url,
+      loginUrl,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -102,80 +102,14 @@ class LoginPages extends StatelessWidget {
     if (response.statusCode == 200) {
       final responseData = json.decode(response.body);
       final token = responseData['access_token'];
-      final name = responseData['name'];
-      final gender = responseData['gender'];
-      final work = responseData['work'];
-      final dateOfBirth = responseData['date_of_birth'];
-      final height = responseData['height'];
-      final weight = responseData['weight'];
 
       // Simpan token ke SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', token);
+      await prefs.setString('email', email);
 
-      showCustomSnackBar(context, "Login berhasil");
-
-      // Memeriksa dan bernavigasi berdasarkan status pendaftaran setiap langkah
-      if (name == null || name.isEmpty) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => Namepage(email: email)),
-        );
-      } else if (gender == null || gender.isEmpty) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => Genderpage(name: name, email: email)),
-        );
-      } else if (work == null || work.isEmpty) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>
-                  Workpage(name: name, email: email, gender: gender)),
-        );
-      } else if (dateOfBirth == null || dateOfBirth.isEmpty) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => Datepicker(
-                  name: name, email: email, gender: gender, work: work)),
-        );
-      } else if (weight == null || weight == 0) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => Weightpage(
-                    name: name,
-                    email: email,
-                    gender: gender,
-                    work: work,
-                    date_of_birth: dateOfBirth,
-                    height: height ?? 0,
-                    userEmail: email,
-                  )),
-        );
-      } else if (height == null || height == 0) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => HeightSelection(
-                  name: name,
-                  email: email,
-                  gender: gender,
-                  work: work,
-                  date_of_birth: dateOfBirth)),
-        );
-      } else {
-        print("Navigating to Jurnaltidur");
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => HomePage(
-                    userEmail: email,
-                  )),
-        );
-      }
+      // Ambil profil user
+      await _getUserProfile(context, token);
     } else {
       final errorResponse = json.decode(response.body);
       final errorMessage = errorResponse['detail'];
@@ -183,6 +117,142 @@ class LoginPages extends StatelessWidget {
       showCustomSnackBar(context, errorMessage);
     }
   }
+
+  Future<void> _getUserProfile(BuildContext context, String token) async {
+  final url = Uri.parse('http://localhost:8000/user-profile/');
+  final response = await http.get(
+    url,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token', // Sertakan token di header
+    },
+  );
+
+  print('Response status: ${response.statusCode}');
+  print('Response body: ${response.body}');
+
+  if (response.statusCode == 200) {
+    final responseData = json.decode(response.body);
+
+    final name = responseData['name'];
+    final gender = responseData['gender']?.toString();
+    final work = responseData['work'];
+    final dateOfBirth = responseData['date_of_birth'];
+    final height = (responseData['height'] as num).toDouble(); 
+    final weight = (responseData['weight'] as num).toDouble();
+
+    // Simpan data profil ke SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('name', name ?? '');
+    
+    // Correctly interpret gender and store it
+    if (gender != null) {
+      await prefs.setString('gender', gender == '0' ? 'female' : 'male');
+    } else {
+      await prefs.setString('gender', '');
+    }
+    
+    await prefs.setString('work', work ?? '');
+    await prefs.setString('date_of_birth', dateOfBirth ?? '');
+    await prefs.setDouble('height', height);
+    await prefs.setDouble('weight', weight);
+
+    showCustomSnackBar(context, "Login berhasil");
+
+    // Cek status profil yang sudah disimpan
+    checkProfileCompletion(context, prefs.getString('email') ?? '');
+  } else {
+    final errorResponse = json.decode(response.body);
+    final errorMessage = errorResponse['detail'];
+
+    showCustomSnackBar(context, errorMessage);
+  }
+}
+
+Future<void> checkProfileCompletion(
+    BuildContext context, String email) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  final name = prefs.getString('name') ?? '';
+  final gender = prefs.getString('gender'); // Check gender as stored above
+  final work = prefs.getString('work') ?? '';
+  final dateOfBirth = prefs.getString('date_of_birth') ?? '';
+  final height = prefs.getDouble('height') ?? 0;
+  final weight = prefs.getDouble('weight') ?? 0;
+
+  // Debugging untuk memastikan urutan pengecekan
+  print('Name: $name');
+  print('Gender: $gender');
+  print('Work: $work');
+  print('Date of Birth: $dateOfBirth');
+  print('Height: $height');
+  print('Weight: $weight');
+
+  if (name.isEmpty) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => Namepage(email: email)),
+    );
+  } else if (gender == null || gender.isEmpty) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Genderpage(name: name, email: email),
+      ),
+    );
+  } else if (work.isEmpty) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            Workpage(name: name, email: email, gender: gender),
+      ),
+    );
+  } else if (dateOfBirth.isEmpty) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            Datepicker(name: name, email: email, gender: gender, work: work),
+      ),
+    );
+  } else if (weight == 0) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Weightpage(
+          name: name,
+          email: email,
+          gender: gender,
+          work: work,
+          date_of_birth: dateOfBirth,
+          height: height.toInt(),
+          userEmail: email,
+        ),
+      ),
+    );
+  } else if (height == 0) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HeightSelection(
+          name: name,
+          email: email,
+          gender: gender,
+          work: work,
+          date_of_birth: dateOfBirth,
+        ),
+      ),
+    );
+  } else {
+    // Semua data sudah lengkap
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => HomePage(userEmail: email)),
+    );
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -395,7 +465,129 @@ class LoginPages extends StatelessWidget {
   }
 }
 
-class ForgotPasswordBottomSheet extends StatelessWidget {
+class ForgotPasswordBottomSheet extends StatefulWidget {
+  @override
+  _ForgotPasswordBottomSheetState createState() =>
+      _ForgotPasswordBottomSheetState();
+}
+
+class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
+  TextEditingController emailController = TextEditingController();
+  TextEditingController otpController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  String? email;
+  bool isOtpSent = false;
+  bool isOtpVerified = false;
+
+  String? emailError;
+  String? otpError;
+  String? passwordError;
+
+  Future<void> requestOtp() async {
+    setState(() {
+      emailError = null;
+    });
+
+    if (emailController.text.isEmpty) {
+      setState(() {
+        emailError = 'Email tidak boleh kosong';
+      });
+      return;
+    }
+
+    final email = emailController.text;
+    final response = await http.post(
+      Uri.parse('http://localhost:8000/request-otp/?email=$email'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        isOtpSent = true;
+        this.email = email;
+      });
+    } else if (response.statusCode == 404) {
+      setState(() {
+        emailError = 'Email tidak terdaftar';
+      });
+    } else {
+      setState(() {
+        emailError = 'Terjadi kesalahan, coba lagi nanti.';
+      });
+    }
+  }
+
+  Future<void> verifyOtp() async {
+    setState(() {
+      otpError = null;
+    });
+
+    if (otpController.text.isEmpty) {
+      setState(() {
+        otpError = 'OTP tidak boleh kosong';
+      });
+      return;
+    }
+
+    final url = Uri.parse('http://localhost:8000/verify-otp/')
+        .replace(queryParameters: {
+      'email': email!,
+      'otp': otpController.text,
+    });
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      setState(() {
+        isOtpVerified = true;
+      });
+    } else if (response.statusCode == 400) {
+      setState(() {
+        otpError = 'Kode OTP salah atau sudah kedaluwarsa';
+      });
+    } else {
+      setState(() {
+        otpError = 'Terjadi kesalahan, coba lagi nanti.';
+      });
+    }
+  }
+
+  Future<void> resetPassword() async {
+    final url = Uri.parse('http://localhost:8000/reset-password/')
+        .replace(queryParameters: {
+      'email': email!,
+      'new_password': passwordController.text,
+    });
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      // Display success alert
+      ArtSweetAlert.show(
+        context: context,
+        artDialogArgs: ArtDialogArgs(
+          type: ArtSweetAlertType.success,
+          title: "Success",
+          text: "Password berhasil direset!",
+          confirmButtonText: "OK",
+          onConfirm: () {
+            Navigator.of(context).pop(); // Close the dialog
+            Navigator.of(context).pop(); // Close the bottom sheet
+          },
+        ),
+      );
+    } else {
+      print('Failed to reset password. Error: ${response.body}');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -403,7 +595,8 @@ class ForgotPasswordBottomSheet extends StatelessWidget {
     return SingleChildScrollView(
       child: Container(
         padding: const EdgeInsets.all(30),
-        height: MediaQuery.of(context).viewInsets.bottom + 350,
+        height:
+            MediaQuery.of(context).viewInsets.bottom + (isOtpSent ? 400 : 350),
         decoration: const BoxDecoration(
           color: Color(0xFF272E49),
           borderRadius: BorderRadius.only(
@@ -418,9 +611,7 @@ class ForgotPasswordBottomSheet extends StatelessWidget {
               height: 4,
               color: const Color(0xFF009090),
             ),
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10),
             Text(
               'Lupa Password?',
               style: TextStyle(
@@ -430,11 +621,9 @@ class ForgotPasswordBottomSheet extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10),
             Text(
-              'Instruksi untuk melakukan reset password akan dikirim melalui email yang kamu gunakan untuk mendaftar.',
+              _getInstructionText(),
               style: TextStyle(
                 fontFamily: 'Urbanist',
                 fontSize: screenWidth * 0.04,
@@ -443,61 +632,222 @@ class ForgotPasswordBottomSheet extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: screenWidth * 0.05),
-            Container(
-              height: screenWidth * 0.12,
-              width: screenWidth * 0.85,
-              child: TextField(
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  hintText: 'Email',
-                  hintStyle: TextStyle(
-                    color: Color(0xFF333333),
-                    fontFamily: 'Urbanist',
-                    fontSize: screenWidth * 0.04,
-                  ),
-                  prefixIcon: Container(
-                    padding: EdgeInsets.all(screenWidth * 0.04),
-                    child: Image.asset('assets/images/email1.png'),
-                    height: screenWidth * 0.08,
-                    width: screenWidth * 0.08,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-                style: TextStyle(
-                  color: Color(0xFF333333),
-                  fontFamily: 'Urbanist',
-                  fontSize: screenWidth * 0.04,
-                ),
-              ),
-            ),
-            SizedBox(height: screenWidth * 0.03),
-            Container(
-              height: screenWidth * 0.12,
-              width: screenWidth * 0.85,
-              child: ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF009090),
-                  padding: EdgeInsets.symmetric(vertical: screenWidth * 0.02),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                ),
-                child: Text(
-                  'Kirim',
-                  style: TextStyle(
-                    fontFamily: 'Urbanist',
-                    color: Colors.white,
-                    fontSize: screenWidth * 0.04,
-                  ),
-                ),
-              ),
-            ),
+            if (!isOtpSent) ...[
+              if (emailError != null) buildErrorText(emailError!, screenWidth),
+              buildEmailInput(screenWidth),
+              SizedBox(height: screenWidth * 0.03),
+              buildSendOtpButton(screenWidth),
+            ] else if (isOtpSent && !isOtpVerified) ...[
+              if (otpError != null) buildErrorText(otpError!, screenWidth),
+              buildOtpInput(screenWidth),
+              SizedBox(height: screenWidth * 0.03),
+              buildVerifyOtpButton(screenWidth),
+            ] else if (isOtpVerified) ...[
+              if (passwordError != null)
+                buildErrorText(passwordError!, screenWidth),
+              buildNewPasswordInput(screenWidth),
+              SizedBox(height: screenWidth * 0.03),
+              buildResetPasswordButton(screenWidth),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildErrorText(String errorText, double screenWidth) {
+    return Container(
+      width: screenWidth * 0.85,
+      margin: EdgeInsets.only(bottom: 8.0),
+      child: Text(
+        errorText,
+        style: TextStyle(
+          color: Colors.red,
+          fontFamily: 'Urbanist',
+          fontSize: screenWidth * 0.04,
+        ),
+      ),
+    );
+  }
+
+  String _getInstructionText() {
+    if (!isOtpSent) {
+      return 'Kode OTP akan dikirim melalui email yang kamu gunakan untuk mendaftar.';
+    } else if (isOtpSent && !isOtpVerified) {
+      return 'Masukkan kode OTP yang telah kami kirim ke email Anda untuk verifikasi.';
+    } else if (isOtpVerified) {
+      return 'Masukkan password baru Anda untuk mereset password.';
+    } else {
+      return 'Error: Status tidak dikenali';
+    }
+  }
+
+  Widget buildEmailInput(double screenWidth) {
+    return Container(
+      height: screenWidth * 0.12,
+      width: screenWidth * 0.85,
+      child: TextField(
+        controller: emailController,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          hintText: 'Email',
+          hintStyle: TextStyle(
+            color: Color(0xFF333333),
+            fontFamily: 'Urbanist',
+            fontSize: screenWidth * 0.04,
+          ),
+          prefixIcon: Container(
+            padding: EdgeInsets.all(screenWidth * 0.025),
+            child: Image.asset('assets/images/email1.png'),
+            height: screenWidth * 0.08,
+            width: screenWidth * 0.08,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        style: TextStyle(
+          color: Color(0xFF333333),
+          fontFamily: 'Urbanist',
+          fontSize: screenWidth * 0.04,
+        ),
+      ),
+    );
+  }
+
+  Widget buildSendOtpButton(double screenWidth) {
+    return Container(
+      height: screenWidth * 0.12,
+      width: screenWidth * 0.85,
+      child: ElevatedButton(
+        onPressed: requestOtp,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF009090),
+          padding: EdgeInsets.symmetric(vertical: screenWidth * 0.02),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+        ),
+        child: Text(
+          'Kirim',
+          style: TextStyle(
+            fontFamily: 'Urbanist',
+            color: Colors.white,
+            fontSize: screenWidth * 0.04,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildOtpInput(double screenWidth) {
+    return Container(
+      height: screenWidth * 0.12,
+      width: screenWidth * 0.85,
+      child: TextField(
+        controller: otpController,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          hintText: 'OTP',
+          hintStyle: TextStyle(
+            color: Color(0xFF333333),
+            fontFamily: 'Urbanist',
+            fontSize: screenWidth * 0.04,
+          ),
+          prefixIcon: Icon(Icons.lock, color: Color(0xFF333333)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        style: TextStyle(
+          color: Color(0xFF333333),
+          fontFamily: 'Urbanist',
+          fontSize: screenWidth * 0.04,
+        ),
+      ),
+    );
+  }
+
+  Widget buildVerifyOtpButton(double screenWidth) {
+    return Container(
+      height: screenWidth * 0.12,
+      width: screenWidth * 0.85,
+      child: ElevatedButton(
+        onPressed: verifyOtp,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF009090),
+          padding: EdgeInsets.symmetric(vertical: screenWidth * 0.02),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+        ),
+        child: Text(
+          'Verifikasi',
+          style: TextStyle(
+            fontFamily: 'Urbanist',
+            color: Colors.white,
+            fontSize: screenWidth * 0.04,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget buildNewPasswordInput(double screenWidth) {
+    return Container(
+      height: screenWidth * 0.12,
+      width: screenWidth * 0.85,
+      child: TextField(
+        controller: passwordController,
+        obscureText: true,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.white,
+          hintText: 'Password Baru',
+          hintStyle: TextStyle(
+            color: Color(0xFF333333),
+            fontFamily: 'Urbanist',
+            fontSize: screenWidth * 0.04,
+          ),
+          prefixIcon: Icon(Icons.lock, color: Color(0xFF333333)),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        style: TextStyle(
+          color: Color(0xFF333333),
+          fontFamily: 'Urbanist',
+          fontSize: screenWidth * 0.04,
+        ),
+      ),
+    );
+  }
+
+  Widget buildResetPasswordButton(double screenWidth) {
+    return Container(
+      height: screenWidth * 0.12,
+      width: screenWidth * 0.85,
+      child: ElevatedButton(
+        onPressed: resetPassword,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF009090),
+          padding: EdgeInsets.symmetric(vertical: screenWidth * 0.02),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+        ),
+        child: Text(
+          'Reset Password',
+          style: TextStyle(
+            fontFamily: 'Urbanist',
+            color: Colors.white,
+            fontSize: screenWidth * 0.04,
+          ),
         ),
       ),
     );

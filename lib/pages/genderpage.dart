@@ -1,39 +1,56 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:sleepys/pages/workpage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:hive/hive.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:provider/provider.dart';
+import '../models/user_data.dart';
+import '../pages/workpage.dart';
 
-class Genderpage extends StatelessWidget {
+class Genderpage extends StatefulWidget {
   final String name;
   final String email;
 
   const Genderpage({super.key, required this.name, required this.email});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Genderpages(name: name, email: email),
-    );
-  }
+  _GenderpageState createState() => _GenderpageState();
 }
 
-class Genderpages extends StatefulWidget {
-  final String name;
-  final String email;
-
-  const Genderpages({super.key, required this.name, required this.email});
-
-  @override
-  _GenderpagesState createState() => _GenderpagesState();
-}
-
-class _GenderpagesState extends State<Genderpages> {
+class _GenderpageState extends State<Genderpage> {
   Color borderColor1 = Colors.transparent;
   Color borderColor2 = Colors.transparent;
+  late Connectivity _connectivity;
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _connectivity = Connectivity();
+
+    _connectivitySubscription = _connectivity.onConnectivityChanged
+        .listen((List<ConnectivityResult> resultList) {
+      if (resultList.isNotEmpty &&
+          resultList.first != ConnectivityResult.none) {
+        syncData();
+      }
+    });
+
+    syncData();
+  }
+
+  @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
 
   void _onTap(int index) async {
-    String gender = index == 1 ? "female" : "male";
-    await saveGender(widget.name, widget.email, gender);
+    String gender = index == 1 ? "0" : "1";
+
+    // Save gender to the server
+    await saveGender(context, widget.name, widget.email, gender);
 
     setState(() {
       if (index == 1) {
@@ -49,16 +66,16 @@ class _GenderpagesState extends State<Genderpages> {
       }
     });
 
+    // Navigate to the next page
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            Workpage(name: widget.name, email: widget.email, gender: gender),
+        builder: (context) => Workpage(name: widget.name, email: widget.email, gender: gender),
       ),
     );
   }
 
-  Future<void> saveGender(String name, String email, String gender) async {
+  Future<void> saveGender(BuildContext context, String name, String email, String gender) async {
     try {
       final response = await http.put(
         Uri.parse('http://localhost:8000/save-gender/'),
@@ -74,12 +91,50 @@ class _GenderpagesState extends State<Genderpages> {
 
       if (response.statusCode == 200) {
         print('Gender saved successfully: ${jsonDecode(response.body)}');
+        Provider.of<UserData>(context, listen: false).setGender(gender); // Update global state
       } else {
         print('Failed to save gender: ${response.body}');
         throw Exception('Failed to save gender');
       }
     } catch (error) {
       print('Error: $error');
+
+      // Save data locally using Hive if there's an error
+      var box = Hive.box('userBox');
+      await box.put('genderData', {'name': name, 'email': email, 'gender': gender});
+
+      Provider.of<UserData>(context, listen: false).setGender(gender); // Update global state
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save gender. Data saved locally.')),
+      );
+    }
+  }
+
+  Future<void> syncData() async {
+    var box = Hive.box('userBox');
+    var genderData = box.get('genderData');
+
+    if (genderData != null) {
+      print('Attempting to sync gender data: $genderData');
+      try {
+        final response = await http.put(
+          Uri.parse('http://localhost:8000/save-gender/'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(genderData),
+        );
+
+        if (response.statusCode == 200) {
+          print('Gender synced successfully: ${jsonDecode(response.body)}');
+          await box.delete('genderData');
+        } else {
+          print('Failed to sync gender data: ${response.body}');
+        }
+      } catch (error) {
+        print('Error: $error');
+      }
     }
   }
 
@@ -145,8 +200,7 @@ class _GenderpagesState extends State<Genderpages> {
                               children: [
                                 Padding(
                                   padding: EdgeInsets.all(paddingSize),
-                                  child:
-                                      Image.asset('assets/images/person2.png'),
+                                  child: Image.asset('assets/images/person2.png'),
                                 ),
                                 Text(
                                   'Perempuan',
@@ -175,8 +229,7 @@ class _GenderpagesState extends State<Genderpages> {
                               children: [
                                 Padding(
                                   padding: EdgeInsets.all(paddingSize),
-                                  child:
-                                      Image.asset('assets/images/person1.png'),
+                                  child: Image.asset('assets/images/person1.png'),
                                 ),
                                 Text(
                                   'Pria',

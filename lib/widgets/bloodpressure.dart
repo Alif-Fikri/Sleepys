@@ -241,7 +241,7 @@ class _BloodpressureState extends State<Bloodpressure> {
                 ),
               ],
             ),
-            Spacer(), // Push the buttons to the bottom
+            SizedBox(height: screenHeight * 0.15),
             Center(
               child: Container(
                 width: screenWidth * 0.8, // Button width is 80% of screen width

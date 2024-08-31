@@ -1,30 +1,35 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:sleepys/pages/genderpage.dart';
-import 'package:sleepys/widgets/bloodpressure.dart';
-import 'package:sleepys/widgets/dailystep.dart';
-import 'package:sleepys/widgets/sleeppage.dart';
-import '../pages/singup.dart';
 import 'package:provider/provider.dart';
 import '../pages/splashscreen.dart';
 import '../widgets/signupprovider.dart';
-import '../pages/loginpage.dart';
-import '../pages/heightselection.dart';
-import '../pages/namepage.dart';
-import '../pages/datepicker.dart';
-import '../pages/home.dart';
-import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:sleepys/widgets/profilepage.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import '../models/user_data.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize date formatting for the 'id' locale
+  if (!kIsWeb) {
+    await Hive.initFlutter();
+    var dir = await getApplicationDocumentsDirectory();
+    Hive.init(dir.path);
+  } else {
+    await Hive.initFlutter();
+  }
+
+  await Hive.openBox('userBox');
+
   await initializeDateFormatting('id', null);
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SignupFormProvider()),
+        ChangeNotifierProvider(create: (_) => UserData()), // Tambahkan ini
       ],
       child: MyApp(),
     ),

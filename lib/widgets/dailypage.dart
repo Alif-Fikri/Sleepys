@@ -43,8 +43,18 @@ class _DailyPageState extends State<DailyPage> {
 
       for (var record in sleepData) {
         String date = record['date'];
-        uniqueData[date] =
-            record; // Overwrite any existing record for the same date
+
+        // If the date already exists, compare the time and keep the latest
+        if (uniqueData.containsKey(date)) {
+          DateTime existingTime = parseTime(uniqueData[date]!['time']);
+          DateTime newTime = parseTime(record['time']);
+
+          if (newTime.isAfter(existingTime)) {
+            uniqueData[date] = record; // Replace with the newer record
+          }
+        } else {
+          uniqueData[date] = record; // Add new date entry
+        }
       }
 
       return uniqueData.values
@@ -52,6 +62,17 @@ class _DailyPageState extends State<DailyPage> {
     } catch (e) {
       print('Error fetching sleep data: $e');
       rethrow;
+    }
+  }
+
+  DateTime parseTime(String timeString) {
+    try {
+      // Assuming timeString format is '02:17 - 07:00'
+      final startTimeString = timeString.split(' - ')[0]; // Get the start time
+      return DateFormat('HH:mm').parse(startTimeString); // Parse to DateTime
+    } catch (e) {
+      print('Error parsing time: $e');
+      return DateTime.now(); // Fallback in case of an error
     }
   }
 

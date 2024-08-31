@@ -222,7 +222,6 @@ class _SleepPageState extends State<SleepPage> {
                                 builder: (context) => AlarmScreen(
                                   wakeUpTime:
                                       '${selectedWakeUpHour.toString().padLeft(2, '0')}:${selectedSleepMinute.toString().padLeft(2, '0')}',
-                                  userName: widget.email,
                                   email: widget.email,
                                 ),
                               ),

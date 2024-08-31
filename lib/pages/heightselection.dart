@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
+import 'package:hive/hive.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../pages/weightpage.dart';
-import 'package:sleepys/widgets/note_card.dart';
+import '../widgets/note_card.dart';
 
 class HeightSelection extends StatelessWidget {
   final String name;
@@ -60,6 +62,29 @@ class _HeightSelectionPageState extends State<HeightSelectionPage> {
   FixedExtentScrollController _controller = FixedExtentScrollController();
   int selectedItem = 0;
   Timer? _timer;
+  late final Connectivity _connectivity;
+  late final Stream<ConnectivityResult> _connectivityStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _connectivity = Connectivity();
+    _connectivityStream = _connectivity.onConnectivityChanged.map(
+        (List<ConnectivityResult> results) => results.firstWhere(
+            (result) => result != ConnectivityResult.none,
+            orElse: () => ConnectivityResult.none));
+
+    // Listen for changes in connectivity
+    _connectivityStream.listen((ConnectivityResult result) {
+      if (result != ConnectivityResult.none) {
+        // If connectivity is restored, sync data
+        syncData();
+      }
+    });
+
+    // Sync any unsent data at the start
+    syncData();
+  }
 
   @override
   void dispose() {
@@ -70,15 +95,14 @@ class _HeightSelectionPageState extends State<HeightSelectionPage> {
   Future<void> saveHeight(int height) async {
     try {
       final response = await http.put(
-        Uri.parse(
-            'http://localhost:8000/save-height/'), // Ubah URL sesuai kebutuhan
+        Uri.parse('http://localhost:8000/save-height/'), // Update URL as needed
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
           'email': widget.email,
           'name': widget.name,
-          'gender': widget.gender,
+          'gender': int.parse(widget.gender),
           'work': widget.work,
           'date_of_birth': widget.date_of_birth,
           'height': height,
@@ -93,6 +117,50 @@ class _HeightSelectionPageState extends State<HeightSelectionPage> {
       }
     } catch (error) {
       print('Error: $error');
+
+      // Save the height data to Hive for later sync
+      var box = Hive.box('userBox');
+      print(
+          'Saving height data to Hive: {name: ${widget.name}, email: ${widget.email}, gender: ${widget.gender}, work: ${widget.work}, date_of_birth: ${widget.date_of_birth}, height: $height}');
+      await box.put('heightData', {
+        'name': widget.name,
+        'email': widget.email,
+        'gender': widget.gender,
+        'work': widget.work,
+        'date_of_birth': widget.date_of_birth,
+        'height': height,
+      });
+    }
+  }
+
+  Future<void> syncData() async {
+    var box = Hive.box('userBox');
+    var heightData = box.get('heightData');
+
+    if (heightData != null) {
+      print('Attempting to sync height data: $heightData');
+      try {
+        final response = await http.put(
+          Uri.parse(
+              'http://localhost:8000/save-height/'), // Update URL as needed
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(heightData),
+        );
+
+        if (response.statusCode == 200) {
+          print('Height synced successfully: ${jsonDecode(response.body)}');
+          // Remove the data from Hive after successful sync
+          await box.delete('heightData');
+          print(
+              'Hive Data after deletion: ${box.get('heightData')}'); // Debugging statement to check if Hive is empty
+        } else {
+          print('Failed to sync height data: ${response.body}');
+        }
+      } catch (error) {
+        print('Error: $error');
+      }
     }
   }
 
@@ -127,6 +195,11 @@ class _HeightSelectionPageState extends State<HeightSelectionPage> {
     });
   }
 
+  void printHiveData() {
+    var box = Hive.box('userBox');
+    print('Hive Data: ${box.get('heightData')}');
+  }
+
   @override
   Widget build(BuildContext context) {
     // MediaQuery for responsive sizing
@@ -137,11 +210,15 @@ class _HeightSelectionPageState extends State<HeightSelectionPage> {
     final double pickerContainerWidth = deviceWidth * 0.25;
     final double paddingHorizontal = deviceWidth * 0.05;
 
+    // Sync any unsent data when this page is built
+    printHiveData();
+
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: const Color(0xFF20223F),
+          automaticallyImplyLeading: false,
         ),
         backgroundColor: const Color(0xFF20223F),
         body: Column(
@@ -172,8 +249,9 @@ class _HeightSelectionPageState extends State<HeightSelectionPage> {
                   ),
                   SizedBox(height: deviceWidth * 0.02),
                   NoteCard(
-                      text:
-                          'Lakukan Scrolling untuk menentukan Tinggi Badan kamu!')
+                    text:
+                        'Lakukan Scrolling untuk menentukan Tinggi Badan kamu!',
+                  ),
                 ],
               ),
             ),
@@ -238,6 +316,7 @@ class _HeightSelectionPageState extends State<HeightSelectionPage> {
                 ),
               ),
             ),
+            SizedBox(height: deviceWidth * 0.08),
           ],
         ),
       ),

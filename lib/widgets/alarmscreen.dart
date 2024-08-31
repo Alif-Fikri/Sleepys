@@ -1,15 +1,15 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:http/http.dart' as http;
 import 'package:sleepys/pages/home.dart';
 
 class AlarmScreen extends StatefulWidget {
   final String wakeUpTime;
-  final String userName;
   final String email;
 
-  AlarmScreen(
-      {required this.wakeUpTime, required this.userName, required this.email});
+  AlarmScreen({required this.wakeUpTime, required this.email});
 
   @override
   _AlarmScreenState createState() => _AlarmScreenState();
@@ -19,6 +19,7 @@ class _AlarmScreenState extends State<AlarmScreen>
     with SingleTickerProviderStateMixin {
   String _currentTime = '';
   bool _isWakeUpTime = false;
+  String _userName = '';
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
@@ -41,6 +42,7 @@ class _AlarmScreenState extends State<AlarmScreen>
 
     _initNotification();
     _updateTime();
+    _fetchUserName(); // Fetch the user's name
   }
 
   @override
@@ -69,7 +71,7 @@ class _AlarmScreenState extends State<AlarmScreen>
   void _checkWakeUpTime() {
     if (_currentTime == widget.wakeUpTime && !_isWakeUpTime) {
       _isWakeUpTime = true;
-      _showNotification();
+      _startRepeatingNotification();
     }
   }
 
@@ -82,7 +84,7 @@ class _AlarmScreenState extends State<AlarmScreen>
     print("Alarm stopped");
   }
 
-  Future<void> _showNotification() async {
+  void _startRepeatingNotification() async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails('alarm_channel', 'Alarm',
             channelDescription: 'Alarm Notification',
@@ -93,9 +95,26 @@ class _AlarmScreenState extends State<AlarmScreen>
     const NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
 
-    await flutterLocalNotificationsPlugin.show(0, 'Waktu Bangun',
-        'Ini saatnya untuk bangun!', platformChannelSpecifics,
-        payload: 'alarm_payload');
+    await flutterLocalNotificationsPlugin.periodicallyShow(
+      0,
+      'Waktu Bangun',
+      'Ini saatnya untuk bangun!',
+      RepeatInterval.everyMinute, // Repeat every 1 minute
+      platformChannelSpecifics,
+      androidAllowWhileIdle: true,
+    );
+
+    // Schedule a timer to stop the notification after 2 minutes and then restart it
+    Timer.periodic(Duration(minutes: 2), (timer) {
+      if (!_isWakeUpTime) {
+        timer.cancel(); // Stop the timer if the user has dismissed the alarm
+      } else {
+        flutterLocalNotificationsPlugin.cancel(0);
+        Future.delayed(Duration(minutes: 2), () {
+          _startRepeatingNotification(); // Restart the alarm
+        });
+      }
+    });
   }
 
   void _onSwipeUp() {
@@ -109,6 +128,24 @@ class _AlarmScreenState extends State<AlarmScreen>
     }
   }
 
+  Future<void> _fetchUserName() async {
+    try {
+      final response = await http
+          .get(Uri.parse('http://localhost:8000/user/${widget.email}'));
+
+      if (response.statusCode == 200) {
+        final user = json.decode(response.body);
+        setState(() {
+          _userName = user['name'];
+        });
+      } else {
+        throw Exception('Failed to load user data');
+      }
+    } catch (e) {
+      print("Error fetching user data: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
@@ -117,8 +154,7 @@ class _AlarmScreenState extends State<AlarmScreen>
       body: GestureDetector(
         onVerticalDragEnd: (details) {
           if (_isWakeUpTime && details.primaryVelocity! < -1000) {
-            // Cek kecepatan gesekan vertikal
-            _onSwipeUp(); // Panggil fungsi untuk menghentikan alarm dan mungkin bernavigasi ke layar lain
+            _onSwipeUp();
           }
         },
         child: Stack(
@@ -128,15 +164,16 @@ class _AlarmScreenState extends State<AlarmScreen>
               children: <Widget>[
                 Padding(
                   padding: EdgeInsets.only(
-                    top: screenSize.height * 0.030, // Responsive top padding
-                    bottom:
-                        screenSize.height * 0.20, // Responsive bottom padding
+                    top: screenSize.height * 0.030,
+                    bottom: screenSize.height * 0.20,
                   ),
                   child: Text(
-                    'Selamat tidur, ${widget.userName}', // Gunakan nama pengguna dari input
+                    _userName.isNotEmpty
+                        ? 'Selamat tidur, $_userName'
+                        : 'Selamat tidur',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: screenSize.width * 0.06, // Responsive font size
+                      fontSize: screenSize.width * 0.06,
                       fontWeight: FontWeight.bold,
                       fontFamily: 'Urbanist',
                     ),
@@ -148,7 +185,7 @@ class _AlarmScreenState extends State<AlarmScreen>
                     _currentTime,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: screenSize.width * 0.12, // Responsive font size
+                      fontSize: screenSize.width * 0.12,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -158,8 +195,7 @@ class _AlarmScreenState extends State<AlarmScreen>
                     'Waktu bangun: ${widget.wakeUpTime}',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize:
-                          screenSize.width * 0.045, // Responsive font size
+                      fontSize: screenSize.width * 0.045,
                       fontFamily: 'Urbanist',
                     ),
                   ),
@@ -168,7 +204,7 @@ class _AlarmScreenState extends State<AlarmScreen>
                   padding: EdgeInsets.only(top: screenSize.height * 0.10),
                   child: Image.asset('assets/images/line.png'),
                 ),
-                if (_isWakeUpTime) // Hanya tampilkan bagian ini jika sudah waktu bangun
+                if (_isWakeUpTime)
                   Padding(
                     padding: EdgeInsets.only(top: screenSize.height * 0.20),
                     child: Center(
@@ -176,27 +212,24 @@ class _AlarmScreenState extends State<AlarmScreen>
                         animation: _controller,
                         builder: (context, child) {
                           return Transform.translate(
-                            offset: Offset(
-                                0, _animation.value), // Pindah secara vertikal
+                            offset: Offset(0, _animation.value),
                             child: Icon(
                               Icons.keyboard_arrow_up,
                               color: _colorAnimation.value,
-                              size: screenSize.width *
-                                  0.08, // Ukuran ikon responsif
+                              size: screenSize.width * 0.08,
                             ),
                           );
                         },
                       ),
                     ),
                   ),
-                if (_isWakeUpTime) // Hanya tampilkan bagian ini jika sudah waktu bangun
+                if (_isWakeUpTime)
                   Center(
                     child: Text(
                       'Geser ke atas untuk bangun',
                       style: TextStyle(
                         color: Colors.grey,
-                        fontSize:
-                            screenSize.width * 0.035, // Responsive font size
+                        fontSize: screenSize.width * 0.035,
                         fontFamily: 'Urbanist',
                       ),
                     ),

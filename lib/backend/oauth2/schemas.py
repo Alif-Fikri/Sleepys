@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from datetime import date, datetime, time
 
 class UserCreate(BaseModel):
@@ -16,13 +16,14 @@ class NameRequest(BaseModel):
 class UserUpdate(BaseModel):
     name: str = None
     email: str = None
-    gender: str = None
+    gender: int = None
     work: str = None
     date_of_birth: str = None
     weight: int = None
     height: int = None
     upper_pressure: int = None
     lower_pressure: int = None
+    heart_rate: int = None
     daily_steps: int = None
     sleep_time: int = None
     wake_time: int = None
@@ -31,6 +32,25 @@ class SleepData(BaseModel):
     email: str
     sleep_time: datetime
     wake_time: datetime
+    
+class PredictionInput(BaseModel):
+    age: int
+    work_id: int
+    gender: int  # 0 for male, 1 for female
+    height: float
+    weight: float
+    upper_pressure: float
+    lower_pressure: float
+    heart_rate: float
+    physical_activity_level: float
+    quality_of_sleep: float
+    stress_level: float
+    
+class PredictRequest(BaseModel):
+    email: EmailStr
+
+class OtpRequest(BaseModel):
+    email: EmailStr
     
 class SleepDataResponse(BaseModel):
     sleep_time: str

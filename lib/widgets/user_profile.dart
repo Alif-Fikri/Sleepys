@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:intl/intl.dart';
 import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:flutter_holo_date_picker/flutter_holo_date_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Userprofile extends StatefulWidget {
   final String email;
@@ -29,20 +30,40 @@ class _UserprofileState extends State<Userprofile> {
   }
 
   Future<void> getUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      print('No token found');
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
     try {
       final response = await http.get(
         Uri.parse('http://localhost:8000/user-profile?email=${widget.email}'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
         },
       );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
+        print('Response Data: $data'); // Tambahkan ini untuk debug
+
         setState(() {
           nameController.text = data['name'] ?? 'N/A';
-          emailController.text = data['email'] ?? 'N/A';
-          selectedGender = data['gender'];
+          emailController.text = widget.email;
+
+          // Convert gender to a string
+          if (data['gender'] != null) {
+            selectedGender = data['gender'] == 1 ? 'male' : 'female';
+          } else {
+            selectedGender = null;
+          }
 
           if (data['date_of_birth'] != null) {
             DateTime dob = DateTime.parse(data['date_of_birth']);
@@ -73,15 +94,29 @@ class _UserprofileState extends State<Userprofile> {
     });
 
     try {
+      // Get token from SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null) {
+        print('No token found');
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
+
       final response = await http.put(
         Uri.parse('http://localhost:8000/user-profile/update'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(<String, String>{
+        body: jsonEncode(<String, dynamic>{
+          // Use dynamic to handle int values
           'email': widget.email,
           'name': nameController.text,
-          'gender': selectedGender ?? '',
+          'gender': selectedGender == 'male' ? 1 : 0, // Convert back to int
           'date_of_birth': DateFormat('yyyy-MM-dd')
               .format(DateFormat('dd/MM/yyyy').parse(dobController.text)),
         }),
@@ -216,7 +251,7 @@ class _UserprofileState extends State<Userprofile> {
                 controller: controller,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (value) {},
-                readOnly: label == 'Email', // Membuat email tidak bisa diedit
+                readOnly: label == 'Email', // Make email non-editable
                 decoration: InputDecoration(
                   filled: true,
                   fillColor: Color(0xFF272E49),
@@ -283,7 +318,7 @@ class _UserprofileState extends State<Userprofile> {
               width: screenSize.width * 0.875,
               height: screenSize.height * 0.06875,
               child: DropdownButtonFormField<String>(
-                value: selectedGender,
+                value: selectedGender, // Ensure this is correctly set
                 hint: Text(
                   'Pilih Gender',
                   style: TextStyle(color: Colors.white),
@@ -292,7 +327,9 @@ class _UserprofileState extends State<Userprofile> {
                 items: ['male', 'female'].map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
-                    child: Text(value, style: TextStyle(color: Colors.white)),
+                    child: Text(value,
+                        style: TextStyle(
+                            color: Colors.white, fontFamily: 'Urbanist')),
                   );
                 }).toList(),
                 onChanged: (value) {
