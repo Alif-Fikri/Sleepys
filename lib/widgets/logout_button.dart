@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:art_sweetalert/art_sweetalert.dart';
-import 'package:sleepys/pages/loginpage.dart';
+import 'package:sleepys/authentication/loginpage.dart';
 
 class LogoutButton extends StatelessWidget {
   final Size screenSize;
@@ -18,7 +18,7 @@ class LogoutButton extends StatelessWidget {
 
     // Panggil endpoint logout di server
     final url = Uri.parse(
-        'http://localhost:8000/logout/'); // Ganti dengan URL yang sesuai
+        'http://192.168.0.126:8000/logout/'); // Ganti dengan URL yang sesuai
     final response = await http.post(
       url,
       headers: {

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../pages/home.dart';
-import 'alarmscreen.dart';
+import '../home.dart';
+import '../../widgets/alarmscreen.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:permission_handler/permission_handler.dart';
 
 class SleepPage extends StatefulWidget {
   final String email;
@@ -20,6 +21,51 @@ class _SleepPageState extends State<SleepPage> {
   bool isHourSelected = false;
   bool isMinuteSelected = false;
 
+  Future<void> requestNotificationPermission() async {
+    var status = await Permission.notification.status;
+    if (status.isDenied || status.isRestricted) {
+      // Jika izin ditolak, minta izin
+      await Permission.notification.request();
+    }
+  }
+
+  Future<void> showPermissionAlert() async {
+    var status = await Permission.notification.status;
+    if (!status.isGranted) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Izin Notifikasi Diperlukan'),
+            content: Text('Aplikasi ini membutuhkan izin notifikasi.'),
+            actions: [
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  await requestNotificationPermission(); // Minta izin saat pengguna memilih "Izinkan"
+                },
+                child: Text('Izinkan'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('Tutup'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Memeriksa izin saat halaman dibuka
+    showPermissionAlert();
+  }
+
   Future<void> saveSleepData() async {
     final sleepTime = DateTime.now();
     final wakeTime = DateTime(
@@ -30,7 +76,7 @@ class _SleepPageState extends State<SleepPage> {
       selectedSleepMinute ?? 0,
     );
 
-    final url = Uri.parse('http://localhost:8000/save-sleep-record/');
+    final url = Uri.parse('http://192.168.0.126:8000/save-sleep-record/');
     final response = await http.post(
       url,
       headers: {

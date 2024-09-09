@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Time, DateTime, ForeignKey, Float, Date, Enum
+from sqlalchemy import Column, Integer, String, Time, DateTime, ForeignKey, Float, Date, Enum, TIMESTAMP
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from .database import Base
 from datetime import datetime
 
@@ -24,6 +25,7 @@ class User(Base):
     reset_token = Column(String, nullable=True)
 
     sleep_records = relationship("SleepRecord", back_populates="user", cascade="all, delete-orphan")
+    weekly_records = relationship("WeeklyPrediction", back_populates="user", cascade="all, delete-orphan")
     
 class SleepRecord(Base):
     __tablename__ = "sleep_records"
@@ -56,5 +58,31 @@ class Daily(Base):
     lower_pressure = Column(Integer, nullable=True)
     daily_steps = Column(Integer, nullable=True)
     heart_rate = Column(Integer, nullable=True)
-    sleep_duration = Column(Float, nullable=False)
+    duration = Column(Float, nullable=False)
+    prediction_result= Column(Integer, nullable=True)
     
+class WeeklyPrediction(Base):
+    __tablename__ = "weekly_predictions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), ForeignKey("users.email", ondelete="CASCADE"), nullable=False)
+    prediction_result = Column(Enum('Insomnia', 'Normal', 'Sleep Apnea', name="prediction_enum"), nullable=False)
+    prediction_date = Column(TIMESTAMP, server_default=func.now())
+
+    user = relationship("User", back_populates="weekly_records")
+
+class Feedback(Base):
+    __tablename__ = "feedback"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, index=True, nullable=False)
+    feedback = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+class MonthlyPrediction(Base):
+    __tablename__ = "monthly_predictions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, nullable=False)  # Pastikan tipe data sesuai
+    prediction_result = Column(String, nullable=False)  # Pastikan tipe data sesuai
+    # Tambahkan kolom lain jika diperlukan

@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
-import 'package:hive/hive.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import '../pages/datepicker.dart';
-import '../widgets/note_card.dart';
+import 'datepicker.dart';
+import '../../helper/note_card.dart';
 
 class Workpage extends StatelessWidget {
   final String email;
@@ -43,9 +41,6 @@ class Workpages extends StatefulWidget {
 
 class _WorkpagesState extends State<Workpages> {
   String? selectedWork;
-  late final Connectivity _connectivity;
-  late final Stream<ConnectivityResult> _connectivityStream;
-
   final List<String> occupations = [
     'Accountant',
     'Doctor',
@@ -60,42 +55,17 @@ class _WorkpagesState extends State<Workpages> {
     'Teacher'
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _connectivity = Connectivity();
-    _connectivityStream = _connectivity.onConnectivityChanged.map(
-        (List<ConnectivityResult> results) => results.firstWhere(
-            (result) => result != ConnectivityResult.none,
-            orElse: () => ConnectivityResult.none));
-
-    // Listen for changes in connectivity
-    _connectivityStream.listen((ConnectivityResult result) {
-      if (result != ConnectivityResult.none) {
-        // If connectivity is restored, sync data
-        syncData();
-      }
-    });
-
-    // Sync any unsent data at the start
-    syncData();
-  }
-
   Future<void> saveWork(String work) async {
-    int genderInt = widget.gender == "female"
-        ? 0
-        : 1; // Declare genderInt outside the try block
-
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:8000/save-work/'),
+        Uri.parse('http://192.168.0.126:8000/save-work/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body: jsonEncode(<String, dynamic>{
+        body: jsonEncode(<String, String>{
           'name': widget.name,
           'email': widget.email,
-          'gender': genderInt, // Use genderInt here
+          'gender': widget.gender, // Send gender as string
           'work': work,
         }),
       );
@@ -108,47 +78,6 @@ class _WorkpagesState extends State<Workpages> {
       }
     } catch (error) {
       print('Error: $error');
-
-      // Save the work data to Hive for later sync
-      var box = Hive.box('userBox');
-      print(
-          'Saving work data to Hive: {name: ${widget.name}, email: ${widget.email}, gender: $genderInt, work: $work}');
-      await box.put('workData', {
-        'name': widget.name,
-        'email': widget.email,
-        'gender': genderInt, // Store the integer value in Hive as well
-        'work': work
-      });
-    }
-  }
-
-  Future<void> syncData() async {
-    var box = Hive.box('userBox');
-    var workData = box.get('workData');
-
-    if (workData != null) {
-      print('Attempting to sync work data: $workData');
-      try {
-        final response = await http.put(
-          Uri.parse('http://localhost:8000/save-work/'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(workData),
-        );
-
-        if (response.statusCode == 200) {
-          print('Work synced successfully: ${jsonDecode(response.body)}');
-          // Remove the data from Hive after successful sync
-          await box.delete('workData');
-          print(
-              'Hive Data after deletion: ${box.get('workData')}'); // Debugging statement to check if Hive is empty
-        } else {
-          print('Failed to sync work data: ${response.body}');
-        }
-      } catch (error) {
-        print('Error: $error');
-      }
     }
   }
 
@@ -171,20 +100,12 @@ class _WorkpagesState extends State<Workpages> {
     });
   }
 
-  void printHiveData() {
-    var box = Hive.box('userBox');
-    print('Hive Data: ${box.get('workData')}');
-  }
-
   @override
   Widget build(BuildContext context) {
     // MediaQuery for responsive sizing
     final double deviceWidth = MediaQuery.of(context).size.width;
     final double titleFontSize = deviceWidth * 0.06;
     final double subtitleFontSize = deviceWidth * 0.04;
-
-    // Sync any unsent data when this page is built
-    printHiveData();
 
     return WillPopScope(
       onWillPop: () async => false,

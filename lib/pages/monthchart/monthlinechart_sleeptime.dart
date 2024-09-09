@@ -196,31 +196,29 @@ class _MonthLineChartState extends State<MonthLineChart> {
     double maxY = 30.0;
 
     List<FlSpot> spots = [];
-    originalYValues.clear(); // Ensure the list is cleared before filling
+    originalYValues.clear(); // Clear the list before filling
 
     for (int i = 0; i < widget.data.length; i++) {
       if (widget.data[i] != null) {
         double yValue = widget.data[i]!;
+        originalYValues.add(yValue); // Store original Y value
 
-        // Store the original Y value before any adjustment
-        originalYValues.add(yValue);
-
-        // Adjust the Y value for display if it falls outside the visualization range
-        if (yValue < 20) {
-          yValue = minY;
-        } else if (yValue > 25) {
-          yValue = maxY;
-        } else if (yValue < 6) {
+        // Correct the Y value for display
+        if (yValue < 6) {
+          // Time between 00:00 - 05:59 should be treated as post-midnight (after 24:00)
           yValue += 24;
         }
 
+        // Ensure Y values are within displayable range
+        yValue = yValue.clamp(minY, maxY);
+
         spots.add(FlSpot(i.toDouble(), yValue));
       } else {
-        // If data is null, ensure to maintain list consistency
-        originalYValues.add(0); // Placeholder value; can be adjusted as needed
+        originalYValues.add(0); // Placeholder value for nulls
       }
     }
 
+    // Add a tiny offset to avoid a single data point issue
     if (spots.length == 1) {
       spots.add(FlSpot(spots[0].x + 0.1, spots[0].y));
     }

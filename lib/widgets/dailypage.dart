@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart'; // Import the intl package
-import 'package:sleepys/widgets/card_sleepprofile.dart';
+import 'package:sleepys/helper/card_sleepprofile.dart';
 
 class DailyPage extends StatefulWidget {
   final String email;
@@ -23,7 +23,7 @@ class _DailyPageState extends State<DailyPage> {
   }
 
   Future<List<Map<String, dynamic>>> getSleepData(String email) async {
-    final url = Uri.parse('http://localhost:8000/get-sleep-records/$email');
+    final url = Uri.parse('http://192.168.0.126:8000/get-sleep-records/$email');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {
@@ -38,27 +38,21 @@ class _DailyPageState extends State<DailyPage> {
       final sleepData = await getSleepData(widget.email);
       print('Data received from API: $sleepData');
 
-      // Ensure there is only one sleep record per day by using a map
-      final Map<String, Map<String, dynamic>> uniqueData = {};
+      final List<Map<String, dynamic>> filteredData = [];
 
       for (var record in sleepData) {
-        String date = record['date'];
+        String timeRange = record['time'];
+        DateTime wakeUpDateTime =
+            calculateWakeUpDateTime(record['date'], timeRange);
 
-        // If the date already exists, compare the time and keep the latest
-        if (uniqueData.containsKey(date)) {
-          DateTime existingTime = parseTime(uniqueData[date]!['time']);
-          DateTime newTime = parseTime(record['time']);
-
-          if (newTime.isAfter(existingTime)) {
-            uniqueData[date] = record; // Replace with the newer record
-          }
-        } else {
-          uniqueData[date] = record; // Add new date entry
+        // Check if the current time has reached or passed the wake-up time
+        if (DateTime.now().isAfter(wakeUpDateTime)) {
+          filteredData.add(
+              record); // Only add records if the current time has reached the wake-up time
         }
       }
 
-      return uniqueData.values
-          .toList(); // Convert the map values back to a list
+      return filteredData;
     } catch (e) {
       print('Error fetching sleep data: $e');
       rethrow;
@@ -67,12 +61,32 @@ class _DailyPageState extends State<DailyPage> {
 
   DateTime parseTime(String timeString) {
     try {
-      // Assuming timeString format is '02:17 - 07:00'
-      final startTimeString = timeString.split(' - ')[0]; // Get the start time
-      return DateFormat('HH:mm').parse(startTimeString); // Parse to DateTime
+      final startTimeString = timeString.split(' - ')[0];
+      return DateFormat('HH:mm').parse(startTimeString);
     } catch (e) {
       print('Error parsing time: $e');
-      return DateTime.now(); // Fallback in case of an error
+      return DateTime.now();
+    }
+  }
+
+  DateTime calculateWakeUpDateTime(String date, String timeRange) {
+    try {
+      final wakeUpTimeString =
+          timeRange.split(' - ')[1]; // Get the wake-up time
+      DateTime wakeUpTime = DateFormat('HH:mm').parse(wakeUpTimeString);
+
+      DateTime sleepDate = DateFormat('d MMMM yyyy').parse(date);
+
+      // Adjust the date if the wake-up time is earlier than the sleep time
+      if (wakeUpTime.isBefore(parseTime(timeRange))) {
+        sleepDate = sleepDate.add(Duration(days: 1));
+      }
+
+      return DateTime(sleepDate.year, sleepDate.month, sleepDate.day,
+          wakeUpTime.hour, wakeUpTime.minute);
+    } catch (e) {
+      print('Error calculating wake-up time: $e');
+      return DateTime.now();
     }
   }
 
@@ -109,14 +123,6 @@ class _DailyPageState extends State<DailyPage> {
             );
           } else if (snapshot.hasData) {
             final data = snapshot.data!;
-
-            // Parse and sort data to display the most recent first
-            data.sort((a, b) {
-              DateTime dateA = parseDate(a['date']);
-              DateTime dateB = parseDate(b['date']);
-              return dateB.compareTo(dateA);
-            });
-
             bool hasSleepData = data.isNotEmpty;
 
             return ListView(
@@ -162,13 +168,12 @@ class _DailyPageState extends State<DailyPage> {
   }
 
   DateTime parseDate(String dateString) {
-    // Parse the date using the intl package
     try {
-      final DateFormat dateFormat = DateFormat('d MMMM yyyy'); // '26 July 2024'
+      final DateFormat dateFormat = DateFormat('d MMMM yyyy');
       return dateFormat.parse(dateString);
     } catch (e) {
       print('Error parsing date: $e');
-      return DateTime.now(); // Fallback in case of an error
+      return DateTime.now();
     }
   }
 }

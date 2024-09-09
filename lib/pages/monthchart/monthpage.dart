@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sleepys/widgets/card_sleepprofile.dart';
+import 'package:sleepys/helper/card_sleepprofile.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:sleepys/pages/monthchart/monthbarchart.dart';
@@ -20,7 +20,7 @@ Future<Map<String, dynamic>> fetchMonthlyData(
     String email, String month, String year) async {
   // Constructing the URL with the required month and year parameters
   final url = Uri.parse(
-      'http://localhost:8000/get-monthly-sleep-data/$email?month=$month&year=$year');
+      'http://192.168.0.126:8000/get-monthly-sleep-data/$email?month=$month&year=$year');
 
   final response = await http.get(url);
 
@@ -63,9 +63,25 @@ class _MonthPageState extends State<MonthPage> {
 
       Map<String, dynamic> data =
           await fetchMonthlyData(widget.email, month, year);
+
+      // Tambahkan log untuk mengecek isi data
+      print("Fetched Data: $data");
+
       setState(() {
         monthlyData = data;
       });
+
+      // Tambahkan log untuk mengecek hasil evaluasi kondisi
+      if (monthlyData.containsKey('daily_sleep_durations')) {
+        print(
+            "daily_sleep_durations found: ${monthlyData['daily_sleep_durations']}");
+        print(
+            "Length of daily_sleep_durations: ${(monthlyData['daily_sleep_durations'] as List).length}");
+        print(
+            "All durations valid: ${(monthlyData['daily_sleep_durations'] as List).every((duration) => duration != null && duration > 0)}");
+      } else {
+        print("Key 'daily_sleep_durations' not found in monthlyData");
+      }
     } catch (e) {
       print("Error fetching data: $e");
     } finally {
@@ -75,24 +91,23 @@ class _MonthPageState extends State<MonthPage> {
     }
   }
 
-void _previousMonth() {
-  setState(() {
-    isLoading = true; // Set loading status to true
-    monthlyData = {}; // Clear old data
-    startDate = DateTime(startDate.year, startDate.month - 1, 1);
-    _fetchData();
-  });
-}
+  void _previousMonth() {
+    setState(() {
+      isLoading = true; // Set loading status to true
+      monthlyData = {}; // Clear old data
+      startDate = DateTime(startDate.year, startDate.month - 1, 1);
+      _fetchData();
+    });
+  }
 
-void _nextMonth() {
-  setState(() {
-    isLoading = true; // Set loading status to true
-    monthlyData = {}; // Clear old data
-    startDate = DateTime(startDate.year, startDate.month + 1, 1);
-    _fetchData();
-  });
-}
-
+  void _nextMonth() {
+    setState(() {
+      isLoading = true; // Set loading status to true
+      monthlyData = {}; // Clear old data
+      startDate = DateTime(startDate.year, startDate.month + 1, 1);
+      _fetchData();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,6 +166,13 @@ void _nextMonth() {
         body: Center(child: CircularProgressIndicator()),
       );
     }
+
+    bool hasFullMonthData = monthlyData.containsKey('daily_sleep_durations') &&
+        monthlyData['daily_sleep_durations'] is List &&
+        (monthlyData['daily_sleep_durations'] as List).length == 30 &&
+        (monthlyData['daily_sleep_durations'] as List).every(
+            (duration) => duration != null); // Menghapus pemeriksaan durasi > 0
+
     return Scaffold(
       backgroundColor: Color(0xFF20223F),
       body: SingleChildScrollView(
@@ -161,8 +183,7 @@ void _nextMonth() {
             children: [
               MonthlySleepProfile(
                 email: widget.email,
-                hasSleepData: monthlyData
-                    .isNotEmpty, // Determine if the user has sleep data
+                hasSleepData: hasFullMonthData, // Only show if full month data
               ),
               SizedBox(height: 10),
               Text(

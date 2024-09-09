@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_holo_date_picker/flutter_holo_date_picker.dart';
-import '../pages/heightselection.dart';
+import 'heightselection.dart';
 
 class Datepicker extends StatelessWidget {
   final String name;
@@ -55,7 +55,7 @@ class _DatepickersState extends State<Datepickers> {
   Future<void> saveDateOfBirth(String dateofbirth) async {
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:8000/save-dob/'),
+        Uri.parse('http://192.168.0.126:8000/save-dob/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -63,8 +63,7 @@ class _DatepickersState extends State<Datepickers> {
           // Ubah di sini menjadi dynamic agar gender bisa integer
           'name': widget.name,
           'email': widget.email,
-          'gender':
-              int.parse(widget.gender), // Ubah string gender menjadi integer
+          'gender': widget.gender, // Ubah string gender menjadi integer
           'work': widget.work,
           'date_of_birth': dateofbirth,
         }),

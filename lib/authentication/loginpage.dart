@@ -2,14 +2,14 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:provider/provider.dart';
-import 'package:sleepys/pages/namepage.dart';
-import 'package:sleepys/pages/genderpage.dart';
-import 'package:sleepys/pages/workpage.dart';
-import 'package:sleepys/pages/datepicker.dart';
-import 'package:sleepys/pages/weightpage.dart';
-import 'package:sleepys/pages/heightselection.dart';
+import 'package:sleepys/pages/data_user/namepage.dart';
+import 'package:sleepys/pages/data_user/genderpage.dart';
+import 'package:sleepys/pages/data_user/workpage.dart';
+import 'package:sleepys/pages/data_user/datepicker.dart';
+import 'package:sleepys/pages/data_user/weightpage.dart';
+import 'package:sleepys/pages/data_user/heightselection.dart';
 import 'package:sleepys/pages/home.dart';
-import 'package:sleepys/pages/singup.dart';
+import 'package:sleepys/authentication/singup.dart';
 import 'package:http/http.dart' as http;
 import '../widgets/signupprovider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -84,7 +84,7 @@ class LoginPages extends StatelessWidget {
       return;
     }
 
-    final loginUrl = Uri.parse('http://localhost:8000/login/');
+    final loginUrl = Uri.parse('http://192.168.0.126:8000/login/');
     final response = await http.post(
       loginUrl,
       headers: {
@@ -119,140 +119,139 @@ class LoginPages extends StatelessWidget {
   }
 
   Future<void> _getUserProfile(BuildContext context, String token) async {
-  final url = Uri.parse('http://localhost:8000/user-profile/');
-  final response = await http.get(
-    url,
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token', // Sertakan token di header
-    },
-  );
+    final url = Uri.parse('http://192.168.0.126:8000/user-profile/');
+    final response = await http.get(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token', // Sertakan token di header
+      },
+    );
 
-  print('Response status: ${response.statusCode}');
-  print('Response body: ${response.body}');
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
 
-  if (response.statusCode == 200) {
-    final responseData = json.decode(response.body);
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
 
-    final name = responseData['name'];
-    final gender = responseData['gender']?.toString();
-    final work = responseData['work'];
-    final dateOfBirth = responseData['date_of_birth'];
-    final height = (responseData['height'] as num).toDouble(); 
-    final weight = (responseData['weight'] as num).toDouble();
+      final name = responseData['name'];
+      final gender = responseData['gender']?.toString();
+      final work = responseData['work'];
+      final dateOfBirth = responseData['date_of_birth'];
+      final height = (responseData['height'] as num).toDouble();
+      final weight = (responseData['weight'] as num).toDouble();
 
-    // Simpan data profil ke SharedPreferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('name', name ?? '');
-    
-    // Correctly interpret gender and store it
-    if (gender != null) {
-      await prefs.setString('gender', gender == '0' ? 'female' : 'male');
+      // Simpan data profil ke SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('name', name ?? '');
+
+      // Correctly interpret gender and store it
+      if (gender != null) {
+        await prefs.setString('gender', gender == '0' ? 'female' : 'male');
+      } else {
+        await prefs.setString('gender', '');
+      }
+
+      await prefs.setString('work', work ?? '');
+      await prefs.setString('date_of_birth', dateOfBirth ?? '');
+      await prefs.setDouble('height', height);
+      await prefs.setDouble('weight', weight);
+
+      showCustomSnackBar(context, "Login berhasil");
+
+      // Cek status profil yang sudah disimpan
+      checkProfileCompletion(context, prefs.getString('email') ?? '');
     } else {
-      await prefs.setString('gender', '');
+      final errorResponse = json.decode(response.body);
+      final errorMessage = errorResponse['detail'];
+
+      showCustomSnackBar(context, errorMessage);
     }
-    
-    await prefs.setString('work', work ?? '');
-    await prefs.setString('date_of_birth', dateOfBirth ?? '');
-    await prefs.setDouble('height', height);
-    await prefs.setDouble('weight', weight);
-
-    showCustomSnackBar(context, "Login berhasil");
-
-    // Cek status profil yang sudah disimpan
-    checkProfileCompletion(context, prefs.getString('email') ?? '');
-  } else {
-    final errorResponse = json.decode(response.body);
-    final errorMessage = errorResponse['detail'];
-
-    showCustomSnackBar(context, errorMessage);
   }
-}
 
-Future<void> checkProfileCompletion(
-    BuildContext context, String email) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  Future<void> checkProfileCompletion(
+      BuildContext context, String email) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  final name = prefs.getString('name') ?? '';
-  final gender = prefs.getString('gender'); // Check gender as stored above
-  final work = prefs.getString('work') ?? '';
-  final dateOfBirth = prefs.getString('date_of_birth') ?? '';
-  final height = prefs.getDouble('height') ?? 0;
-  final weight = prefs.getDouble('weight') ?? 0;
+    final name = prefs.getString('name') ?? '';
+    final gender = prefs.getString('gender'); // Check gender as stored above
+    final work = prefs.getString('work') ?? '';
+    final dateOfBirth = prefs.getString('date_of_birth') ?? '';
+    final height = prefs.getDouble('height') ?? 0;
+    final weight = prefs.getDouble('weight') ?? 0;
 
-  // Debugging untuk memastikan urutan pengecekan
-  print('Name: $name');
-  print('Gender: $gender');
-  print('Work: $work');
-  print('Date of Birth: $dateOfBirth');
-  print('Height: $height');
-  print('Weight: $weight');
+    // Debugging untuk memastikan urutan pengecekan
+    print('Name: $name');
+    print('Gender: $gender');
+    print('Work: $work');
+    print('Date of Birth: $dateOfBirth');
+    print('Height: $height');
+    print('Weight: $weight');
 
-  if (name.isEmpty) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => Namepage(email: email)),
-    );
-  } else if (gender == null || gender.isEmpty) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Genderpage(name: name, email: email),
-      ),
-    );
-  } else if (work.isEmpty) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            Workpage(name: name, email: email, gender: gender),
-      ),
-    );
-  } else if (dateOfBirth.isEmpty) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            Datepicker(name: name, email: email, gender: gender, work: work),
-      ),
-    );
-  } else if (weight == 0) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Weightpage(
-          name: name,
-          email: email,
-          gender: gender,
-          work: work,
-          date_of_birth: dateOfBirth,
-          height: height.toInt(),
-          userEmail: email,
+    if (name.isEmpty) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => Namepage(email: email)),
+      );
+    } else if (gender == null || gender.isEmpty) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Genderpage(name: name, email: email),
         ),
-      ),
-    );
-  } else if (height == 0) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HeightSelection(
-          name: name,
-          email: email,
-          gender: gender,
-          work: work,
-          date_of_birth: dateOfBirth,
+      );
+    } else if (work.isEmpty) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              Workpage(name: name, email: email, gender: gender),
         ),
-      ),
-    );
-  } else {
-    // Semua data sudah lengkap
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => HomePage(userEmail: email)),
-    );
+      );
+    } else if (dateOfBirth.isEmpty) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              Datepicker(name: name, email: email, gender: gender, work: work),
+        ),
+      );
+    } else if (weight == 0) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Weightpage(
+            name: name,
+            email: email,
+            gender: gender,
+            work: work,
+            date_of_birth: dateOfBirth,
+            height: height.toInt(),
+            userEmail: email,
+          ),
+        ),
+      );
+    } else if (height == 0) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HeightSelection(
+            name: name,
+            email: email,
+            gender: gender,
+            work: work,
+            date_of_birth: dateOfBirth,
+          ),
+        ),
+      );
+    } else {
+      // Semua data sudah lengkap
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage(userEmail: email)),
+      );
+    }
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -498,7 +497,7 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
 
     final email = emailController.text;
     final response = await http.post(
-      Uri.parse('http://localhost:8000/request-otp/?email=$email'),
+      Uri.parse('http://192.168.0.126:8000/request-otp/?email=$email'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -530,7 +529,7 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
       return;
     }
 
-    final url = Uri.parse('http://localhost:8000/verify-otp/')
+    final url = Uri.parse('http://192.168.0.126:8000/verify-otp/')
         .replace(queryParameters: {
       'email': email!,
       'otp': otpController.text,
@@ -557,7 +556,7 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
   }
 
   Future<void> resetPassword() async {
-    final url = Uri.parse('http://localhost:8000/reset-password/')
+    final url = Uri.parse('http://192.168.0.126:8000/reset-password/')
         .replace(queryParameters: {
       'email': email!,
       'new_password': passwordController.text,

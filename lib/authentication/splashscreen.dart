@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sleepys/pages/loginpage.dart';
+import 'package:sleepys/authentication/loginpage.dart';
 import 'dart:async';
-import 'package:sleepys/pages/singup.dart';
+import 'package:sleepys/authentication/singup.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});

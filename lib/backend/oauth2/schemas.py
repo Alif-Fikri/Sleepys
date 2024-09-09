@@ -16,7 +16,7 @@ class NameRequest(BaseModel):
 class UserUpdate(BaseModel):
     name: str = None
     email: str = None
-    gender: int = None
+    gender: str = None
     work: str = None
     date_of_birth: str = None
     weight: int = None
@@ -27,6 +27,12 @@ class UserUpdate(BaseModel):
     daily_steps: int = None
     sleep_time: int = None
     wake_time: int = None
+    
+class UserProfile(BaseModel):
+    name: str = None
+    email: str = None
+    gender: int = None
+    date_of_birth: str = None
     
 class SleepData(BaseModel):
     email: str
@@ -51,6 +57,15 @@ class PredictRequest(BaseModel):
 
 class OtpRequest(BaseModel):
     email: EmailStr
+    
+class UserData(BaseModel):
+    email: str
+    name: str
+    gender: int
+    work: str
+    date_of_birth: date
+    height: float
+    weight: float 
     
 class SleepDataResponse(BaseModel):
     sleep_time: str

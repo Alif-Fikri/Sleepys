@@ -1,36 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:sleepys/helper/note_card.dart';
 import 'dart:convert';
-import 'package:sleepys/widgets/heartrate.dart';
+import 'package:sleepys/pages/data_user/sleeppage.dart';
 
-class Dailystep extends StatefulWidget {
+class HeartRatePage extends StatefulWidget {
   final String email;
-  Dailystep({required this.email, Key? key}) : super(key: key);
+  HeartRatePage({required this.email, Key? key}) : super(key: key);
 
   @override
-  _DailystepState createState() => _DailystepState();
+  _HeartRatePageState createState() => _HeartRatePageState();
 }
 
-class _DailystepState extends State<Dailystep> {
-  TextEditingController _stepsController = TextEditingController();
+class _HeartRatePageState extends State<HeartRatePage> {
+  TextEditingController _heartRateController = TextEditingController();
   bool _isButtonEnabled = false;
 
   @override
   void initState() {
     super.initState();
-    _stepsController.addListener(_updateButtonState);
+    _heartRateController.addListener(_updateButtonState);
   }
 
   @override
   void dispose() {
-    _stepsController.removeListener(_updateButtonState);
-    _stepsController.dispose();
+    _heartRateController.removeListener(_updateButtonState);
+    _heartRateController.dispose();
     super.dispose();
   }
 
   void _updateButtonState() {
     setState(() {
-      _isButtonEnabled = _stepsController.text.isNotEmpty;
+      _isButtonEnabled = _heartRateController.text.isNotEmpty;
     });
   }
 
@@ -54,31 +55,31 @@ class _DailystepState extends State<Dailystep> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => HeartRatePage(email: widget.email),
+        builder: (context) => SleepPage(email: widget.email),
       ),
     );
   }
 
-  Future<void> _saveDailySteps() async {
-    int dailySteps = int.tryParse(_stepsController.text) ?? 0;
+  Future<void> _saveHeartRate() async {
+    int heartRate = int.tryParse(_heartRateController.text) ?? 0;
 
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:8000/save-daily-steps/'),
+        Uri.parse('http://192.168.0.126:8000/save-heart-rate/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
           'email': widget.email,
-          'dailySteps': dailySteps,
+          'heartRate': heartRate,
         }),
       );
 
       if (response.statusCode == 200) {
-        print('Daily steps saved successfully: ${jsonDecode(response.body)}');
+        print('Heart rate saved successfully: ${jsonDecode(response.body)}');
       } else {
-        print('Failed to save daily steps: ${response.body}');
-        throw Exception('Failed to save daily steps');
+        print('Failed to save heart rate: ${response.body}');
+        throw Exception('Failed to save heart rate');
       }
     } catch (error) {
       print('Error: $error');
@@ -86,7 +87,7 @@ class _DailystepState extends State<Dailystep> {
   }
 
   void _saveAndNavigate() {
-    _saveDailySteps().then((_) {
+    _saveHeartRate().then((_) {
       _navigateToSleepPage();
     }).catchError((error) {
       print('Error: $error');
@@ -95,16 +96,13 @@ class _DailystepState extends State<Dailystep> {
 
   @override
   Widget build(BuildContext context) {
-    // Get the width and height of the screen
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
-    // Define adaptive font sizes based on screen width
     double fontSizeTitle = screenWidth * 0.06;
     double fontSizeSubtitle = screenWidth * 0.045;
     double fontSizeButton = screenWidth * 0.04;
 
-    // Define adaptive padding and spacing
     double verticalPadding = screenHeight * 0.02;
     double horizontalPadding = screenWidth * 0.05;
 
@@ -120,38 +118,41 @@ class _DailystepState extends State<Dailystep> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: verticalPadding), // Adjusted spacing
+            SizedBox(height: verticalPadding),
             Text(
               'Saya ingin tau tentang kamu,',
               style: TextStyle(
                 fontFamily: 'Urbanist',
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
-                fontSize: fontSizeTitle, // Adjusted font size
+                fontSize: fontSizeTitle,
               ),
             ),
-            SizedBox(height: verticalPadding * 0.5), // Adjusted spacing
+            SizedBox(height: verticalPadding * 0.5),
             Text(
-              'Berapa jumlah langkah hari ini?',
+              'Berapa detak jantungmu hari ini?',
               style: TextStyle(
                 fontFamily: 'Urbanist',
-                fontSize: fontSizeSubtitle, // Adjusted font size
+                fontSize: fontSizeSubtitle,
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: verticalPadding), // Adjusted spacing
+            NoteCard(
+                text:
+                    'Letakkan jari telunjuk dan jari tengah di area nadi pergelangan tangan atau sisi leher, lalu hitung denyut selama 15 detik. Kalikan jumlah denyut dengan empat untuk mendapatkan detak jantungmu.'),
+            SizedBox(height: verticalPadding),
             Row(
               children: [
                 Expanded(
                   child: TextField(
-                    controller: _stepsController,
+                    controller: _heartRateController,
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.done,
                     onSubmitted: (value) => _saveAndNavigate(),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Color(0xFF272E49),
-                      hintText: 'Jumlah langkah',
+                      hintText: 'Detak jantung',
                       hintStyle: TextStyle(
                         color: Colors.white,
                         fontFamily: 'Urbanist',
@@ -170,11 +171,11 @@ class _DailystepState extends State<Dailystep> {
                 Row(
                   children: [
                     IconButton(
-                      onPressed: () => _decrement(_stepsController),
+                      onPressed: () => _decrement(_heartRateController),
                       icon: Icon(Icons.remove, color: Colors.white),
                     ),
                     IconButton(
-                      onPressed: () => _increment(_stepsController),
+                      onPressed: () => _increment(_heartRateController),
                       icon: Icon(Icons.add, color: Colors.white),
                     ),
                   ],
@@ -184,16 +185,16 @@ class _DailystepState extends State<Dailystep> {
             Expanded(
               child: Center(
                 child: Container(
-                  height: screenHeight * 0.07, // Adjusted button height
-                  width: screenWidth * 0.8, // Adjusted button width
+                  height: screenHeight * 0.07,
+                  width: screenWidth * 0.8,
                   child: ElevatedButton(
                     onPressed: _isButtonEnabled ? _saveAndNavigate : null,
                     child: Text('Next'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF009090), // Button color
+                      backgroundColor: Color(0xFF009090),
                       textStyle: TextStyle(
                         fontFamily: 'Urbanist',
-                        fontSize: fontSizeButton, // Adjusted font size
+                        fontSize: fontSizeButton,
                       ),
                       foregroundColor: Colors.white,
                     ),

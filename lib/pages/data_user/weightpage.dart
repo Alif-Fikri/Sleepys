@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:async';
-import 'package:hive/hive.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import '../pages/home.dart';
-import '../widgets/note_card.dart';
+import '../home.dart';
+import 'package:sleepys/helper/note_card.dart';
 
 class Weightpage extends StatefulWidget {
   final String name;
@@ -35,29 +33,6 @@ class _WeightpageState extends State<Weightpage> {
   FixedExtentScrollController _controller = FixedExtentScrollController();
   int selectedItem = 0;
   Timer? _timer;
-  late final Connectivity _connectivity;
-  late final Stream<ConnectivityResult> _connectivityStream;
-
-  @override
-  void initState() {
-    super.initState();
-    _connectivity = Connectivity();
-    _connectivityStream = _connectivity.onConnectivityChanged.map(
-        (List<ConnectivityResult> results) => results.firstWhere(
-            (result) => result != ConnectivityResult.none,
-            orElse: () => ConnectivityResult.none));
-
-    // Listen for changes in connectivity
-    _connectivityStream.listen((ConnectivityResult result) {
-      if (result != ConnectivityResult.none) {
-        // If connectivity is restored, sync data
-        syncData();
-      }
-    });
-
-    // Sync any unsent data at the start
-    syncData();
-  }
 
   @override
   void dispose() {
@@ -68,14 +43,15 @@ class _WeightpageState extends State<Weightpage> {
   Future<void> saveWeight(int weight) async {
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:8000/save-weight/'),
+        Uri.parse(
+            'http://192.168.0.126:8000/save-weight/'), // Update the URL as needed
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, dynamic>{
           'email': widget.email,
           'name': widget.name,
-          'gender': int.parse(widget.gender),
+          'gender': widget.gender,
           'work': widget.work,
           'date_of_birth': widget.date_of_birth,
           'height': widget.height,
@@ -91,50 +67,6 @@ class _WeightpageState extends State<Weightpage> {
       }
     } catch (error) {
       print('Error: $error');
-
-      // Save the weight data to Hive for later sync
-      var box = Hive.box('userBox');
-      print(
-          'Saving weight data to Hive: {name: ${widget.name}, email: ${widget.email}, gender: ${widget.gender}, work: ${widget.work}, date_of_birth: ${widget.date_of_birth}, height: ${widget.height}, weight: $weight}');
-      await box.put('weightData', {
-        'name': widget.name,
-        'email': widget.email,
-        'gender': widget.gender,
-        'work': widget.work,
-        'date_of_birth': widget.date_of_birth,
-        'height': widget.height,
-        'weight': weight,
-      });
-    }
-  }
-
-  Future<void> syncData() async {
-    var box = Hive.box('userBox');
-    var weightData = box.get('weightData');
-
-    if (weightData != null) {
-      print('Attempting to sync weight data: $weightData');
-      try {
-        final response = await http.put(
-          Uri.parse('http://localhost:8000/save-weight/'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(weightData),
-        );
-
-        if (response.statusCode == 200) {
-          print('Weight synced successfully: ${jsonDecode(response.body)}');
-          // Remove the data from Hive after successful sync
-          await box.delete('weightData');
-          print(
-              'Hive Data after deletion: ${box.get('weightData')}'); // Debugging statement to check if Hive is empty
-        } else {
-          print('Failed to sync weight data: ${response.body}');
-        }
-      } catch (error) {
-        print('Error: $error');
-      }
     }
   }
 
@@ -161,11 +93,6 @@ class _WeightpageState extends State<Weightpage> {
     });
   }
 
-  void printHiveData() {
-    var box = Hive.box('userBox');
-    print('Hive Data: ${box.get('weightData')}');
-  }
-
   @override
   Widget build(BuildContext context) {
     // MediaQuery for responsive sizing
@@ -175,9 +102,6 @@ class _WeightpageState extends State<Weightpage> {
     final double pickerItemHeight = deviceWidth * 0.15;
     final double pickerContainerWidth = deviceWidth * 0.25;
     final double paddingHorizontal = deviceWidth * 0.05;
-
-    // Sync any unsent data when this page is built
-    printHiveData();
 
     return WillPopScope(
       onWillPop: () async => false,
@@ -215,9 +139,8 @@ class _WeightpageState extends State<Weightpage> {
                   ),
                   SizedBox(height: deviceWidth * 0.02),
                   NoteCard(
-                    text:
-                        'Lakukan Scrolling untuk menentukan Berat Badan kamu!',
-                  ),
+                      text:
+                          'Lakukan Scrolling untuk menentukan Berat Badan kamu dan tunggu 2 detik untuk lanjut ke halaman berikutnya!!')
                 ],
               ),
             ),

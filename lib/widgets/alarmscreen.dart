@@ -28,6 +28,8 @@ class _AlarmScreenState extends State<AlarmScreen>
   late Animation<double> _animation;
   late Animation<Color?> _colorAnimation;
 
+  Timer? _alarmTimer;
+
   @override
   void initState() {
     super.initState();
@@ -48,6 +50,7 @@ class _AlarmScreenState extends State<AlarmScreen>
   @override
   void dispose() {
     _controller.dispose();
+    _alarmTimer?.cancel();
     super.dispose();
   }
 
@@ -71,7 +74,7 @@ class _AlarmScreenState extends State<AlarmScreen>
   void _checkWakeUpTime() {
     if (_currentTime == widget.wakeUpTime && !_isWakeUpTime) {
       _isWakeUpTime = true;
-      _startRepeatingNotification();
+      _startRepeatingAlarm();
     }
   }
 
@@ -80,11 +83,12 @@ class _AlarmScreenState extends State<AlarmScreen>
   }
 
   void _stopAlarm() {
+    _alarmTimer?.cancel();
     flutterLocalNotificationsPlugin.cancelAll();
     print("Alarm stopped");
   }
 
-  void _startRepeatingNotification() async {
+  Future<void> _startRepeatingAlarm() async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails('alarm_channel', 'Alarm',
             channelDescription: 'Alarm Notification',
@@ -95,25 +99,10 @@ class _AlarmScreenState extends State<AlarmScreen>
     const NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
 
-    await flutterLocalNotificationsPlugin.periodicallyShow(
-      0,
-      'Waktu Bangun',
-      'Ini saatnya untuk bangun!',
-      RepeatInterval.everyMinute, // Repeat every 1 minute
-      platformChannelSpecifics,
-      androidAllowWhileIdle: true,
-    );
-
-    // Schedule a timer to stop the notification after 2 minutes and then restart it
-    Timer.periodic(Duration(minutes: 2), (timer) {
-      if (!_isWakeUpTime) {
-        timer.cancel(); // Stop the timer if the user has dismissed the alarm
-      } else {
-        flutterLocalNotificationsPlugin.cancel(0);
-        Future.delayed(Duration(minutes: 2), () {
-          _startRepeatingNotification(); // Restart the alarm
-        });
-      }
+    _alarmTimer = Timer.periodic(Duration(seconds: 5), (timer) async {
+      await flutterLocalNotificationsPlugin.show(0, 'Waktu Bangun',
+          'Ini saatnya untuk bangun!', platformChannelSpecifics,
+          payload: 'alarm_payload');
     });
   }
 
@@ -131,7 +120,7 @@ class _AlarmScreenState extends State<AlarmScreen>
   Future<void> _fetchUserName() async {
     try {
       final response = await http
-          .get(Uri.parse('http://localhost:8000/user/${widget.email}'));
+          .get(Uri.parse('http://192.168.0.126:8000/user/${widget.email}'));
 
       if (response.statusCode == 200) {
         final user = json.decode(response.body);

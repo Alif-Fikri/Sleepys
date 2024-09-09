@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sleepys/widgets/sleepprofile.dart'; // Pastikan Anda mengganti ini dengan path yang benar
+import 'package:sleepys/pages/prediction/sleep_profile_daily.dart';
+import 'package:sleepys/pages/prediction/sleep_profile_month.dart';
+import 'package:sleepys/pages/prediction/sleep_profile_week.dart';
 
 class DailySleepProfile extends StatelessWidget {
   final String email;
@@ -44,7 +46,7 @@ class DailySleepProfile extends StatelessWidget {
                         ),
                         onPressed: () {
                           Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => SleepProfile(
+                            builder: (context) => SleepProfileDaily(
                               email: email,
                             ),
                           ));
@@ -113,7 +115,7 @@ class WeeklySleepProfile extends StatelessWidget {
                         ),
                         onPressed: () {
                           Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => SleepProfile(
+                            builder: (context) => SleepProfileWeek(
                               email: email,
                             ),
                           ));
@@ -182,7 +184,7 @@ class MonthlySleepProfile extends StatelessWidget {
                         ),
                         onPressed: () {
                           Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => SleepProfile(
+                            builder: (context) => SleepProfileMonth(
                               email: email,
                             ),
                           ));

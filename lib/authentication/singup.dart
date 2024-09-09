@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sleepys/pages/home.dart';
 import 'package:sleepys/widgets/profilepage.dart';
-import 'namepage.dart';
+import '../pages/data_user/namepage.dart';
 import 'loginpage.dart';
 import '../widgets/signupprovider.dart';
 
@@ -101,7 +101,7 @@ class Signups extends StatelessWidget {
     // Lanjutkan dengan proses signup seperti biasa
     try {
       final url = Uri.parse(
-          'http://localhost:8000/register/'); // Ganti dengan URL yang sesuai
+          'http://192.168.0.126:8000/register/'); // Ganti dengan URL yang sesuai
       final response = await http.post(
         url,
         headers: {
@@ -372,6 +372,17 @@ class Signups extends StatelessWidget {
                             ],
                           ),
                         ),
+                        ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => HomePage(
+                                    userEmail: AutofillHints.email,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Text('tes'))
                       ],
                     ),
                   ),

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:sleepys/widgets/prediction.dart';
+import 'package:sleepys/pages/prediction/prediction.dart';
 
-class SleepProfile extends StatelessWidget {
+class SleepProfileWeek extends StatelessWidget {
   final String email;
 
-  SleepProfile({required this.email, Key? key}) : super(key: key);
+  SleepProfileWeek({required this.email, Key? key}) : super(key: key);
 
   Future<void> getPrediction(BuildContext context) async {
     try {
-      final url = Uri.parse('http://localhost:8000/predict');
+      final url = Uri.parse('http://192.168.0.126:8000/weekly_predict');
 
       // Kirim POST request dengan email dalam body
       final response = await http.post(
@@ -25,7 +25,10 @@ class SleepProfile extends StatelessWidget {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final prediction = data['prediction'];
+        final prediction = data['weekly_prediction'];
+
+        // Panggil fungsi untuk menyimpan hasil prediksi ke database
+        await savePrediction(context, email, prediction);
 
         // Navigasi berdasarkan hasil prediksi
         if (prediction == 'Normal') {
@@ -43,17 +46,47 @@ class SleepProfile extends StatelessWidget {
               context,
               MaterialPageRoute(
                   builder: (context) => InsomniaPage(email: email)));
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Unknown prediction result')));
         }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to get prediction from API')));
       }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error: $e')));
+      // Handle errors silently or with a custom error handler if needed
+    }
+  }
+
+  Future<void> savePrediction(
+      BuildContext context, String email, String prediction) async {
+    try {
+      // Use the correct URL for your server
+      final url = Uri.parse('http://192.168.0.126:8000/save_prediction_week');
+
+      // Map string prediction results to integer values
+      int predictionResult;
+      if (prediction == 'Insomnia') {
+        predictionResult = 0; // Example: 1 for Insomnia
+      } else if (prediction == 'Normal') {
+        predictionResult = 1; // Example: 0 for Normal
+      } else if (prediction == 'Sleep Apnea') {
+        predictionResult = 2; // Example: 2 for Sleep Apnea
+      } else {
+        return;
+      }
+
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'email': email,
+          'prediction_result': predictionResult, // Send integer
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        // Handle successful save if needed
+      }
+    } catch (e) {
+      // Handle errors silently or with a custom error handler if needed
     }
   }
 
@@ -85,19 +118,19 @@ class SleepProfile extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 20),
-                  InfoItem(
+                  InfoItemWeek(
                     text:
                         'Sleepy Panda bertujuan untuk memberikan edukasi dan informasi. Sleepy Panda berusaha untuk memberikan pemahaman lebih tentang pola tidur kamu. Tetapi, Sleepy Panda bukanlah alat diagnostik atau pengganti konsultasi dengan dokter.',
                   ),
-                  InfoItem(
+                  InfoItemWeek(
                     text:
                         'Profil tidur yang disediakan oleh Sleepy Panda berdasarkan data tidur yang kamu berikan, dan bertujuan untuk memberikan rekomendasi terkait pola tidur atau potensi kesehatan.',
                   ),
-                  InfoItem(
+                  InfoItemWeek(
                     text:
                         'Kami selalu menyarankan untuk berkonsultasi dengan dokter atau ahli tidur jika mengalami masalah tidur yang serius atau berkelanjutan.',
                   ),
-                  InfoItem(
+                  InfoItemWeek(
                     text: 'Hasil profil tidur dapat berubah seiring waktu.',
                   ),
                   SizedBox(height: 20),
@@ -139,10 +172,10 @@ class SleepProfile extends StatelessWidget {
   }
 }
 
-class InfoItem extends StatelessWidget {
+class InfoItemWeek extends StatelessWidget {
   final String text;
 
-  InfoItem({required this.text});
+  InfoItemWeek({required this.text});
 
   @override
   Widget build(BuildContext context) {

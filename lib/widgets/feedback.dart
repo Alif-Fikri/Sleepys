@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class FeedbackPage extends StatefulWidget {
   @override
@@ -18,33 +20,54 @@ class _FeedbackPageState extends State<FeedbackPage> {
     super.dispose();
   }
 
-  void _submitFeedback() {
+  Future<void> _submitFeedback() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isSubmitting = true;
       });
 
-      // Simulate feedback submission
-      Future.delayed(Duration(seconds: 2), () {
+      final url = Uri.parse(
+          'http://192.168.0.126:8000/submit-feedback/'); // Replace with your backend URL
+
+      try {
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'email': _emailController.text,
+            'feedback': _feedbackController.text,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Thank you for your feedback!')),
+          );
+
+          _emailController.clear();
+          _feedbackController.clear();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Failed to submit feedback. Please try again.')),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('An error occurred. Please try again.')),
+        );
+      } finally {
         setState(() {
           _isSubmitting = false;
         });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Thank you for your feedback!')),
-        );
-
-        _emailController.clear();
-        _feedbackController.clear();
-      });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
-    double containerWidth =
-        screenSize.width * 0.8; // Set a fixed width for alignment
+    double containerWidth = screenSize.width * 0.8;
 
     return Scaffold(
       backgroundColor: Color(0xFF20223F),
@@ -54,10 +77,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Tambahkan Spacer atau SizedBox untuk memberikan jarak dari atas
-              Spacer(
-                  flex:
-                      2), // Menggunakan flex untuk menyesuaikan ruang secara proporsional
+              Spacer(flex: 2),
               CircleAvatar(
                 radius: screenSize.width * 0.08,
                 backgroundColor: Color(0xFF272E49),
@@ -185,9 +205,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   ],
                 ),
               ),
-              Spacer(
-                  flex:
-                      5), // Menambahkan spacer di bawah agar konten utama berada di tengah
+              Spacer(flex: 5),
             ],
           ),
         ),

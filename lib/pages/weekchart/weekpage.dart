@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:sleepys/widgets/card_sleepprofile.dart';
+import 'package:sleepys/helper/card_sleepprofile.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:sleepys/pages/weekchart/weekbarchart.dart';
@@ -18,7 +18,7 @@ class WeekPage extends StatefulWidget {
 Future<Map<String, dynamic>> fetchWeeklySleepData(
     String email, String startDate, String endDate) async {
   final url =
-      'http://localhost:8000/get-weekly-sleep-data/$email?start_date=$startDate&end_date=$endDate';
+      'http://192.168.0.126:8000/get-weekly-sleep-data/$email?start_date=$startDate&end_date=$endDate';
   final response = await http.get(Uri.parse(url));
 
   if (response.statusCode == 200) {
@@ -46,17 +46,19 @@ class _WeekPageState extends State<WeekPage> {
 
   void _previousWeek() {
     setState(() {
+      // Move to the previous week
       startDate = startDate.subtract(Duration(days: 7));
       endDate = startDate.add(Duration(days: 6));
-      fetchAndSetWeeklyData();
+      fetchAndSetWeeklyData(); // Fetch new data for the updated week
     });
   }
 
   void _nextWeek() {
     setState(() {
+      // Move to the next week
       startDate = startDate.add(Duration(days: 7));
       endDate = startDate.add(Duration(days: 6));
-      fetchAndSetWeeklyData();
+      fetchAndSetWeeklyData(); // Fetch new data for the updated week
     });
   }
 
@@ -66,6 +68,7 @@ class _WeekPageState extends State<WeekPage> {
 
     setState(() {
       isLoading = true; // Start loading
+      weeklyData.clear(); // Clear old data before fetching new data
     });
 
     try {
@@ -98,39 +101,43 @@ class _WeekPageState extends State<WeekPage> {
     print("Weekly Data: ${weeklyData['daily_sleep_start_times']}");
 
     // Proses waktu mulai tidur
-final sleepStartTimes = (weeklyData.containsKey('daily_sleep_start_times') &&
-        weeklyData['daily_sleep_start_times'] is Map)
-    ? List<double?>.generate(7, (index) {
-        List<dynamic>? times = weeklyData['daily_sleep_start_times'][index.toString()];
-        if (times != null && times.isNotEmpty) {
-          // Ambil data terakhir yang ada di list 'times'
-          String latestTime = times.last as String;
-          double hours = double.parse(latestTime.split(":")[0]);
-          double minutes = double.parse(latestTime.split(":")[1]) / 60;
-          return hours + minutes;
-        } else {
-          return null; // Jika tidak ada data, kembalikan null
-        }
-      })
-    : List<double?>.filled(7, null); // Gunakan List dengan tipe double? untuk nullable
+    final sleepStartTimes =
+        (weeklyData.containsKey('daily_sleep_start_times') &&
+                weeklyData['daily_sleep_start_times'] is Map)
+            ? List<double?>.generate(7, (index) {
+                List<dynamic>? times =
+                    weeklyData['daily_sleep_start_times'][index.toString()];
+                if (times != null && times.isNotEmpty) {
+                  String latestTime = times.last as String;
+                  print(
+                      'Sleep Start Time on day $index: $latestTime'); // Tambahkan log
+                  double hours = double.parse(latestTime.split(":")[0]);
+                  double minutes = double.parse(latestTime.split(":")[1]) / 60;
+                  return hours + minutes;
+                } else {
+                  return null;
+                }
+              })
+            : List<double?>.filled(7, null);
 
 // Proses waktu bangun tidur
-final wakeUpTimes = (weeklyData.containsKey('daily_wake_times') &&
-        weeklyData['daily_wake_times'] is Map)
-    ? List<double?>.generate(7, (index) {
-        List<dynamic>? times = weeklyData['daily_wake_times'][index.toString()];
-        if (times != null && times.isNotEmpty) {
-          // Ambil data terakhir yang ada di list 'times'
-          String latestTime = times.last as String;
-          double hours = double.parse(latestTime.split(":")[0]);
-          double minutes = double.parse(latestTime.split(":")[1]) / 60;
-          return hours + minutes;
-        } else {
-          return null; // Jika tidak ada data, kembalikan null
-        }
-      })
-    : List<double?>.filled(7, null); // Gunakan List dengan tipe double? untuk nullable
-
+    final wakeUpTimes = (weeklyData.containsKey('daily_wake_times') &&
+            weeklyData['daily_wake_times'] is Map)
+        ? List<double?>.generate(7, (index) {
+            List<dynamic>? times =
+                weeklyData['daily_wake_times'][index.toString()];
+            if (times != null && times.isNotEmpty) {
+              // Ambil data terakhir yang ada di list 'times'
+              String latestTime = times.last as String;
+              double hours = double.parse(latestTime.split(":")[0]);
+              double minutes = double.parse(latestTime.split(":")[1]) / 60;
+              return hours + minutes;
+            } else {
+              return null; // Jika tidak ada data, kembalikan null
+            }
+          })
+        : List<double?>.filled(
+            7, null); // Gunakan List dengan tipe double? untuk nullable
 
     final dateFormat = DateFormat('d MMMM', 'id');
     double baseFontSize = MediaQuery.of(context).size.width * 0.04;
@@ -141,6 +148,13 @@ final wakeUpTimes = (weeklyData.containsKey('daily_wake_times') &&
         body: Center(child: CircularProgressIndicator()),
       );
     }
+
+    bool hasFullWeekData = weeklyData.containsKey('daily_sleep_durations') &&
+        weeklyData['daily_sleep_durations'] is List &&
+        (weeklyData['daily_sleep_durations'] as List).length == 7 &&
+        (weeklyData['daily_sleep_durations'] as List)
+            .every((duration) => duration != null && duration > 0);
+
     return Scaffold(
       backgroundColor: Color(0xFF20223F),
       body: SingleChildScrollView(
@@ -151,7 +165,7 @@ final wakeUpTimes = (weeklyData.containsKey('daily_wake_times') &&
             children: [
               WeeklySleepProfile(
                 email: widget.email,
-                hasSleepData: weeklyData.isNotEmpty,
+                hasSleepData: hasFullWeekData, // Only show if full week data
               ),
               SizedBox(height: 10),
               Text(

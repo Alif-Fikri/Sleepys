@@ -1,53 +1,18 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../pages/genderpage.dart';
-import 'package:hive/hive.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:provider/provider.dart';
-import '../models/user_data.dart';
+import 'genderpage.dart';
 
-class Namepage extends StatefulWidget {
+class Namepage extends StatelessWidget {
   final String email;
+  final TextEditingController _controller = TextEditingController();
 
   Namepage({Key? key, required this.email}) : super(key: key);
-
-  @override
-  _NamepageState createState() => _NamepageState();
-}
-
-class _NamepageState extends State<Namepage> {
-  final TextEditingController _controller = TextEditingController();
-  late Connectivity _connectivity;
-  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
-
-  @override
-  void initState() {
-    super.initState();
-    _connectivity = Connectivity();
-
-    _connectivitySubscription = _connectivity.onConnectivityChanged
-        .listen((List<ConnectivityResult> resultList) {
-      if (resultList.isNotEmpty &&
-          resultList.first != ConnectivityResult.none) {
-        syncData();
-      }
-    });
-
-    syncData();
-  }
-
-  @override
-  void dispose() {
-    _connectivitySubscription.cancel();
-    super.dispose();
-  }
 
   Future<void> saveName(BuildContext context, String name, String email) async {
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:8000/save-name/'),
+        Uri.parse('http://192.168.0.126:8000/save-name/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -59,7 +24,7 @@ class _NamepageState extends State<Namepage> {
 
       if (response.statusCode == 200) {
         print('Name saved successfully: ${jsonDecode(response.body)}');
-        Provider.of<UserData>(context, listen: false).setName(name); // Update Global State
+        // Navigasi ke halaman berikutnya setelah menyimpan nama
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -72,56 +37,16 @@ class _NamepageState extends State<Namepage> {
       }
     } catch (error) {
       print('Error: $error');
-
-      var box = Hive.box('userBox');
-      print('Saving data to Hive: {name: $name, email: $email}');
-      await box.put('userData', {'name': name, 'email': email});
-
-      Provider.of<UserData>(context, listen: false).setName(name); // Update Global State
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Genderpage(name: name, email: email),
-        ),
-      );
-
+      // Tampilkan error ke pengguna, misalnya menggunakan Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save name. Data saved locally.')),
+        SnackBar(content: Text('Failed to save name. Please try again.')),
       );
-    }
-  }
-
-  Future<void> syncData() async {
-    var box = Hive.box('userBox');
-    var userData = box.get('userData');
-
-    if (userData != null) {
-      print('Attempting to sync data: $userData');
-      try {
-        final response = await http.put(
-          Uri.parse('http://localhost:8000/save-name/'),
-          headers: <String, String>{
-            'Content-Type': 'application/json; charset=UTF-8',
-          },
-          body: jsonEncode(userData),
-        );
-
-        if (response.statusCode == 200) {
-          print('Name synced successfully: ${jsonDecode(response.body)}');
-          await box.delete('userData');
-          print('Hive Data after deletion: ${box.get('userData')}');
-        } else {
-          print('Failed to sync data: ${response.body}');
-        }
-      } catch (error) {
-        print('Error: $error');
-      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // MediaQuery for responsive sizing
     final double deviceWidth = MediaQuery.of(context).size.width;
     final double titleFontSize = deviceWidth * 0.06;
     final double subtitleFontSize = deviceWidth * 0.04;
@@ -169,7 +94,7 @@ class _NamepageState extends State<Namepage> {
                         textInputAction: TextInputAction.done,
                         onSubmitted: (value) {
                           String name = _controller.text;
-                          saveName(context, name, widget.email);
+                          saveName(context, name, email);
                         },
                         decoration: InputDecoration(
                           filled: true,

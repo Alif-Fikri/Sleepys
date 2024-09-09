@@ -1,27 +1,17 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../pages/splashscreen.dart';
+import 'authentication/splashscreen.dart';
 import '../widgets/signupprovider.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart';
-import '../models/user_data.dart';
+import 'package:flutter/services.dart'; // Import untuk mengatur orientasi
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  if (!kIsWeb) {
-    await Hive.initFlutter();
-    var dir = await getApplicationDocumentsDirectory();
-    Hive.init(dir.path);
-  } else {
-    await Hive.initFlutter();
-  }
-
-  await Hive.openBox('userBox');
+  
+  // Mengatur orientasi aplikasi hanya ke potret (portrait)
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp, // Potret normal
+  ]);
 
   await initializeDateFormatting('id', null);
 
@@ -29,7 +19,6 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SignupFormProvider()),
-        ChangeNotifierProvider(create: (_) => UserData()), // Tambahkan ini
       ],
       child: MyApp(),
     ),
