@@ -170,8 +170,9 @@ class _MonthPageState extends State<MonthPage> {
     bool hasFullMonthData = monthlyData.containsKey('daily_sleep_durations') &&
         monthlyData['daily_sleep_durations'] is List &&
         (monthlyData['daily_sleep_durations'] as List).length == 30 &&
-        (monthlyData['daily_sleep_durations'] as List).every(
-            (duration) => duration != null); // Menghapus pemeriksaan durasi > 0
+        (monthlyData['daily_sleep_durations'] as List).every((duration) =>
+            duration != null &&
+            duration > 0); // Pastikan data lengkap dan valid
 
     return Scaffold(
       backgroundColor: Color(0xFF20223F),

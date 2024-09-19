@@ -84,103 +84,111 @@ class LoginPages extends StatelessWidget {
       return;
     }
 
-    final loginUrl = Uri.parse('http://192.168.0.126:8000/login/');
-    final response = await http.post(
-      loginUrl,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
-        'email': email,
-        'password': password,
-      }),
+    // Tampilkan loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => Center(child: CircularProgressIndicator()),
     );
 
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
+    try {
+      final loginUrl = Uri.parse('http://192.168.0.126:8000/login/');
+      final response = await http.post(
+        loginUrl,
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'email': email, 'password': password}),
+      );
 
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      final token = responseData['access_token'];
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
-      // Simpan token ke SharedPreferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', token);
-      await prefs.setString('email', email);
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        final token = responseData['access_token'];
 
-      // Ambil profil user
-      await _getUserProfile(context, token);
-    } else {
-      final errorResponse = json.decode(response.body);
-      final errorMessage = errorResponse['detail'];
+        // Simpan token ke SharedPreferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+        await prefs.setString('email', email);
 
-      showCustomSnackBar(context, errorMessage);
+        // Ambil profil user
+        await _getUserProfile(context, token);
+      } else {
+        final errorResponse = json.decode(response.body);
+        final errorMessage = errorResponse['detail'];
+
+        showCustomSnackBar(context, errorMessage);
+      }
+    } catch (e) {
+      showCustomSnackBar(context, "Terjadi kesalahan. Silakan coba lagi.");
+    } finally {
+      // Tutup loading indicator
+      Navigator.of(context).pop();
     }
   }
 
   Future<void> _getUserProfile(BuildContext context, String token) async {
-    final url = Uri.parse('http://192.168.0.126:8000/user-profile/');
-    final response = await http.get(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token', // Sertakan token di header
-      },
-    );
+    try {
+      final url = Uri.parse('http://192.168.0.126:8000/user-profile/');
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        final name = responseData['name'];
+        final gender = responseData['gender']?.toString();
+        final work = responseData['work'];
+        final dateOfBirth = responseData['date_of_birth'];
+        final height = (responseData['height'] as num).toDouble();
+        final weight = (responseData['weight'] as num).toDouble();
 
-      final name = responseData['name'];
-      final gender = responseData['gender']?.toString();
-      final work = responseData['work'];
-      final dateOfBirth = responseData['date_of_birth'];
-      final height = (responseData['height'] as num).toDouble();
-      final weight = (responseData['weight'] as num).toDouble();
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('name', name ?? '');
+        if (gender != null) {
+          await prefs.setString('gender', gender == '0' ? 'female' : 'male');
+        } else {
+          await prefs.setString('gender', '');
+        }
 
-      // Simpan data profil ke SharedPreferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString('name', name ?? '');
+        await prefs.setString('work', work ?? '');
+        await prefs.setString('date_of_birth', dateOfBirth ?? '');
+        await prefs.setDouble('height', height);
+        await prefs.setDouble('weight', weight);
 
-      // Correctly interpret gender and store it
-      if (gender != null) {
-        await prefs.setString('gender', gender == '0' ? 'female' : 'male');
+        showCustomSnackBar(context, "Login berhasil");
+
+        // Cek status profil yang sudah disimpan
+        checkProfileCompletion(context, prefs.getString('email') ?? '');
       } else {
-        await prefs.setString('gender', '');
+        final errorResponse = json.decode(response.body);
+        final errorMessage = errorResponse['detail'];
+
+        showCustomSnackBar(context, errorMessage);
       }
-
-      await prefs.setString('work', work ?? '');
-      await prefs.setString('date_of_birth', dateOfBirth ?? '');
-      await prefs.setDouble('height', height);
-      await prefs.setDouble('weight', weight);
-
-      showCustomSnackBar(context, "Login berhasil");
-
-      // Cek status profil yang sudah disimpan
-      checkProfileCompletion(context, prefs.getString('email') ?? '');
-    } else {
-      final errorResponse = json.decode(response.body);
-      final errorMessage = errorResponse['detail'];
-
-      showCustomSnackBar(context, errorMessage);
+    } catch (e) {
+      showCustomSnackBar(
+          context, "Terjadi kesalahan saat mengambil data profil.");
     }
   }
 
   Future<void> checkProfileCompletion(
       BuildContext context, String email) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     final name = prefs.getString('name') ?? '';
-    final gender = prefs.getString('gender'); // Check gender as stored above
+    final gender = prefs.getString('gender');
     final work = prefs.getString('work') ?? '';
     final dateOfBirth = prefs.getString('date_of_birth') ?? '';
     final height = prefs.getDouble('height') ?? 0;
     final weight = prefs.getDouble('weight') ?? 0;
 
-    // Debugging untuk memastikan urutan pengecekan
     print('Name: $name');
     print('Gender: $gender');
     print('Work: $work');
@@ -245,7 +253,6 @@ class LoginPages extends StatelessWidget {
         ),
       );
     } else {
-      // Semua data sudah lengkap
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomePage(userEmail: email)),
@@ -697,7 +704,7 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
             fontSize: screenWidth * 0.04,
           ),
           prefixIcon: Container(
-            padding: EdgeInsets.all(screenWidth * 0.025),
+            padding: EdgeInsets.all(screenWidth * 0.035),
             child: Image.asset('assets/images/email1.png'),
             height: screenWidth * 0.08,
             width: screenWidth * 0.08,

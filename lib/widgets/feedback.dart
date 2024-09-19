@@ -89,7 +89,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
               ),
               SizedBox(height: screenSize.height * 0.02),
               Text(
-                'How are we doing?',
+                'Beritahu Kami Jika Terjadi Bug!!..',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: screenSize.width * 0.05,
@@ -99,7 +99,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
               ),
               SizedBox(height: screenSize.height * 0.005),
               Text(
-                "We'd love to hear your thoughts",
+                "Kami Akan Segara Memperbaikinya...",
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: screenSize.width * 0.035,

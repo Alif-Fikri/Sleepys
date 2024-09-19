@@ -24,7 +24,6 @@ class _SleepPageState extends State<SleepPage> {
   Future<void> requestNotificationPermission() async {
     var status = await Permission.notification.status;
     if (status.isDenied || status.isRestricted) {
-      // Jika izin ditolak, minta izin
       await Permission.notification.request();
     }
   }
@@ -42,7 +41,7 @@ class _SleepPageState extends State<SleepPage> {
               TextButton(
                 onPressed: () async {
                   Navigator.of(context).pop();
-                  await requestNotificationPermission(); // Minta izin saat pengguna memilih "Izinkan"
+                  await requestNotificationPermission();
                 },
                 child: Text('Izinkan'),
               ),
@@ -62,7 +61,6 @@ class _SleepPageState extends State<SleepPage> {
   @override
   void initState() {
     super.initState();
-    // Memeriksa izin saat halaman dibuka
     showPermissionAlert();
   }
 
@@ -90,10 +88,8 @@ class _SleepPageState extends State<SleepPage> {
     );
 
     if (response.statusCode == 200) {
-      // Successfully saved the data
       print('Sleep data saved successfully');
     } else {
-      // Failed to save the data
       print('Failed to save sleep data: ${response.body}');
     }
   }
@@ -166,150 +162,159 @@ class _SleepPageState extends State<SleepPage> {
         automaticallyImplyLeading: false,
         backgroundColor: Color(0xFF20223F),
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          color: Color(0xFF272E49),
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(screenSize.width * 0.05),
-            topRight: Radius.circular(screenSize.width * 0.05),
+      body: SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: screenSize
+                .height, // Mengatur tinggi minimum agar sesuai dengan layar
           ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.only(top: screenSize.height * 0.1),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                'Pilih waktu bangun tidur mu',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: screenSize.width * 0.06,
-                    fontFamily: 'Urbanist',
-                    fontWeight: FontWeight.bold),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Color(0xFF272E49),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(screenSize.width * 0.05),
+                topRight: Radius.circular(screenSize.width * 0.05),
               ),
-              SizedBox(height: screenSize.height * 0.025),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(top: screenSize.height * 0.1),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    height: screenSize.height * 0.25,
-                    width: screenSize.width * 0.25,
-                    child: ListWheelScrollView.useDelegate(
-                      itemExtent: screenSize.height * 0.085,
-                      perspective: 0.001,
-                      diameterRatio: 9.0,
-                      physics: FixedExtentScrollPhysics(),
-                      onSelectedItemChanged: (index) {
-                        setState(() {
-                          selectedWakeUpHour = index;
-                          isHourSelected = true;
-                        });
-                      },
-                      childDelegate: ListWheelChildLoopingListDelegate(
-                        children: generateHours(screenSize),
+                  Text(
+                    'Pilih waktu bangun tidur mu',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: screenSize.width * 0.06,
+                        fontFamily: 'Urbanist',
+                        fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: screenSize.height * 0.025),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: screenSize.height * 0.25,
+                        width: screenSize.width * 0.25,
+                        child: ListWheelScrollView.useDelegate(
+                          itemExtent: screenSize.height * 0.085,
+                          perspective: 0.001,
+                          diameterRatio: 9.0,
+                          physics: FixedExtentScrollPhysics(),
+                          onSelectedItemChanged: (index) {
+                            setState(() {
+                              selectedWakeUpHour = index;
+                              isHourSelected = true;
+                            });
+                          },
+                          childDelegate: ListWheelChildLoopingListDelegate(
+                            children: generateHours(screenSize),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        ':',
+                        style: TextStyle(
+                            fontSize: screenSize.width * 0.1,
+                            color: Colors.white),
+                      ),
+                      SizedBox(
+                        height: screenSize.height * 0.25,
+                        width: screenSize.width * 0.25,
+                        child: ListWheelScrollView.useDelegate(
+                          itemExtent: screenSize.height * 0.085,
+                          perspective: 0.001,
+                          diameterRatio: 9.0,
+                          physics: FixedExtentScrollPhysics(),
+                          onSelectedItemChanged: (index) {
+                            setState(() {
+                              selectedSleepMinute = index;
+                              isMinuteSelected = true;
+                            });
+                          },
+                          childDelegate: ListWheelChildLoopingListDelegate(
+                            children: generateMinutes(screenSize),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: screenSize.height * 0.056),
+                    child: RichText(
+                      text: TextSpan(
+                          text: 'Waktu tidur ideal yang cukup adalah \nselama ',
+                          style: TextStyle(
+                              fontFamily: 'Urbanist',
+                              fontSize: screenSize.width * 0.04,
+                              color: Colors.white),
+                          children: [
+                            TextSpan(
+                                text: '8 jam',
+                                style: TextStyle(
+                                    fontFamily: 'Urbanist', color: Colors.red))
+                          ]),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(top: screenSize.height * 0.1),
+                    child: Container(
+                      height: screenSize.height * 0.0625,
+                      width: screenSize.width * 0.875,
+                      child: ElevatedButton(
+                        onPressed: isHourSelected && isMinuteSelected
+                            ? () {
+                                saveSleepData();
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => AlarmScreen(
+                                      wakeUpTime:
+                                          '${selectedWakeUpHour.toString().padLeft(2, '0')}:${selectedSleepMinute.toString().padLeft(2, '0')}',
+                                      email: widget.email,
+                                    ),
+                                  ),
+                                );
+                              }
+                            : null,
+                        child: Text(
+                          'Tidur sekarang',
+                          style: TextStyle(
+                              fontFamily: 'Urbanist',
+                              fontSize: screenSize.width * 0.045,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF00A8B5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(screenSize.width * 0.075),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                  Text(
-                    ':',
-                    style: TextStyle(
-                        fontSize: screenSize.width * 0.1, color: Colors.white),
-                  ),
-                  SizedBox(
-                    height: screenSize.height * 0.25,
-                    width: screenSize.width * 0.25,
-                    child: ListWheelScrollView.useDelegate(
-                      itemExtent: screenSize.height * 0.085,
-                      perspective: 0.001,
-                      diameterRatio: 9.0,
-                      physics: FixedExtentScrollPhysics(),
-                      onSelectedItemChanged: (index) {
-                        setState(() {
-                          selectedSleepMinute = index;
-                          isMinuteSelected = true;
-                        });
-                      },
-                      childDelegate: ListWheelChildLoopingListDelegate(
-                        children: generateMinutes(screenSize),
-                      ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => HomePage(
+                                  userEmail: widget.email,
+                                )),
+                      );
+                    },
+                    child: Text(
+                      'Nanti saja',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Urbanist',
+                          fontSize: screenSize.width * 0.045),
                     ),
                   ),
                 ],
               ),
-              Padding(
-                padding: EdgeInsets.only(top: screenSize.height * 0.056),
-                child: RichText(
-                  text: TextSpan(
-                      text: 'Waktu tidur ideal yang cukup adalah \nselama ',
-                      style: TextStyle(
-                          fontFamily: 'Urbanist',
-                          fontSize: screenSize.width * 0.04,
-                          color: Colors.white),
-                      children: [
-                        TextSpan(
-                            text: '8 jam',
-                            style: TextStyle(
-                                fontFamily: 'Urbanist', color: Colors.red))
-                      ]),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: screenSize.height * 0.1),
-                child: Container(
-                  height: screenSize.height * 0.0625,
-                  width: screenSize.width * 0.875,
-                  child: ElevatedButton(
-                    onPressed: isHourSelected && isMinuteSelected
-                        ? () {
-                            saveSleepData(); // Panggil fungsi untuk menyimpan data
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => AlarmScreen(
-                                  wakeUpTime:
-                                      '${selectedWakeUpHour.toString().padLeft(2, '0')}:${selectedSleepMinute.toString().padLeft(2, '0')}',
-                                  email: widget.email,
-                                ),
-                              ),
-                            );
-                          }
-                        : null,
-                    child: Text(
-                      'Tidur sekarang',
-                      style: TextStyle(
-                          fontFamily: 'Urbanist',
-                          fontSize: screenSize.width * 0.045,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF00A8B5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(screenSize.width * 0.075),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                        builder: (context) => HomePage(
-                              userEmail: widget.email,
-                            )),
-                  );
-                },
-                child: Text(
-                  'Nanti saja',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Urbanist',
-                      fontSize: screenSize.width * 0.045),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

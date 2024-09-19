@@ -9,7 +9,79 @@ class Namepage extends StatelessWidget {
 
   Namepage({Key? key, required this.email}) : super(key: key);
 
+  // Fungsi untuk memvalidasi nama
+  bool isValidName(String name) {
+    return name.isNotEmpty &&
+        name.length >= 3; // Nama harus tidak kosong dan minimal  karakter
+  }
+
+  void showCustomSnackBar(BuildContext context, String message) {
+    final screenSize = MediaQuery.of(context).size;
+
+    // SnackBar kustom yang meniru gaya login dan register
+    final snackBar = SnackBar(
+      backgroundColor:
+          Colors.transparent, // Background transparan untuk efek floating
+      elevation: 0, // Menghilangkan elevasi untuk tampilan datar
+      content: Container(
+        padding: EdgeInsets.symmetric(
+          vertical: screenSize.height * 0.02, // Padding vertikal dinamis
+          horizontal: screenSize.width * 0.05, // Padding horizontal dinamis
+        ),
+        decoration: BoxDecoration(
+          color: const Color(
+              0xFF272E49), // Warna latar belakang sesuai desain login/register
+          borderRadius:
+              BorderRadius.circular(screenSize.width * 0.03), // Sudut membulat
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1), // Bayangan halus
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min, // Row akan menyesuaikan sesuai konten
+          children: [
+            Icon(
+              Icons
+                  .error_outline, // Ikon sesuai desain snack bar error di login/register
+              color: Colors.redAccent, // Warna ikon merah untuk pesan kesalahan
+              size: screenSize.width * 0.05, // Ukuran ikon dinamis
+            ),
+            SizedBox(
+                width: screenSize.width * 0.03), // Jarak antara ikon dan teks
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(
+                  color: Colors.white, // Warna teks putih
+                  fontFamily: 'Urbanist', // Menggunakan font yang konsisten
+                  fontSize: screenSize.width * 0.035, // Ukuran font dinamis
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      behavior: SnackBarBehavior.floating, // SnackBar mengapung di atas konten
+      margin: EdgeInsets.symmetric(
+        vertical: screenSize.height * 0.02, // Margin vertikal dinamis
+        horizontal: screenSize.width * 0.04, // Margin horizontal dinamis
+      ),
+    );
+
+    // Menampilkan SnackBar menggunakan ScaffoldMessenger
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
   Future<void> saveName(BuildContext context, String name, String email) async {
+    if (!isValidName(name)) {
+      showCustomSnackBar(context, 'Nama harus minimal 3 karakter.');
+      return;
+    }
+
     try {
       final response = await http.put(
         Uri.parse('http://192.168.0.126:8000/save-name/'),
@@ -39,7 +111,10 @@ class Namepage extends StatelessWidget {
       print('Error: $error');
       // Tampilkan error ke pengguna, misalnya menggunakan Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to save name. Please try again.')),
+        const SnackBar(
+          content: Text('Gagal menyimpan nama. Silakan coba lagi.'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -93,7 +168,8 @@ class Namepage extends StatelessWidget {
                         controller: _controller,
                         textInputAction: TextInputAction.done,
                         onSubmitted: (value) {
-                          String name = _controller.text;
+                          String name =
+                              _controller.text.trim(); // Trim whitespace
                           saveName(context, name, email);
                         },
                         decoration: InputDecoration(

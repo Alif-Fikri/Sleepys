@@ -142,7 +142,7 @@ class ScreenOpsi extends StatelessWidget {
                       SizedBox(height: screenSize.height * 0.02),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => LoginPages()));
@@ -167,7 +167,7 @@ class ScreenOpsi extends StatelessWidget {
                       SizedBox(height: screenSize.height * 0.015),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => Signup()));

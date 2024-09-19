@@ -57,6 +57,7 @@ dev_dependencies:
   test: ^1.16.0
   hive_test: ^1.0.1
   mocktail: ^1.0.4
+  flutter_launcher_icons: ^0.13.1
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -66,6 +67,10 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/icon.png"
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -102,6 +107,7 @@ flutter:
   - assets/images/gangguan.png
   - assets/images/baik.png
   - assets/images/line.png
+  - assets/images/icon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

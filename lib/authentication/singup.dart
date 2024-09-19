@@ -13,23 +13,14 @@ import '../widgets/signupprovider.dart';
 class Signup extends StatelessWidget {
   const Signup({Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => SignupFormProvider(),
-      child: MaterialApp(
-        home: Signups(),
-      ),
-    );
-  }
-}
-
-class Signups extends StatelessWidget {
-  const Signups({Key? key}) : super(key: key);
-
   bool _isValidEmail(String email) {
     final regex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     return regex.hasMatch(email);
+  }
+
+  bool _isValidPassword(String password) {
+    final regex = RegExp(r'^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$');
+    return regex.hasMatch(password);
   }
 
   void showCustomSnackBar(BuildContext context, String message) {
@@ -90,6 +81,12 @@ class Signups extends StatelessWidget {
 
     if (password.isEmpty) {
       showCustomSnackBar(context, "Password tidak boleh kosong");
+      return;
+    }
+
+    if (!_isValidPassword(password)) {
+      showCustomSnackBar(context,
+          "Password harus minimal 8 karakter, mengandung huruf kapital dan angka");
       return;
     }
 
@@ -372,17 +369,6 @@ class Signups extends StatelessWidget {
                             ],
                           ),
                         ),
-                        ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => HomePage(
-                                    userEmail: AutofillHints.email,
-                                  ),
-                                ),
-                              );
-                            },
-                            child: Text('tes'))
                       ],
                     ),
                   ),
