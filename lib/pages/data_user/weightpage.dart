@@ -44,7 +44,7 @@ class _WeightpageState extends State<Weightpage> {
     try {
       final response = await http.put(
         Uri.parse(
-            'http://192.168.0.126:8000/save-weight/'), // Update the URL as needed
+            'http://localhost:8000/save-weight/'), // Update the URL as needed
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

@@ -74,7 +74,7 @@ class _SleepPageState extends State<SleepPage> {
       selectedSleepMinute ?? 0,
     );
 
-    final url = Uri.parse('http://192.168.0.126:8000/save-sleep-record/');
+    final url = Uri.parse('http://localhost:8000/save-sleep-record/');
     final response = await http.post(
       url,
       headers: {

@@ -55,7 +55,7 @@ class _DatepickersState extends State<Datepickers> {
   Future<void> saveDateOfBirth(String dateofbirth) async {
     try {
       final response = await http.put(
-        Uri.parse('http://192.168.0.126:8000/save-dob/'),
+        Uri.parse('http://localhost:8000/save-dob/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

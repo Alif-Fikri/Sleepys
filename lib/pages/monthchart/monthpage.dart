@@ -20,7 +20,7 @@ Future<Map<String, dynamic>> fetchMonthlyData(
     String email, String month, String year) async {
   // Constructing the URL with the required month and year parameters
   final url = Uri.parse(
-      'http://192.168.0.126:8000/get-monthly-sleep-data/$email?month=$month&year=$year');
+      'http://localhost:8000/get-monthly-sleep-data/$email?month=$month&year=$year');
 
   final response = await http.get(url);
 

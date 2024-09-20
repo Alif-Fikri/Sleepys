@@ -10,7 +10,7 @@ class SleepProfileMonth extends StatelessWidget {
 
   Future<void> getPrediction(BuildContext context) async {
     try {
-      final url = Uri.parse('http://192.168.0.126:8000/monthly_predict');
+      final url = Uri.parse('http://localhost:8000/monthly_predict');
 
       // Kirim POST request dengan email dalam body
       final response = await http.post(
@@ -56,7 +56,7 @@ class SleepProfileMonth extends StatelessWidget {
   Future<void> savePrediction(
       BuildContext context, String email, String prediction) async {
     try {
-      final url = Uri.parse('http://192.168.0.126:8000/save_prediction_month');
+      final url = Uri.parse('http://localhost:8000/save_prediction_month');
 
       // Map string prediction results to integer values
       int predictionResult;

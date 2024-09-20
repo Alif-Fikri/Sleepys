@@ -65,7 +65,7 @@ class _GenderpagesState extends State<Genderpages> {
       print(
           'Saving gender: $gender'); // Tambahkan logging untuk melihat nilai gender
       final response = await http.put(
-        Uri.parse('http://192.168.0.126:8000/save-gender/'),
+        Uri.parse('http://localhost:8000/save-gender/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

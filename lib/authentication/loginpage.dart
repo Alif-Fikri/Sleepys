@@ -92,7 +92,7 @@ class LoginPages extends StatelessWidget {
     );
 
     try {
-      final loginUrl = Uri.parse('http://192.168.0.126:8000/login/');
+      final loginUrl = Uri.parse('http://localhost:8000/login/');
       final response = await http.post(
         loginUrl,
         headers: {'Content-Type': 'application/json'},
@@ -129,7 +129,7 @@ class LoginPages extends StatelessWidget {
 
   Future<void> _getUserProfile(BuildContext context, String token) async {
     try {
-      final url = Uri.parse('http://192.168.0.126:8000/user-profile/');
+      final url = Uri.parse('http://localhost:8000/user-profile/');
       final response = await http.get(
         url,
         headers: {
@@ -504,7 +504,7 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
 
     final email = emailController.text;
     final response = await http.post(
-      Uri.parse('http://192.168.0.126:8000/request-otp/?email=$email'),
+      Uri.parse('http://localhost:8000/request-otp/?email=$email'),
       headers: {'Content-Type': 'application/json'},
     );
 
@@ -536,7 +536,7 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
       return;
     }
 
-    final url = Uri.parse('http://192.168.0.126:8000/verify-otp/')
+    final url = Uri.parse('http://localhost:8000/verify-otp/')
         .replace(queryParameters: {
       'email': email!,
       'otp': otpController.text,
@@ -563,7 +563,7 @@ class _ForgotPasswordBottomSheetState extends State<ForgotPasswordBottomSheet> {
   }
 
   Future<void> resetPassword() async {
-    final url = Uri.parse('http://192.168.0.126:8000/reset-password/')
+    final url = Uri.parse('http://localhost:8000/reset-password/')
         .replace(queryParameters: {
       'email': email!,
       'new_password': passwordController.text,

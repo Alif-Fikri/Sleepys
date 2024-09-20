@@ -58,7 +58,7 @@ class _WorkpagesState extends State<Workpages> {
   Future<void> saveWork(String work) async {
     try {
       final response = await http.put(
-        Uri.parse('http://192.168.0.126:8000/save-work/'),
+        Uri.parse('http://localhost:8000/save-work/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

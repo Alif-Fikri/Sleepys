@@ -98,7 +98,7 @@ class Signup extends StatelessWidget {
     // Lanjutkan dengan proses signup seperti biasa
     try {
       final url = Uri.parse(
-          'http://192.168.0.126:8000/register/'); // Ganti dengan URL yang sesuai
+          'http://localhost:8000/register/'); // Ganti dengan URL yang sesuai
       final response = await http.post(
         url,
         headers: {

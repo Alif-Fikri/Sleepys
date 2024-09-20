@@ -71,7 +71,7 @@ class _HeightSelectionPageState extends State<HeightSelectionPage> {
     try {
       final response = await http.put(
         Uri.parse(
-            'http://192.168.0.126:8000/save-height/'), // Ubah URL sesuai kebutuhan
+            'http://localhost:8000/save-height/'), // Ubah URL sesuai kebutuhan
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

@@ -43,8 +43,7 @@ class _UserprofileState extends State<Userprofile> {
 
     try {
       final response = await http.get(
-        Uri.parse(
-            'http://192.168.0.126:8000/user-profile?email=${widget.email}'),
+        Uri.parse('http://localhost:8000/user-profile?email=${widget.email}'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',
@@ -108,7 +107,7 @@ class _UserprofileState extends State<Userprofile> {
       }
 
       final response = await http.put(
-        Uri.parse('http://192.168.0.126:8000/user-profile/update'),
+        Uri.parse('http://localhost:8000/user-profile/update'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',

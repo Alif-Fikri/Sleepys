@@ -84,7 +84,7 @@ class Namepage extends StatelessWidget {
 
     try {
       final response = await http.put(
-        Uri.parse('http://192.168.0.126:8000/save-name/'),
+        Uri.parse('http://localhost:8000/save-name/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
