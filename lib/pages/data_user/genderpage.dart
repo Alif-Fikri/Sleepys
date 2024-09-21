@@ -30,40 +30,66 @@ class Genderpages extends StatefulWidget {
 class _GenderpagesState extends State<Genderpages> {
   Color borderColor1 = Colors.transparent;
   Color borderColor2 = Colors.transparent;
+  String selectedGender = "";
 
   void _onTap(int index) async {
-    String gender = index == 1
-        ? "0"
-        : "1"; // Ubah gender menjadi "0" untuk female dan "1" untuk male
-    await saveGender(widget.name, widget.email, gender);
-
+    String gender = index == 1 ? "0" : "1"; // "0" untuk female, "1" untuk male
     setState(() {
+      selectedGender = gender;
       if (index == 1) {
-        borderColor1 = borderColor1 == Colors.transparent
-            ? Color(0xFF009090)
-            : Colors.transparent;
+        borderColor1 = Color(0xFF009090);
         borderColor2 = Colors.transparent;
       } else {
-        borderColor2 = borderColor2 == Colors.transparent
-            ? Color(0xFF009090)
-            : Colors.transparent;
         borderColor1 = Colors.transparent;
+        borderColor2 = Color(0xFF009090);
       }
     });
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            Workpage(name: widget.name, email: widget.email, gender: gender),
-      ),
-    );
+    // Tampilkan dialog konfirmasi sebelum menyimpan gender
+    bool confirmed = await _showConfirmationDialog(context, gender);
+    if (confirmed) {
+      await saveGender(widget.name, widget.email, gender);
+
+      // Navigasi ke halaman berikutnya jika konfirmasi berhasil
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              Workpage(name: widget.name, email: widget.email, gender: gender),
+        ),
+      );
+    }
+  }
+
+  Future<bool> _showConfirmationDialog(BuildContext context, String gender) async {
+    String genderText = gender == "0" ? "Perempuan" : "Pria";
+    return await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Konfirmasi Gender'),
+          content: Text('Apakah kamu yakin gender kamu adalah $genderText?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Batal'),
+              onPressed: () {
+                Navigator.of(context).pop(false); // Tidak lanjut
+              },
+            ),
+            TextButton(
+              child: const Text('Ya'),
+              onPressed: () {
+                Navigator.of(context).pop(true); // Konfirmasi
+              },
+            ),
+          ],
+        );
+      },
+    ) ?? false; // Jika user membatalkan dialog
   }
 
   Future<void> saveGender(String name, String email, String gender) async {
     try {
-      print(
-          'Saving gender: $gender'); // Tambahkan logging untuk melihat nilai gender
       final response = await http.put(
         Uri.parse('http://localhost:8000/save-gender/'),
         headers: <String, String>{
