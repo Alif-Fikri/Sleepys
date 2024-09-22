@@ -44,7 +44,7 @@ class _WeightpageState extends State<Weightpage> {
     try {
       final response = await http.put(
         Uri.parse(
-            'http://localhost:8000/save-weight/'), // Update the URL as needed
+            'http://103.129.148.84/save-weight/'), // Update the URL as needed
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -79,7 +79,7 @@ class _WeightpageState extends State<Weightpage> {
 
   void _resetTimer() {
     _timer?.cancel();
-    _timer = Timer(Duration(seconds: 5), () {
+    _timer = Timer(Duration(seconds: 3), () {
       // Menampilkan dialog konfirmasi sebelum menyimpan berat badan dan melanjutkan
       showDialog(
         context: context,

@@ -120,7 +120,7 @@ class _AlarmScreenState extends State<AlarmScreen>
   Future<void> _fetchUserName() async {
     try {
       final response = await http
-          .get(Uri.parse('http://localhost:8000/user/${widget.email}'));
+          .get(Uri.parse('http://103.129.148.84/user/${widget.email}'));
 
       if (response.statusCode == 200) {
         final user = json.decode(response.body);

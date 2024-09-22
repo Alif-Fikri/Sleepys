@@ -18,7 +18,7 @@ class WeekPage extends StatefulWidget {
 Future<Map<String, dynamic>> fetchWeeklySleepData(
     String email, String startDate, String endDate) async {
   final url =
-      'http://localhost:8000/get-weekly-sleep-data/$email?start_date=$startDate&end_date=$endDate';
+      'http://103.129.148.84/get-weekly-sleep-data/$email?start_date=$startDate&end_date=$endDate';
   final response = await http.get(Uri.parse(url));
 
   if (response.statusCode == 200) {

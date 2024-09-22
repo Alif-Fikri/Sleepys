@@ -3,11 +3,12 @@ import 'package:provider/provider.dart';
 import 'authentication/splashscreen.dart';
 import '../widgets/signupprovider.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:flutter/services.dart'; // Import untuk mengatur orientasi
+import 'package:flutter/services.dart';
+import 'package:sleepys/helper/ProfileImageProvider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Mengatur orientasi aplikasi hanya ke potret (portrait)
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp, // Potret normal
@@ -19,6 +20,7 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => SignupFormProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileImageProvider()),
       ],
       child: MyApp(),
     ),

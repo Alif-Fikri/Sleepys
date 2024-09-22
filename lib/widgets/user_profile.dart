@@ -5,11 +5,16 @@ import 'package:intl/intl.dart';
 import 'package:art_sweetalert/art_sweetalert.dart';
 import 'package:flutter_holo_date_picker/flutter_holo_date_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:sleepys/helper/ProfileImageProvider.dart';
+import 'package:provider/provider.dart';
 
 class Userprofile extends StatefulWidget {
   final String email;
+  final ImagePicker _picker = ImagePicker();
 
-  const Userprofile({super.key, required this.email});
+  Userprofile({super.key, required this.email});
 
   @override
   _UserprofileState createState() => _UserprofileState();
@@ -22,6 +27,7 @@ class _UserprofileState extends State<Userprofile> {
 
   String? selectedGender;
   bool isLoading = true;
+  File? _image;
 
   @override
   void initState() {
@@ -29,21 +35,46 @@ class _UserprofileState extends State<Userprofile> {
     getUserData();
   }
 
-  Future<void> getUserData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
+Future<void> _pickImage() async {
+  final pickedFile = await widget._picker.pickImage(
+    source: ImageSource.gallery,
+  );
 
-    if (token == null) {
-      print('No token found');
-      setState(() {
-        isLoading = false;
-      });
-      return;
-    }
+  if (pickedFile != null) {
+    setState(() {
+      _image = File(pickedFile.path);
+    });
+
+    // Simpan path gambar ke SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('${widget.email}_profile_image', pickedFile.path);
+  }
+}
+
+
+Future<void> getUserData() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('token');
+
+  // Ambil path gambar dari SharedPreferences
+  final imagePath = prefs.getString('${widget.email}_profile_image');
+  if (imagePath != null) {
+    setState(() {
+      _image = File(imagePath);
+    });
+  }
+
+  if (token == null) {
+    print('No token found');
+    setState(() {
+      isLoading = false;
+    });
+    return;
+  }
 
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:8000/user-profile?email=${widget.email}'),
+        Uri.parse('http://103.129.148.84/user-profile?email=${widget.email}'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',
@@ -107,7 +138,7 @@ class _UserprofileState extends State<Userprofile> {
       }
 
       final response = await http.put(
-        Uri.parse('http://localhost:8000/user-profile/update'),
+        Uri.parse('http://103.129.148.84/user-profile/update'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',
@@ -184,13 +215,46 @@ class _UserprofileState extends State<Userprofile> {
               child: ListView(
                 padding: EdgeInsets.all(screenSize.width * 0.04),
                 children: [
-                  CircleAvatar(
-                    radius: screenSize.width * 0.1,
-                    backgroundColor: Colors.grey,
-                    child: Icon(
-                      Icons.person,
-                      size: screenSize.width * 0.15,
-                      color: Colors.white,
+                  Container(
+                    width:
+                        screenSize.width * 0.2, // Atur ukuran sesuai keinginan
+                    height: screenSize.width * 0.2,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color:
+                          Colors.grey, // Warna background jika gambar tidak ada
+                      image: _image != null
+                          ? DecorationImage(
+                              image: FileImage(_image!),
+                              fit: BoxFit
+                                  .cover, // Ganti dengan BoxFit.contain untuk mengurangi zoom
+                            )
+                          : null,
+                    ),
+                    child: _image == null
+                        ? Icon(
+                            Icons.person,
+                            size: screenSize.width * 0.15,
+                            color: Colors.white,
+                          )
+                        : null,
+                  ),
+
+                  SizedBox(
+                      height:
+                          10), // Beri sedikit jarak antara avatar dan tombol
+                  GestureDetector(
+                    onTap: () {
+                      _pickImage();
+                    },
+                    child: Text(
+                      'Ubah Foto',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        decoration: TextDecoration.underline,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                   SizedBox(height: screenSize.height * 0.02),

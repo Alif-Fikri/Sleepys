@@ -27,7 +27,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       });
 
       final url = Uri.parse(
-          'http://localhost:8000/submit-feedback/'); // Replace with your backend URL
+          'http://103.129.148.84/submit-feedback/'); // Replace with your backend URL
 
       try {
         final response = await http.post(

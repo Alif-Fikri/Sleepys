@@ -61,37 +61,40 @@ class _GenderpagesState extends State<Genderpages> {
     }
   }
 
-  Future<bool> _showConfirmationDialog(BuildContext context, String gender) async {
+  Future<bool> _showConfirmationDialog(
+      BuildContext context, String gender) async {
     String genderText = gender == "0" ? "Perempuan" : "Pria";
     return await showDialog<bool>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Konfirmasi Gender'),
-          content: Text('Apakah kamu yakin gender kamu adalah $genderText?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Batal'),
-              onPressed: () {
-                Navigator.of(context).pop(false); // Tidak lanjut
-              },
-            ),
-            TextButton(
-              child: const Text('Ya'),
-              onPressed: () {
-                Navigator.of(context).pop(true); // Konfirmasi
-              },
-            ),
-          ],
-        );
-      },
-    ) ?? false; // Jika user membatalkan dialog
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Konfirmasi Gender'),
+              content:
+                  Text('Apakah kamu yakin gender kamu adalah $genderText?'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Batal'),
+                  onPressed: () {
+                    Navigator.of(context).pop(false); // Tidak lanjut
+                  },
+                ),
+                TextButton(
+                  child: const Text('Ya'),
+                  onPressed: () {
+                    Navigator.of(context).pop(true); // Konfirmasi
+                  },
+                ),
+              ],
+            );
+          },
+        ) ??
+        false; // Jika user membatalkan dialog
   }
 
   Future<void> saveGender(String name, String email, String gender) async {
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:8000/save-gender/'),
+        Uri.parse('http://103.129.148.84/save-gender/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

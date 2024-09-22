@@ -64,7 +64,7 @@ class _DailystepState extends State<Dailystep> {
 
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:8000/save-daily-steps/'),
+        Uri.parse('http://103.129.148.84/save-daily-steps/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

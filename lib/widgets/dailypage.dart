@@ -23,7 +23,7 @@ class _DailyPageState extends State<DailyPage> {
   }
 
   Future<List<Map<String, dynamic>>> getSleepData(String email) async {
-    final url = Uri.parse('http://localhost:8000/get-sleep-records/$email');
+    final url = Uri.parse('http://103.129.148.84/get-sleep-records/$email');
     final response = await http.get(url);
 
     if (response.statusCode == 200) {

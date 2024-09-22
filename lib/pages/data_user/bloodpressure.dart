@@ -72,7 +72,7 @@ class _BloodpressureState extends State<Bloodpressure> {
 
     try {
       final response = await http.put(
-        Uri.parse('http://localhost:8000/save-blood-pressure/'),
+        Uri.parse('http://103.129.148.84/save-blood-pressure/'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

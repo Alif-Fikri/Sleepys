@@ -18,7 +18,7 @@ class LogoutButton extends StatelessWidget {
 
     // Panggil endpoint logout di server
     final url = Uri.parse(
-        'http://localhost:8000/logout/'); // Ganti dengan URL yang sesuai
+        'http://103.129.148.84/logout/'); // Ganti dengan URL yang sesuai
     final response = await http.post(
       url,
       headers: {
