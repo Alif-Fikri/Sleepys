@@ -4,7 +4,6 @@ import 'package:sleepys/widgets/dailypage.dart';
 import 'weekchart/weekpage.dart';
 import 'monthchart/monthpage.dart';
 import '../widgets/profilepage.dart';
-import 'dart:async';
 
 class HomePage extends StatefulWidget {
   final String userEmail;
@@ -18,8 +17,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   late List<Widget> _widgetOptions;
-
-  DateTime? _lastBackPressed;
 
   @override
   void initState() {
@@ -37,67 +34,46 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<bool> _onWillPop() async {
-    final now = DateTime.now();
-    // Check if the back button is pressed twice within 2 seconds
-    if (_lastBackPressed == null ||
-        now.difference(_lastBackPressed!) > Duration(seconds: 2)) {
-      _lastBackPressed = now;
-      // Show a message to press again to exit
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Press back again to exit'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return Future.value(false); // Don't exit the app yet
-    }
-    return Future.value(true); // Exit the app if pressed twice
-  }
-
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop, // Attach the back button handler
-      child: Scaffold(
-        backgroundColor: Color(0xFF20223F),
-        body: _widgetOptions[_selectedIndex],
-        bottomNavigationBar: ClipRRect(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(10),
-            topRight: Radius.circular(10),
-          ),
-          child: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: ImageIcon(AssetImage('assets/images/book.png')),
-                label: 'Jurnal Tidur',
-              ),
-              BottomNavigationBarItem(
-                icon: ImageIcon(AssetImage('assets/images/sleep.png')),
-                label: 'Sleep',
-              ),
-              BottomNavigationBarItem(
-                icon: ImageIcon(AssetImage('assets/images/profile.png')),
-                label: 'Profile',
-              ),
-            ],
-            currentIndex: _selectedIndex,
-            backgroundColor: Color(0xFF272E49),
-            selectedItemColor: Colors.white,
-            unselectedItemColor: Color(0xFF627EAE),
-            selectedLabelStyle: TextStyle(
-              color: Color(0xFF627EAE),
-              fontFamily: 'Urbanist',
+    return Scaffold(
+      backgroundColor: Color(0xFF20223F),
+      body: _widgetOptions[_selectedIndex],
+      bottomNavigationBar: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(10),
+          topRight: Radius.circular(10),
+        ),
+        child: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: ImageIcon(AssetImage('assets/images/book.png')),
+              label: 'Jurnal Tidur',
             ),
-            unselectedLabelStyle: TextStyle(
-              color: Color(0xFF627EAE),
-              fontFamily: 'Urbanist',
+            BottomNavigationBarItem(
+              icon: ImageIcon(AssetImage('assets/images/sleep.png')),
+              label: 'Sleep',
             ),
-            selectedIconTheme: IconThemeData(color: Color(0xFFFFC754)),
-            unselectedIconTheme: IconThemeData(color: Color(0xFF627EAE)),
-            onTap: _onItemTapped,
+            BottomNavigationBarItem(
+              icon: ImageIcon(AssetImage('assets/images/profile.png')),
+              label: 'Profile',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          backgroundColor: Color(0xFF272E49),
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Color(0xFF627EAE),
+          selectedLabelStyle: TextStyle(
+            color: Color(0xFF627EAE),
+            fontFamily: 'Urbanist',
           ),
+          unselectedLabelStyle: TextStyle(
+            color: Color(0xFF627EAE),
+            fontFamily: 'Urbanist',
+          ),
+          selectedIconTheme: IconThemeData(color: Color(0xFFFFC754)),
+          unselectedIconTheme: IconThemeData(color: Color(0xFF627EAE)),
+          onTap: _onItemTapped,
         ),
       ),
     );
