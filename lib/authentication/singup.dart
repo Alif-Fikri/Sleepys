@@ -14,9 +14,31 @@ class Signup extends StatelessWidget {
   const Signup({Key? key}) : super(key: key);
 
   bool _isValidEmail(String email) {
+    // List of allowed domains
+    const allowedDomains = [
+      'gmail.com',
+      'yahoo.com',
+      'outlook.com',
+      'hotmail.com'
+    ];
+
+    // Regex to check the general email format
     final regex = RegExp(
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$');
-    return regex.hasMatch(email);
+
+    if (!regex.hasMatch(email)) {
+      return false;
+    }
+
+    // Extract domain from the email
+    final emailDomain = email.split('@').last;
+
+    // Check if the domain is in the allowed list
+    if (!allowedDomains.contains(emailDomain)) {
+      return false;
+    }
+
+    return true;
   }
 
   bool _isValidPassword(String password) {
