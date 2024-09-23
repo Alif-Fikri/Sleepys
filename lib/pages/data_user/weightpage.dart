@@ -80,44 +80,16 @@ class _WeightpageState extends State<Weightpage> {
   void _resetTimer() {
     _timer?.cancel();
     _timer = Timer(Duration(seconds: 3), () {
-      // Menampilkan dialog konfirmasi sebelum menyimpan berat badan dan melanjutkan
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Konfirmasi Berat Badan'),
-            content: Text(
-                'Apakah Anda yakin berat badan Anda adalah $selectedItem kg?'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  // Jika pengguna membatalkan konfirmasi
-                  Navigator.of(context).pop(); // Tutup dialog
-                },
-                child: Text('Batal'),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Jika pengguna mengonfirmasi, simpan berat badan dan navigasi ke halaman berikutnya
-                  Navigator.of(context).pop(); // Tutup dialog
-
-                  saveWeight(selectedItem).then((_) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomePage(userEmail: widget.email),
-                      ),
-                    );
-                  }).catchError((error) {
-                    print('Error: $error');
-                  });
-                },
-                child: Text('Ya'),
-              ),
-            ],
-          );
-        },
-      );
+      saveWeight(selectedItem).then((_) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(userEmail: widget.email),
+          ),
+        );
+      }).catchError((error) {
+        print('Error: $error');
+      });
     });
   }
 

@@ -106,52 +106,24 @@ class _HeightSelectionPageState extends State<HeightSelectionPage> {
   void _resetTimer() {
     _timer?.cancel();
     _timer = Timer(Duration(seconds: 3), () {
-      // Menampilkan dialog konfirmasi sebelum menyimpan tinggi badan dan melanjutkan
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Konfirmasi Tinggi Badan'),
-            content: Text(
-                'Apakah Anda yakin tinggi badan Anda adalah $selectedItem cm?'),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  // Jika pengguna membatalkan konfirmasi
-                  Navigator.of(context).pop(); // Tutup dialog
-                },
-                child: Text('Batal'),
-              ),
-              TextButton(
-                onPressed: () {
-                  // Jika pengguna mengonfirmasi, simpan tinggi badan dan navigasi ke halaman berikutnya
-                  Navigator.of(context).pop(); // Tutup dialog
-
-                  saveHeight(selectedItem).then((_) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Weightpage(
-                          name: widget.name,
-                          email: widget.email,
-                          gender: widget.gender,
-                          work: widget.work,
-                          date_of_birth: widget.date_of_birth,
-                          height: selectedItem,
-                          userEmail: widget.email,
-                        ),
-                      ),
-                    );
-                  }).catchError((error) {
-                    print('Error: $error');
-                  });
-                },
-                child: Text('Ya'),
-              ),
-            ],
-          );
-        },
-      );
+      saveHeight(selectedItem).then((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Weightpage(
+              name: widget.name,
+              email: widget.email,
+              gender: widget.gender,
+              work: widget.work,
+              date_of_birth: widget.date_of_birth,
+              height: selectedItem,
+              userEmail: widget.email,
+            ),
+          ),
+        );
+      }).catchError((error) {
+        print('Error: $error');
+      });
     });
   }
 

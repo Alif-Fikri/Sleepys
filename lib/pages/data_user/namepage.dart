@@ -11,60 +11,68 @@ class Namepage extends StatelessWidget {
 
   // Fungsi untuk memvalidasi nama
   bool isValidName(String name) {
-    return name.isNotEmpty && name.length >= 3; // Nama harus minimal 3 karakter
+    return name.isNotEmpty &&
+        name.length >= 3; // Nama harus tidak kosong dan minimal  karakter
   }
 
   void showCustomSnackBar(BuildContext context, String message) {
     final screenSize = MediaQuery.of(context).size;
 
+    // SnackBar kustom yang meniru gaya login dan register
     final snackBar = SnackBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
+      backgroundColor:
+          Colors.transparent, // Background transparan untuk efek floating
+      elevation: 0, // Menghilangkan elevasi untuk tampilan datar
       content: Container(
         padding: EdgeInsets.symmetric(
-          vertical: screenSize.height * 0.02,
-          horizontal: screenSize.width * 0.05,
+          vertical: screenSize.height * 0.02, // Padding vertikal dinamis
+          horizontal: screenSize.width * 0.05, // Padding horizontal dinamis
         ),
         decoration: BoxDecoration(
-          color: const Color(0xFF272E49),
-          borderRadius: BorderRadius.circular(screenSize.width * 0.03),
+          color: const Color(
+              0xFF272E49), // Warna latar belakang sesuai desain login/register
+          borderRadius:
+              BorderRadius.circular(screenSize.width * 0.03), // Sudut membulat
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withOpacity(0.1), // Bayangan halus
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
           ],
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.min, // Row akan menyesuaikan sesuai konten
           children: [
             Icon(
-              Icons.error_outline,
-              color: Colors.redAccent,
-              size: screenSize.width * 0.05,
+              Icons
+                  .error_outline, // Ikon sesuai desain snack bar error di login/register
+              color: Colors.redAccent, // Warna ikon merah untuk pesan kesalahan
+              size: screenSize.width * 0.05, // Ukuran ikon dinamis
             ),
-            SizedBox(width: screenSize.width * 0.03),
+            SizedBox(
+                width: screenSize.width * 0.03), // Jarak antara ikon dan teks
             Expanded(
               child: Text(
                 message,
                 style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Urbanist',
-                  fontSize: screenSize.width * 0.035,
+                  color: Colors.white, // Warna teks putih
+                  fontFamily: 'Urbanist', // Menggunakan font yang konsisten
+                  fontSize: screenSize.width * 0.035, // Ukuran font dinamis
                 ),
               ),
             ),
           ],
         ),
       ),
-      behavior: SnackBarBehavior.floating,
+      behavior: SnackBarBehavior.floating, // SnackBar mengapung di atas konten
       margin: EdgeInsets.symmetric(
-        vertical: screenSize.height * 0.02,
-        horizontal: screenSize.width * 0.04,
+        vertical: screenSize.height * 0.02, // Margin vertikal dinamis
+        horizontal: screenSize.width * 0.04, // Margin horizontal dinamis
       ),
     );
 
+    // Menampilkan SnackBar menggunakan ScaffoldMessenger
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
@@ -101,6 +109,7 @@ class Namepage extends StatelessWidget {
       }
     } catch (error) {
       print('Error: $error');
+      // Tampilkan error ke pengguna, misalnya menggunakan Snackbar
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Gagal menyimpan nama. Silakan coba lagi.'),
@@ -110,36 +119,9 @@ class Namepage extends StatelessWidget {
     }
   }
 
-  // Fungsi untuk menampilkan dialog konfirmasi
-  void _showConfirmationDialog(BuildContext context, String name) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Konfirmasi Nama"),
-          content: Text("Apakah nama '$name' sudah benar?"),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Tutup dialog jika "Tidak"
-              },
-              child: const Text("Tidak"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Tutup dialog
-                saveName(context, name, email); // Simpan nama jika "Ya"
-              },
-              child: const Text("Ya"),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    // MediaQuery for responsive sizing
     final double deviceWidth = MediaQuery.of(context).size.width;
     final double titleFontSize = deviceWidth * 0.06;
     final double subtitleFontSize = deviceWidth * 0.04;
@@ -186,19 +168,14 @@ class Namepage extends StatelessWidget {
                         controller: _controller,
                         textInputAction: TextInputAction.done,
                         onSubmitted: (value) {
-                          String name = _controller.text.trim();
-                          if (isValidName(name)) {
-                            _showConfirmationDialog(
-                                context, name); // Tampilkan dialog konfirmasi
-                          } else {
-                            showCustomSnackBar(
-                                context, 'Nama harus minimal 3 karakter.');
-                          }
+                          String name =
+                              _controller.text.trim(); // Trim whitespace
+                          saveName(context, name, email);
                         },
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: const Color(0xFF272E49),
-                          hintText: 'Nama',
+                          hintText: 'Name',
                           hintStyle: TextStyle(
                             color: Colors.white,
                             fontFamily: 'Urbanist',
